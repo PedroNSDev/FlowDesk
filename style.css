@@ -1,231 +1,254 @@
-:root{
-    --primary:#6366f1;
-    --primary-hover:#818cf8;
+:root {
+  
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-gradient-end: #6366f1;
+    --primary-light: #818cf8;
+    --primary-alpha: rgba(79, 70, 229, 0.1);
+    --primary-glow: rgba(79, 70, 229, 0.15);
+    --primary-shadow: rgba(79, 70, 229, 0.2);
 
-    --bg:#082868;
-    --card:rgba(30,41,59,0.6);
-    --card-solid:#1e293b;
+    /* Backgrounds e Cards - Tons de Branco e Cinza muito claro */
+    --bg: #f8fafc;
+    --bg-gradient-start: #ffffff;
+    --bg-gradient-end: #f1f5f9;
+    --card: rgba(255, 255, 255, 0.7);
+    --card-solid: #ffffff;
+    --second: #f1f5f9;
+    --input-bg: #ffffff;
+    --logs-bg: #f8fafc;
 
-    --second:#0f244d;
+    /* Textos e Bordas - Escuros para leitura no fundo claro */
+    --text: #1e293b;         /* Azul escuro quase preto */
+    --text-button: #ffffff;  /* Texto do botão continua branco */
+    --muted: #64748b;        /* Cinza para textos secundários */
+    --border: rgba(0, 0, 0, 0.08);
 
-    --text:#e2e8f0;
-    --muted:#94a3b8;
-    --border:rgba(255,255,255,0.08);
+    --info: #0ea5e9;
+    --error: #ef4444;
+    --status-nao-iniciado: #94a3b8;
+    --status-em-progresso: #eab308;
+    --status-finalizado: #22c55e;
+
+    /* Sombras Gerais - Mais suaves e naturais para fundo claro */
+    --shadow-login: 0 10px 25px rgba(0, 0, 0, 0.05), 0 20px 48px rgba(0, 0, 0, 0.05);
+    --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 /* RESET BASE */
-*{
-    box-sizing:border-box;
+* {
+    box-sizing: border-box;
 }
 
-body{
-    margin:0;
-    font-family:system-ui, -apple-system, sans-serif;
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, sans-serif;
     
-    background:
-        radial-gradient(circle at top, #1e293b, #0b1220 60%);
-        background-size: fill;
+    background: radial-gradient(circle at top, var(--bg-gradient-start), var(--bg-gradient-end) 60%);
+    background-size: fill;
 
-
-    color:var(--text);
+    color: var(--text);
 }
 
 /* LAYOUT */
-.container{
-    max-width:1100px;
-    margin:auto;
-    padding:30px 20px;
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 30px 20px;
 }
 
 /* LOGIN */
-.login-box{
-    background:var(--card);
+.login-box {
+    background: var(--card);
     backdrop-filter: blur(12px);
-    border:1px solid var(--border);
+    border: 1px solid var(--border);
 
-    padding:35px;
-    border-radius:16px;
+    padding: 35px;
+    border-radius: 16px;
 
-    box-shadow:0 20px 60px rgba(0,0,0,.5);
+    box-shadow: var(--shadow-login);
 
-    margin:100px auto;
-    max-width:360px;
+    margin: 100px auto;
+    max-width: 360px;
 
-    text-align:center;
+    text-align: center;
 }
 
-.login-box h2{
-    margin-bottom:10px;
+.login-box h2 {
+    margin-bottom: 10px;
 }
 
-.hint{
-    color:var(--muted);
-    font-size:13px;
-    margin-bottom:20px;
+.hint {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 20px;
 }
 
 /* INPUT */
-input{
-    width:100%;
-    padding:12px 14px;
-    margin:10px 0;
+input {
+    width: 100%;
+    padding: 12px 14px;
+    margin: 10px 0;
 
-    border-radius:10px;
-    border:1px solid var(--border);
+    border-radius: 10px;
+    border: 1px solid var(--border);
 
-    background:#020617;
-    color:var(--text);
+    background: var(--input-bg);
+    color: var(--text);
 
-    outline:none;
-    transition:.2s;
+    outline: none;
+    transition: .2s;
 }
 
-input:focus{
-    border-color:var(--primary);
-    box-shadow:0 0 0 2px rgba(99,102,241,.2);
+input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-glow);
 }
 
 /* BUTTON */
-button{
-    width:100%;
-    padding:12px;
+button {
+    width: 100%;
+    padding: 12px;
 
-    border:none;
-    border-radius:10px;
+    border: none;
+    border-radius: 10px;
 
-    background:linear-gradient(135deg,var(--primary),#4f46e5);
-    color:white;
+    background: linear-gradient(135deg, var(--primary), var(--primary-gradient-end));
+    color: var(--text-button);
 
-    font-weight:600;
-    cursor:pointer;
+    font-weight: 600;
+    cursor: pointer;
 
-    transition:.2s;
+    transition: .2s;
 }
 
-button:hover{
-    background:linear-gradient(135deg,var(--primary-hover),var(--primary));
-    transform:translateY(-1px);
-    box-shadow:0 8px 20px rgba(99,102,241,.3);
+button:hover {
+    background: linear-gradient(135deg, var(--primary-hover), var(--primary));
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px var(--primary-shadow);
 }
 
-button:active{
-    transform:scale(0.98);
+button:active {
+    transform: scale(0.98);
 }
 
 /* HEADER */
-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
-    background:var(--card-solid);
-    border:1px solid var(--border);
+    background: var(--card-solid);
+    border: 1px solid var(--border);
 
-    padding:15px 20px;
-    border-radius:14px;
+    padding: 15px 20px;
+    border-radius: 14px;
 
-    margin-bottom:20px;
+    margin-bottom: 20px;
 }
 
 /* CARDS */
-.project-card{
-    background:var(--card);
+.project-card {
+    background: var(--card);
     backdrop-filter: blur(10px);
 
-    border:1px solid var(--border);
+    border: 1px solid var(--border);
 
-    padding:20px;
-    border-radius:14px;
+    padding: 20px;
+    border-radius: 14px;
 
-    margin-top:15px;
+    margin-top: 15px;
 
-    transition:.25s;
+    transition: .25s;
 }
 
-.project-card:hover{
-    transform:translateY(-4px);
-    box-shadow:0 15px 40px rgba(0,0,0,.4);
+.project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card);
 }
 
 /* SESSÕES */
-.session-box{
-    margin-top:15px;
-    padding-left:15px;
-    border-left:2px solid var(--primary);
+.session-box {
+    margin-top: 15px;
+    padding-left: 15px;
+    border-left: 2px solid var(--primary);
 }
 
 /* ETAPAS */
-.step-box{
+.step-box {
     background: var(--second);
-    border:1px solid var(--border);
+    border: 1px solid var(--border);
 
-    padding:12px;
-    border-radius:10px;
+    padding: 12px;
+    border-radius: 10px;
 
-    margin-top:10px;
+    margin-top: 10px;
 
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 /* BADGE */
-.badge{
-    padding:5px 10px;
-    border-radius:999px;
+.badge {
+    padding: 5px 10px;
+    border-radius: 999px;
 
-    font-size:12px;
-    font-weight:600;
+    font-size: 12px;
+    font-weight: 600;
 
-    background:rgba(99,102,241,.15);
-    color:#a5b4fc;
+    background: var(--primary-alpha);
+    color: var(--primary-light);
 }
 
 /* LOGS */
-.logs-panel{
-    margin-top:20px;
+.logs-panel {
+    margin-top: 20px;
 
-    background:#020617;
-    border:1px solid var(--border);
+    background: var(--logs-bg);
+    border: 1px solid var(--border);
 
-    padding:15px;
-    border-radius:12px;
+    padding: 15px;
+    border-radius: 12px;
 
-    font-family:monospace;
+    font-family: monospace;
 }
 
-.hidden{ display:none; }
+.hidden { display: none; }
 
-.search-result{
-    margin-top:10px;
-    color:#38bdf8;
-    font-weight:500;
+.search-result {
+    margin-top: 10px;
+    color: var(--info);
+    font-weight: 500;
 }
 
-.error{
-    color:#f87171;
-    font-size:14px;
-    margin-bottom:10px;
-    display:none;
+.error {
+    color: var(--error);
+    font-size: 14px;
+    margin-bottom: 10px;
+    display: none;
 }
+
 .btn-small {
     width: auto;
     padding: 6px 10px;
     font-size: 12px;
     border-radius: 8px;
 }
+
 .step-box button {
     width: auto;
 }
+
 /* STATUS COLORS */
 .status-nao-iniciado {
-    border-left: 4px solid #6b7280;
+    border-left: 4px solid var(--status-nao-iniciado);
 }
 
 .status-em-progresso {
-    border-left: 4px solid #facc15;
+    border-left: 4px solid var(--status-em-progresso);
 }
 
 .status-finalizado {
-    border-left: 4px solid #22c55e;
+    border-left: 4px solid var(--status-finalizado);
 }

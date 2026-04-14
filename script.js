@@ -118,10 +118,11 @@ function mostrarTela(login=true){
     document.getElementById('dashboard-screen').classList.toggle('hidden', login);
 }
 
-// ================= DASH =================
+/// ================= DASH =================
 function carregarDashboard(){
-    displayName.textContent = currentUser.name;
-    displayLevel.textContent = "Nível " + currentUser.nivel;
+    const displayUser = document.getElementById('display-user');
+    
+    displayUser.textContent = `${currentUser.name}: ${currentUser.username} (Nível ${currentUser.nivel}): /${currentUser.id}`;
 
     renderizarProjetos();
 
@@ -144,7 +145,7 @@ function renderizarProjetos(){
 
         let sessoesHTML = p.sessoes.map(s=>{
 
-            // 👥 COLABORADORES DA SESSÃO
+          
             const colabsHTML = s.usuarios.map(uid=>{
                 const u = getUserById(uid);
                 if(!u) return "";
@@ -173,35 +174,43 @@ function renderizarProjetos(){
                 </div>
             `).join("");
 
+            // Utilizando <details> para expandir/retrair a Sessão
             return `
-            <div class="session-box">
-                <h4>${s.nome}</h4>
-                <p>${s.descricao}</p>
+            <details class="session-box" open>
+                <summary>
+                    <h4>${s.nome}</h4>
+                </summary>
+                <div class="session-content">
+                    <p>${s.descricao}</p>
 
-                <button class="btn-small" onclick="toggleColaboradores(${s.id})">
-                    👥 Colaboradores
-                </button>
+                    <button class="btn-small" onclick="toggleColaboradores(${s.id})">
+                        👥 Colaboradores
+                    </button>
 
-                <div id="colab-${s.id}" class="colaboradores-box hidden">
-                    ${colabsHTML || "<p>Nenhum colaborador</p>"}
+                    <div id="colab-${s.id}" class="colaboradores-box hidden">
+                        ${colabsHTML || "<p>Nenhum colaborador</p>"}
+                    </div>
+
+                    ${etapasHTML}
+
+                    ${currentUser.nivel>=1 ? `<button onclick="criarEtapa(${p.id},${s.id})">+ Etapa</button>`:""}
                 </div>
-
-                ${etapasHTML}
-
-                ${currentUser.nivel>=1 ? `<button onclick="criarEtapa(${p.id},${s.id})">+ Etapa</button>`:""}
-            </div>
+            </details>
             `;
         }).join("");
 
+        // Utilizando <details> para expandir/retrair o Projeto
         container.innerHTML += `
-        <div class="project-card">
-            <h3>${p.nome}</h3>
-            <p>${p.descricao}</p>
-
-            ${sessoesHTML}
-
-            ${currentUser.nivel>=1 ? `<button onclick="criarSessao(${p.id})">+ Sessão</button>`:""}
-        </div>
+        <details class="project-card" open>
+            <summary>
+                <h3>${p.nome}</h3>
+                <span class="project-desc">${p.descricao}</span>
+            </summary>
+            <div class="project-content">
+                ${sessoesHTML}
+                ${currentUser.nivel>=1 ? `<button onclick="criarSessao(${p.id})">+ Sessão</button>`:""}
+            </div>
+        </details>
         `;
     });
 
@@ -209,7 +218,6 @@ function renderizarProjetos(){
         container.innerHTML += `<button onclick="criarProjeto()">+ Projeto</button>`;
     }
 }
-
 // ================= COLABORADORES =================
 function toggleColaboradores(sessaoId){
     const div = document.getElementById(`colab-${sessaoId}`);
@@ -316,6 +324,9 @@ function garantirUsuarioNoProjeto(proj, userId){
         proj.usuarios.push(userId);
     }
 }
+
+
+
 // ================= LOGS =================
 function mostrarLogs(){
     if(currentUser.nivel !== 2) return;
@@ -326,3 +337,5 @@ function mostrarLogs(){
     document.getElementById('log-entries').innerHTML =
         logs.map(l=>`<p>> ${l}</p>`).join("");
 }
+
+
