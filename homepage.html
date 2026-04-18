@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowDesk — Workspaces</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="check_login.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080c14;
+            --surface: #0f1623;
+            --surface2: #161e2e;
+            --surface3: #1c2739;
+            --border: rgba(255,255,255,.07);
+            --border-hover: rgba(99,120,255,.4);
+            --acc: #6378ff;
+            --acc2: #8b9fff;
+            --acc-glow: rgba(99,120,255,.18);
+            --text: #f0f4ff;
+            --muted: #5a6a8a;
+            --muted2: #8899bb;
+            --ok: #22d3a2;
+            --warn: #f5a623;
+            --danger: #ff5c7a;
+            --font: 'Sora', sans-serif;
+            --mono: 'DM Mono', monospace;
+            --r: 14px;
+            --rsm: 8px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% -10%, rgba(99,120,255,.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 110%, rgba(99,120,255,.08) 0%, transparent 60%);
+            pointer-events: none; z-index: 0;
+        }
+        .hidden { display: none !important; }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 36px; height: 60px;
+            background: rgba(8,12,20,.88);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo { font-size: 1.2rem; font-weight: 800; letter-spacing: -.03em; color: var(--text); text-decoration: none; }
+        .nav-logo span { color: var(--acc); }
+        .nav-right { display: flex; align-items: center; gap: 10px; }
+
+        /* ── PROFILE ── */
+        .profile-wrap { position: relative; }
+        .profile-btn {
+            display: flex; align-items: center; gap: 9px;
+            padding: 5px 10px 5px 5px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            cursor: pointer; transition: .2s; outline: none;
+        }
+        .profile-btn:hover { border-color: var(--border-hover); background: var(--surface3); }
+        .profile-av {
+            width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .7rem; font-weight: 700; color: #fff; flex-shrink: 0;
+        }
+        .profile-name { font-size: .81rem; font-weight: 600; color: var(--text); max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .profile-chevron { font-size: .5rem; color: var(--muted2); transition: transform .2s; }
+        .profile-wrap.open .profile-chevron { transform: rotate(180deg); }
+
+        .profile-dropdown {
+            position: absolute; top: calc(100% + 9px); right: 0;
+            width: 220px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            box-shadow: 0 20px 60px rgba(0,0,0,.6);
+            overflow: hidden;
+            opacity: 0; transform: translateY(-8px) scale(.97);
+            pointer-events: none;
+            transition: opacity .18s, transform .18s; z-index: 200;
+        }
+        .profile-wrap.open .profile-dropdown { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+
+        .pd-header { padding: 14px 15px; border-bottom: 1px solid var(--border); background: var(--surface3); }
+        .pd-name { font-weight: 700; font-size: .88rem; }
+        .pd-user { font-family: var(--mono); font-size: .7rem; color: var(--muted2); margin-top: 1px; }
+        .pd-level { margin-top: 8px; }
+        .pd-item {
+            display: flex; align-items: center; gap: 9px;
+            width: 100%; padding: 10px 15px;
+            background: none; border: none;
+            color: var(--muted2); font-family: var(--font); font-size: .82rem;
+            cursor: pointer; transition: .15s; text-align: left;
+        }
+        .pd-item:hover { background: var(--surface3); color: var(--text); }
+        .pd-item.danger { color: var(--danger); }
+        .pd-item.danger:hover { background: rgba(255,92,122,.07); }
+        .pd-sep { border: none; border-top: 1px solid var(--border); margin: 3px 0; }
+
+        .btn-back {
+            display: flex; align-items: center; gap: 6px;
+            padding: 7px 14px;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 40px; color: var(--muted2);
+            font-family: var(--font); font-size: .79rem; font-weight: 600;
+            cursor: pointer; transition: .2s;
+        }
+        .btn-back:hover { border-color: var(--border-hover); color: var(--text); }
+
+        /* ── PAGE ── */
+        .page-wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 48px 36px 80px; }
+
+        .hero { margin-bottom: 44px; animation: fadeUp .4s ease both; }
+        .hero-eyebrow {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: var(--mono); font-size: .68rem; color: var(--acc2);
+            background: var(--acc-glow); border: 1px solid rgba(99,120,255,.2);
+            border-radius: 20px; padding: 3px 10px;
+            margin-bottom: 14px; letter-spacing: .05em;
+        }
+        .hero-title { font-size: 2.1rem; font-weight: 800; letter-spacing: -.04em; line-height: 1.2; margin-bottom: 8px; }
+        .hero-title span { color: var(--acc); }
+        .hero-sub { color: var(--muted2); font-size: .88rem; }
+
+        .section-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; animation: fadeUp .4s .1s ease both; }
+        .section-title { font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+        .section-actions { display: flex; gap: 8px; }
+
+        /* ── WORKSPACE GRID ── */
+        .ws-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; animation: fadeUp .4s .15s ease both; }
+
+        .ws-card {
+            position: relative;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--r); padding: 22px 22px 18px;
+            cursor: pointer;
+            transition: border-color .2s, box-shadow .2s, transform .2s;
+            overflow: hidden;
+        }
+        .ws-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--acc), #a78bff);
+            opacity: 0; transition: opacity .2s;
+        }
+        .ws-card:hover { border-color: var(--border-hover); box-shadow: 0 0 0 1px rgba(99,120,255,.12), 0 16px 40px rgba(0,0,0,.3); transform: translateY(-2px); }
+        .ws-card:hover::before { opacity: 1; }
+
+        .wc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 13px; }
+        .wc-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+        .wc-name { font-weight: 700; font-size: 1rem; letter-spacing: -.02em; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .wc-code { font-family: var(--mono); font-size: .7rem; color: var(--muted2); letter-spacing: .08em; }
+        .wc-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+        .wc-meta { display: flex; align-items: center; gap: 12px; }
+        .wc-stat { display: flex; align-items: center; gap: 4px; font-size: .73rem; color: var(--muted2); }
+        .wc-arrow { width: 27px; height: 27px; border-radius: 7px; background: var(--surface3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: .78rem; color: var(--muted2); transition: .2s; }
+        .ws-card:hover .wc-arrow { background: var(--acc); border-color: var(--acc); color: #fff; }
+
+        .ws-card-create {
+            border-style: dashed; border-color: var(--surface3); background: transparent;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+            min-height: 148px; color: var(--muted); transition: .2s;
+        }
+        .ws-card-create:hover { border-color: var(--acc); color: var(--acc2); background: var(--acc-glow); transform: translateY(-2px); }
+        .ws-card-create:hover::before { opacity: 0; }
+        .create-icon { width: 38px; height: 38px; border-radius: 9px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; transition: .2s; }
+        .ws-card-create:hover .create-icon { background: rgba(99,120,255,.15); }
+        .create-label { font-weight: 600; font-size: .84rem; }
+        .create-sub { font-size: .73rem; }
+
+        /* ── JOIN SECTION ── */
+        .join-section {
+            margin-top: 38px;
+            padding: 20px 22px;
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+            display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+            animation: fadeUp .4s .2s ease both;
+        }
+        .join-icon { width: 40px; height: 40px; border-radius: 9px; background: var(--acc-glow); border: 1px solid rgba(99,120,255,.2); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .join-text { flex: 1; min-width: 160px; }
+        .join-label { font-weight: 700; font-size: .88rem; margin-bottom: 2px; }
+        .join-sub { font-size: .76rem; color: var(--muted2); }
+        .join-form { display: flex; gap: 8px; flex-shrink: 0; }
+        .join-input {
+            padding: 9px 13px; background: var(--surface2); border: 1.5px solid var(--border);
+            border-radius: var(--rsm); font-family: var(--mono); font-size: .86rem; font-weight: 500;
+            letter-spacing: .1em; color: var(--text); outline: none; width: 125px; transition: .15s;
+            text-transform: uppercase;
+        }
+        .join-input::placeholder { color: var(--muted); letter-spacing: .05em; }
+        .join-input:focus { border-color: var(--acc); background: var(--surface3); }
+
+        /* ── BUTTONS ── */
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border: none; border-radius: var(--rsm); font-family: var(--font); font-weight: 600; font-size: .82rem; cursor: pointer; transition: .15s; white-space: nowrap; }
+        .btn-primary { background: var(--acc); color: #fff; }
+        .btn-primary:hover { background: #7b8fff; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,120,255,.3); }
+        .btn-ghost { background: var(--surface2); color: var(--muted2); border: 1px solid var(--border); }
+        .btn-ghost:hover { border-color: var(--border-hover); color: var(--text); }
+        .btn-ok { background: rgba(34,211,162,.1); color: var(--ok); border: 1px solid rgba(34,211,162,.2); }
+        .btn-ok:hover { background: rgba(34,211,162,.18); }
+        .btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
+        .btn-sm { padding: 6px 12px; font-size: .76rem; }
+
+        /* ── BADGES ── */
+        .badge { display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px; border-radius: 20px; font-size: .67rem; font-weight: 600; white-space: nowrap; }
+        .b-admin { background: rgba(99,120,255,.15); color: var(--acc2); border: 1px solid rgba(99,120,255,.2); }
+        .b-member { background: rgba(90,106,138,.1); color: var(--muted2); border: 1px solid var(--border); }
+        .b-level-0 { background: rgba(90,106,138,.1); color: var(--muted2); }
+        .b-level-1 { background: rgba(34,211,162,.1); color: var(--ok); }
+        .b-level-2 { background: rgba(99,120,255,.12); color: var(--acc2); }
+
+        /* ── MODAL ── */
+        .modal-ov { position: fixed; inset: 0; background: rgba(0,0,0,.72); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 430px; box-shadow: 0 30px 80px rgba(0,0,0,.6); animation: mIn .2s ease; }
+        @keyframes mIn { from { opacity: 0; transform: scale(.95) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .m-hdr { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .m-title { font-weight: 700; font-size: .93rem; }
+        .m-x { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1rem; width: 27px; height: 27px; border-radius: 7px; display: flex; align-items: center; justify-content: center; transition: .15s; }
+        .m-x:hover { background: var(--surface3); color: var(--text); }
+        .m-body { padding: 18px 20px; }
+        .m-foot { padding: 13px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+        .fg { margin-bottom: 15px; }
+        .fl { display: block; font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted2); margin-bottom: 6px; }
+        .fi { width: 100%; padding: 10px 13px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--rsm); font-family: var(--font); font-size: .87rem; color: var(--text); outline: none; transition: .15s; }
+        .fi:focus { border-color: var(--acc); background: var(--surface3); box-shadow: 0 0 0 3px rgba(99,120,255,.1); }
+        .fi::placeholder { color: var(--muted); }
+        .fhint { font-size: .72rem; color: var(--muted2); margin-top: 5px; }
+
+        .ws-code-box { background: var(--surface2); border: 1.5px dashed rgba(99,120,255,.3); border-radius: var(--r); padding: 22px; text-align: center; margin: 12px 0; }
+        .wcb-label { font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted2); margin-bottom: 9px; }
+        .wcb-code { font-family: var(--mono); font-size: 2.1rem; font-weight: 700; letter-spacing: .3em; color: var(--acc2); margin-bottom: 13px; }
+        .wcb-hint { font-size: .74rem; color: var(--muted2); line-height: 1.5; }
+
+        .profile-modal-av { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; color: #fff; margin: 0 auto 12px; }
+
+        /* ── TOAST ── */
+        .toast-ctr { position: fixed; bottom: 22px; right: 22px; z-index: 3000; display: flex; flex-direction: column; gap: 7px; }
+        .toast { background: var(--surface2); color: var(--text); padding: 10px 15px; border-radius: var(--rsm); font-size: .82rem; font-weight: 500; box-shadow: 0 8px 28px rgba(0,0,0,.4); animation: tIn .3s ease; border: 1px solid var(--border); border-left: 3px solid var(--ok); max-width: 290px; }
+        .toast.warning { border-left-color: var(--warn); }
+        .toast.error { border-left-color: var(--danger); }
+        @keyframes tIn { from { opacity: 0; transform: translateX(110%); } to { opacity: 1; transform: translateX(0); } }
+
+        .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--surface3); border-top-color: var(--acc); border-radius: 50%; animation: spin .6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-c { text-align: center; padding: 56px 20px; color: var(--muted2); }
+        .empty-state { text-align: center; padding: 54px 20px; color: var(--muted2); grid-column: 1/-1; }
+        .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .empty-title { font-weight: 700; font-size: 1rem; color: var(--text); margin-bottom: 5px; }
+        .empty-sub { font-size: .81rem; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 600px) {
+            .navbar { padding: 0 18px; }
+            .page-wrap { padding: 28px 18px 60px; }
+            .hero-title { font-size: 1.6rem; }
+            .join-form { flex: 1 1 100%; }
+            .join-input { flex: 1; width: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar">
+    <a class="nav-logo" href="#">Flow<span>Desk</span></a>
+    <div class="nav-right">
+        <button class="btn-back" onclick="window.location.href='index.html'">← Voltar ao App</button>
+        <div class="profile-wrap" id="profile-wrap">
+            <button class="profile-btn" onclick="toggleProfile()">
+                <div class="profile-av" id="nav-av" style="background:#6378ff">??</div>
+                <span class="profile-name" id="nav-name">...</span>
+                <span class="profile-chevron">▼</span>
+            </button>
+            <div class="profile-dropdown" id="profile-dropdown">
+                <div class="pd-header">
+                    <div class="pd-name" id="pd-name">—</div>
+                    <div class="pd-user" id="pd-user">—</div>
+                    <div class="pd-level" id="pd-level"></div>
+                </div>
+                <button class="pd-item" onclick="abrirPerfil()">👤 &nbsp;Ver Perfil</button>
+                <button class="pd-item" onclick="abrirModalCriarWorkspace()">✦ &nbsp;Novo Workspace</button>
+                <hr class="pd-sep">
+                <button class="pd-item danger" onclick="sair()">→ &nbsp;Sair da conta</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="page-wrap">
+    <div class="hero">
+        <div class="hero-eyebrow">✦ Dashboard</div>
+        <h1 class="hero-title">Bem-vindo de volta<span id="hero-name">,</span></h1>
+        <p class="hero-sub">Selecione um workspace para continuar ou crie um novo.</p>
+    </div>
+
+    <div class="section-hdr">
+        <span class="section-title">Workspaces</span>
+        <div class="section-actions">
+            <button class="btn btn-ghost btn-sm" onclick="carregarWorkspaces()">↺ Atualizar</button>
+            <button class="btn btn-primary btn-sm" onclick="abrirModalCriarWorkspace()">+ Novo</button>
+        </div>
+    </div>
+
+    <div id="ws-container">
+        <div class="loading-c"><div class="spinner"></div><p style="margin-top:12px;font-size:.82rem">Carregando...</p></div>
+    </div>
+
+    <div class="join-section">
+        <div class="join-icon">🔑</div>
+        <div class="join-text">
+            <div class="join-label">Entrar com código</div>
+            <div class="join-sub">Recebeu um convite? Digite o código para solicitar acesso.</div>
+        </div>
+        <div class="join-form">
+            <input id="join-code" class="join-input" placeholder="ABC123" maxlength="6"
+                onkeydown="if(event.key==='Enter')solicitarEntrada()"
+                oninput="this.value=this.value.toUpperCase()"/>
+            <button class="btn btn-primary" onclick="solicitarEntrada()">Solicitar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-ov" class="modal-ov hidden" onclick="if(event.target.id==='modal-ov')fecharModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="m-hdr"><div class="m-title" id="m-title">—</div><button class="m-x" onclick="fecharModal()">✕</button></div>
+        <div class="m-body" id="m-body"></div>
+        <div class="m-foot" id="m-foot"></div>
+    </div>
+</div>
+<div class="toast-ctr" id="toast-ctr"></div>
+
+<script>
+let currentUser = null;
+const WS_COLORS = ['#6378ff','#8b5cf6','#0891b2','#059669','#d97706','#dc2626','#db2777'];
+const wsColor  = s => { let h=0; for(const c of(s||''))h=(h*31+c.charCodeAt(0))&0xffff; return WS_COLORS[h%WS_COLORS.length]; };
+const initials = n => n?n.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase():'?';
+const escH     = s => s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const LEVEL_LABELS = {0:'Visitante',1:'Colaborador',2:'Administrador'};
+const LEVEL_CLS    = {0:'b-level-0',1:'b-level-1',2:'b-level-2'};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const userId = localStorage.getItem('fd-user-id');
+    if (!userId) { window.location.href='index.html'; return; }
+    const { data: user } = await sb.from('usuarios').select('*').eq('id', userId).single();
+    if (!user) { window.location.href='index.html'; return; }
+    currentUser = user;
+    renderNavProfile();
+    await carregarWorkspaces();
+});
+
+function renderNavProfile() {
+    const av = document.getElementById('nav-av');
+    av.textContent = initials(currentUser.nome);
+    av.style.background = wsColor(currentUser.nome);
+    document.getElementById('nav-name').textContent = currentUser.nome.split(' ')[0];
+    document.getElementById('pd-name').textContent  = currentUser.nome;
+    document.getElementById('pd-user').textContent  = '@'+currentUser.username;
+    document.getElementById('pd-level').innerHTML   = `<span class="badge ${LEVEL_CLS[currentUser.nivel]||'b-level-0'}">${LEVEL_LABELS[currentUser.nivel]||'Usuário'}</span>`;
+    const hn = document.getElementById('hero-name');
+    if (hn) hn.textContent = `, ${currentUser.nome.split(' ')[0]}`;
+}
+
+function toggleProfile() { document.getElementById('profile-wrap').classList.toggle('open'); }
+document.addEventListener('click', e => { if (!document.getElementById('profile-wrap').contains(e.target)) document.getElementById('profile-wrap').classList.remove('open'); });
+
+async function carregarWorkspaces() {
+    const el = document.getElementById('ws-container');
+    el.innerHTML = '<div class="loading-c"><div class="spinner"></div><p style="margin-top:12px;font-size:.82rem">Carregando...</p></div>';
+
+    const { data: memberships } = await sb.from('workspace_usuarios').select('workspace_id, role').eq('usuario_id', currentUser.id);
+    if (!memberships?.length) { el.innerHTML = renderEmpty(); return; }
+
+    const wsIds = memberships.map(m => m.workspace_id);
+    const { data: wss } = await sb.from('workspaces').select('*').in('id', wsIds).order('created_at', { ascending: false });
+    const { data: allMembers } = await sb.from('workspace_usuarios').select('workspace_id').in('workspace_id', wsIds);
+
+    const memberCounts = {};
+    (allMembers||[]).forEach(m => memberCounts[m.workspace_id] = (memberCounts[m.workspace_id]||0)+1);
+    const roleMap = {};
+    memberships.forEach(m => roleMap[m.workspace_id] = m.role);
+
+    el.innerHTML = `<div class="ws-grid">
+        ${(wss||[]).map(ws => renderCard(ws, roleMap[ws.id], memberCounts[ws.id]||1)).join('')}
+        <div class="ws-card ws-card-create" onclick="abrirModalCriarWorkspace()">
+            <div class="create-icon">✦</div>
+            <div class="create-label">Criar Workspace</div>
+            <div class="create-sub">Novo espaço de trabalho</div>
+        </div>
+    </div>`;
+}
+
+function renderCard(ws, role, memberCount) {
+    const color = wsColor(ws.nome);
+    const date  = new Date(ws.created_at).toLocaleDateString('pt-BR',{month:'short',year:'numeric'});
+    const isAdmin = role==='admin';
+    return `<div class="ws-card" onclick="entrarWorkspace(${ws.id})">
+        <div class="wc-top">
+            <div class="wc-icon" style="background:${color}22;border:1px solid ${color}33">🏢</div>
+            ${isAdmin ? '<span class="badge b-admin">★ Admin</span>' : '<span class="badge b-member">Membro</span>'}
+        </div>
+        <div class="wc-name">${escH(ws.nome)}</div>
+        <div class="wc-code"># ${ws.codigo}</div>
+        <div class="wc-footer">
+            <div class="wc-meta">
+                <div class="wc-stat">👥 ${memberCount}</div>
+                <div class="wc-stat">📅 ${date}</div>
+            </div>
+            <div class="wc-arrow">→</div>
+        </div>
+    </div>`;
+}
+
+function renderEmpty() {
+    return `<div class="ws-grid">
+        <div class="empty-state">
+            <div class="empty-icon">🏢</div>
+            <div class="empty-title">Nenhum workspace ainda</div>
+            <div class="empty-sub">Crie um novo ou entre com um código de convite.</div>
+        </div>
+        <div class="ws-card ws-card-create" onclick="abrirModalCriarWorkspace()">
+            <div class="create-icon">✦</div>
+            <div class="create-label">Criar Workspace</div>
+            <div class="create-sub">Novo espaço de trabalho</div>
+        </div>
+    </div>`;
+}
+
+function entrarWorkspace(wsId) { localStorage.setItem('fd-ws-id', wsId); window.location.href='index.html'; }
+
+async function solicitarEntrada() {
+    const code = document.getElementById('join-code').value.trim().toUpperCase();
+    if (!code||code.length<4) { toast('Digite um código válido.','warning'); return; }
+    const { data: ws } = await sb.from('workspaces').select('*').eq('codigo',code).maybeSingle();
+    if (!ws) { toast('Workspace não encontrado.','error'); return; }
+    const { data: member } = await sb.from('workspace_usuarios').select('id').eq('workspace_id',ws.id).eq('usuario_id',currentUser.id).maybeSingle();
+    if (member) { toast('Você já é membro! Clique no card para entrar.'); document.getElementById('join-code').value=''; await carregarWorkspaces(); return; }
+    const { data: pedido } = await sb.from('pedidos_acesso').select('id,status').eq('workspace_id',ws.id).eq('usuario_id',currentUser.id).maybeSingle();
+    if (pedido) { toast(pedido.status==='pendente'?'Pedido já enviado. Aguarde aprovação.':'Seu pedido foi rejeitado pelo admin.', pedido.status==='pendente'?'warning':'error'); return; }
+    await sb.from('pedidos_acesso').insert({ workspace_id:ws.id, usuario_id:currentUser.id, usuario_nome:currentUser.nome, usuario_username:currentUser.username, status:'pendente' });
+    document.getElementById('join-code').value='';
+    toast(`✉️ Pedido enviado para "${escH(ws.nome)}"! Aguarde a aprovação.`);
+}
+
+function abrirModalCriarWorkspace() {
+    document.getElementById('profile-wrap').classList.remove('open');
+    abrirModal('✦ Criar Novo Workspace', `
+        <div class="fg">
+            <label class="fl">Nome do Workspace</label>
+            <input id="m-ws-nome" class="fi" placeholder="Ex: Minha Empresa, Equipe Dev..." onkeydown="if(event.key==='Enter')confirmarCriar()"/>
+        </div>
+        <p class="fhint">Você será o administrador. Um código único será gerado para convites.</p>
+    `, [
+        { label: 'Criar', cls: 'btn-primary', action: confirmarCriar },
+        { label: 'Cancelar', cls: 'btn-ghost', action: fecharModal }
+    ]);
+}
+
+async function confirmarCriar() {
+    const nome = document.getElementById('m-ws-nome')?.value?.trim();
+    if (!nome) { toast('Informe o nome.','warning'); return; }
+    const btn = document.getElementById('mb-0');
+    if (btn) { btn.disabled=true; btn.textContent='Criando...'; }
+    try {
+        const codigo = await gerarCodigoUnico();
+        const { data: ws, error } = await sb.from('workspaces').insert({ nome, codigo, criado_por: currentUser.id }).select().single();
+        if (error) throw error;
+        await sb.from('workspace_usuarios').insert({ workspace_id: ws.id, usuario_id: currentUser.id, role: 'admin' });
+
+        document.getElementById('m-title').textContent = '✅ Workspace Criado!';
+        document.getElementById('m-body').innerHTML = `
+            <p style="color:var(--muted2);font-size:.84rem;margin-bottom:2px"><strong style="color:var(--text)">${escH(nome)}</strong> foi criado. Você é o administrador.</p>
+            <div class="ws-code-box">
+                <div class="wcb-label">Código de Convite</div>
+                <div class="wcb-code">${codigo}</div>
+                <button class="btn btn-ghost btn-sm" onclick="copiarCodigo('${codigo}',this)" style="margin-bottom:10px">📋 Copiar Código</button>
+                <div class="wcb-hint">Compartilhe este código para que outros solicitem acesso ao workspace.</div>
+            </div>`;
+        document.getElementById('m-foot').innerHTML = `
+            <button class="btn btn-ghost" onclick="fecharModal()">Fechar</button>
+            <button class="btn btn-primary" onclick="entrarWorkspace(${ws.id})">Entrar agora →</button>`;
+        await carregarWorkspaces();
+    } catch(e) {
+        toast('Erro: '+e.message,'error');
+        if (btn) { btn.disabled=false; btn.textContent='Criar'; }
+    }
+}
+
+function copiarCodigo(codigo, btn) {
+    navigator.clipboard.writeText(codigo).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✓ Copiado!';
+        btn.classList.replace('btn-ghost','btn-ok');
+        setTimeout(() => { btn.innerHTML=orig; btn.classList.replace('btn-ok','btn-ghost'); }, 2200);
+    }).catch(() => toast('Código: '+codigo,'warning'));
+}
+
+function abrirPerfil() {
+    document.getElementById('profile-wrap').classList.remove('open');
+    const color = wsColor(currentUser.nome);
+    abrirModal('👤 Perfil', `
+        <div style="text-align:center;padding:8px 0 4px">
+            <div class="profile-modal-av" style="background:${color}">${initials(currentUser.nome)}</div>
+            <div style="font-weight:700;font-size:1.05rem;margin-bottom:3px">${escH(currentUser.nome)}</div>
+            <div style="font-family:var(--mono);font-size:.76rem;color:var(--muted2);margin-bottom:9px">@${escH(currentUser.username)}</div>
+            <span class="badge ${LEVEL_CLS[currentUser.nivel]||'b-level-0'}">${LEVEL_LABELS[currentUser.nivel]||'Usuário'}</span>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rsm);padding:13px 15px;margin-top:13px;font-size:.8rem;color:var(--muted2);display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between"><span>ID</span><span style="font-family:var(--mono);color:var(--text)">#${currentUser.id}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Membro desde</span><span style="color:var(--text)">${new Date(currentUser.created_at).toLocaleDateString('pt-BR')}</span></div>
+        </div>
+    `, [{ label: 'Fechar', cls: 'btn-ghost', action: fecharModal }]);
+}
+
+function sair() { localStorage.removeItem('fd-user-id'); window.location.href='index.html'; }
+
+async function gerarCodigoUnico() {
+    const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    for(let t=0;t<10;t++){
+        let code=''; for(let i=0;i<6;i++) code+=chars[Math.floor(Math.random()*chars.length)];
+        const { data } = await sb.from('workspaces').select('id').eq('codigo',code).maybeSingle();
+        if(!data) return code;
+    }
+    throw new Error('Não foi possível gerar código único.');
+}
+
+function abrirModal(titulo, bodyHTML, botoes=[]) {
+    document.getElementById('m-title').textContent = titulo;
+    document.getElementById('m-body').innerHTML    = bodyHTML;
+    document.getElementById('m-foot').innerHTML    = botoes.map((b,i)=>`<button class="btn ${b.cls}" id="mb-${i}">${b.label}</button>`).join('');
+    botoes.forEach((b,i)=>{ document.getElementById(`mb-${i}`).onclick=b.action; });
+    document.getElementById('modal-ov').classList.remove('hidden');
+    setTimeout(()=>{ const f=document.querySelector('#m-body input'); if(f)f.focus(); },120);
+}
+function fecharModal() { document.getElementById('modal-ov').classList.add('hidden'); }
+
+function toast(msg, type='success') {
+    const el=document.createElement('div');
+    el.className=`toast${type!=='success'?' '+type:''}`;
+    el.textContent=msg;
+    document.getElementById('toast-ctr').appendChild(el);
+    setTimeout(()=>el.remove(),3800);
+}
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') fecharModal(); });
+</script>
+</body>
+</html>

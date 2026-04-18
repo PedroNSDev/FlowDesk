@@ -1,11 +1,11 @@
 <?php
 $host = 'localhost';
 $dbname = 'meu_sistema';
-$user = 'root';
-$pass = '';
+$user = 'postgres'; // or your postgres user
+$pass = 'your_password';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
+    $pdo = new PDO("pgsql:host=$host;dbname=$dbname", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch(PDOException $e) {
     die("Erro: " . $e->getMessage());

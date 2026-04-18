@@ -122,7 +122,7 @@ function mostrarTela(login=true){
 function carregarDashboard(){
     const displayUser = document.getElementById('display-user');
     
-    displayUser.textContent = `${currentUser.name}: ${currentUser.username} (Nível ${currentUser.nivel}): /${currentUser.id}`;
+    displayUser.textContent = `${currentUser.name}: ${currentUser.username} (Nível ${currentUser.nivel}): \n Id: ${currentUser.id}`;
 
     renderizarProjetos();
 

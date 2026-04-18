@@ -1,13 +1,16 @@
 <?php
+session_start();
+require 'db.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
     $senha = $_POST['password'];
 
     $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE username = ?");
     $stmt->execute([$username]);
-    $user = $stmt->fetch();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user && $user['senha'] == PASSWORD($senha)) {
+    if ($user && password_verify($senha, $user['senha'])) {
         $_SESSION['user'] = $user;
         header('Location: dashboard.php');
         exit;
