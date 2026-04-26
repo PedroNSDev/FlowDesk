@@ -457,7 +457,31 @@ async function solicitarEntrada() {
     if (member) { toast('Você já é membro! Clique no card para entrar.'); document.getElementById('join-code').value=''; await carregarWorkspaces(); return; }
     const { data: pedido } = await sb.from('pedidos_acesso').select('id,status').eq('workspace_id',ws.id).eq('usuario_id',currentUser.id).maybeSingle();
     if (pedido) { toast(pedido.status==='pendente'?'Pedido já enviado. Aguarde aprovação.':'Seu pedido foi rejeitado pelo admin.', pedido.status==='pendente'?'warning':'error'); return; }
-    await sb.from('pedidos_acesso').insert({ workspace_id:ws.id, usuario_id:currentUser.id, usuario_nome:currentUser.nome, usuario_username:currentUser.username, status:'pendente' });
+
+    // Inserir pedido de acesso
+    const { data: novoPedido } = await sb.from('pedidos_acesso').insert({
+        workspace_id: ws.id, usuario_id: currentUser.id,
+        usuario_nome: currentUser.nome, usuario_username: currentUser.username, status: 'pendente'
+    }).select().single();
+
+    // Enviar notificação para todos os admins do workspace //PLACEHOLDER Fazer UM CARGO DE NIVEL SUPERIOR PRA ENVIAR E ALTERAR DE NUMERO PRA ENUM 
+    try {
+        await sb.from('notificacoes').insert({
+            workspace_id: ws.id,
+            icone: '🔑',
+            mensagem: `${currentUser.nome} (@${currentUser.username}) solicitou acesso ao workspace.`,
+            tipo: 'acesso',
+            lida: false,
+            criado_por: currentUser.id,
+            meta: {
+                pedido_id: novoPedido?.id || null,
+                usuario_id: currentUser.id,
+                usuario_nome: currentUser.nome,
+                usuario_username: currentUser.username
+            }
+        });
+    } catch(e) { console.warn('Erro ao enviar notificação de acesso:', e?.message); }
+
     document.getElementById('join-code').value='';
     toast(`✉️ Pedido enviado para "${escH(ws.nome)}"! Aguarde a aprovação.`);
 }

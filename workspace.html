@@ -313,6 +313,13 @@
         .ark-vis-pub{background:#dcfce7;color:#166534}
         .ark-vis-priv{background:#fce7f3;color:#9d174d}
         .ark-empty{text-align:center;padding:50px 20px;color:var(--muted);background:var(--surface);border-radius:12px;border:2px dashed var(--border)}
+
+        /* ── NOTIF PEDIDO ACESSO ── */
+        .notif-acesso-card{background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;gap:11px;align-items:flex-start}
+        .notif-acesso-card .na-body{flex:1}
+        .notif-acesso-card .na-nome{font-weight:700;font-size:.86rem;color:#92400e}
+        .notif-acesso-card .na-info{font-size:.77rem;color:#b45309;margin-top:2px}
+        .notif-acesso-card .na-acts{display:flex;gap:6px;margin-top:8px}
     </style>
 </head>
 <body>
@@ -530,6 +537,7 @@
         <button class="notif-filter-btn" data-tipo="membro"  onclick="filtrarNotif(this,'membro')">👥 Membros</button>
         <button class="notif-filter-btn" data-tipo="evento"  onclick="filtrarNotif(this,'evento')">📅 Eventos</button>
         <button class="notif-filter-btn" data-tipo="geral"   onclick="filtrarNotif(this,'geral')">💬 Geral</button>
+        <button class="notif-filter-btn" data-tipo="acesso"  onclick="filtrarNotif(this,'acesso')">🔑 Acessos</button>
     </div>
     <div class="notif-list" id="notif-list"><div class="notif-empty">Carregando...</div></div>
     <div class="notif-footer" style="display:flex;gap:8px">
@@ -932,8 +940,12 @@ function abrirModalEtapa(pId, sId, e=null) {
         <div class="fg"><label class="fl">Prioridade (0-4)</label><select id="m-eprio" class="fsel">
             ${[0,1,2,3,4].map(v => `<option value="${v}" ${prio==v?'selected':''}>${v}${v===0?' - Baixa':v===4?' - Alta':''}</option>`).join('')}
         </select></div>
-    `, [
-        { label: e ? 'Salvar' : '+ Criar', cls: 'btn-p', action: e ? `editarEtapaSave(${e.id})` : `criarEtapa(${pId}, ${sId})` },
+    `, e ? [
+        { label: 'Salvar', cls: 'btn-p', action: `editarEtapaSave(${e.id})` },
+        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' },
+        { label: '🗑 Excluir', cls: 'btn-s', style: 'border-color:var(--danger);color:var(--danger);margin-right:auto', action: `deletarEtapa(${e.id})` }
+    ] : [
+        { label: '+ Criar', cls: 'btn-p', action: `criarEtapa(${pId}, ${sId})` },
         { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
     ]);
 }
@@ -982,6 +994,35 @@ async function updateEtapaStatus(eId, status) {
     const { error } = await sb.from('etapas').update({ status }).eq('id', eId);
     if (error) { toast('Erro ao atualizar status.', 'error'); return; }
     await renderizarProjetos();
+}
+
+// ─── DELETAR ETAPA (direto, sem aprovação) ────────────────────────
+async function deletarEtapa(eId) {
+    if (!confirm('Tem certeza que deseja excluir esta etapa? Esta ação não pode ser desfeita.')) return;
+    fecharModal();
+    const { error } = await sb.from('etapas').delete().eq('id', eId);
+    if (error) { toast('Erro ao excluir etapa: '+error.message, 'error'); return; }
+    await addLog('delete','etapa',eId,{});
+    toast('Etapa excluída.');
+    await renderizarProjetos();
+}
+
+// ─── RESPONDER PEDIDO DE ACESSO ──────────────────────────────────
+async function responderAcesso(notifId, pedidoId, usuarioId, aceitar) {
+    if (aceitar) {
+        const { error } = await sb.from('workspace_usuarios').insert({ workspace_id: currentWorkspace.id, usuario_id: usuarioId, role: 'member' });
+        if (error) { toast('Erro ao adicionar membro: '+error.message, 'error'); return; }
+        await sb.from('pedidos_acesso').update({ status: 'aceito' }).eq('id', pedidoId);
+        toast('Membro adicionado!');
+        await pushNotificacao('✅', `Pedido de acesso aceito. Bem-vindo(a) ao workspace!`, 'membro');
+        await addLog('invite','membro',usuarioId,{acao:'aceito'});
+    } else {
+        await sb.from('pedidos_acesso').update({ status: 'rejeitado' }).eq('id', pedidoId);
+        toast('Pedido rejeitado.');
+    }
+    await sb.from('notificacoes').update({ lida: true }).eq('id', notifId);
+    document.getElementById(`notif-${notifId}`)?.remove();
+    await atualizarBellBadge();
 }
 
 // ─── HOME ─────────────────────────────────────────
@@ -1111,7 +1152,6 @@ async function carregarHome() {
         </div>`;
 }
 
-// ─── PROGRESSO ────────────────────────────────────
 let progressoFiltro = 'todos';
 
 async function carregarProgresso() {
@@ -1144,7 +1184,8 @@ function renderProgresso(etapas) {
     const filtradas = progressoFiltro === 'todos' ? todas
         : progressoFiltro === 'pendente' ? todas.filter(e => e.status === 'Não iniciado')
         : progressoFiltro === 'andamento' ? todas.filter(e => e.status === 'Em andamento')
-        : todas.filter(e => e.status === 'Concluído');
+        : progressoFiltro === 'concluido' ? todas.filter(e => e.status === 'Concluído')
+        : todas.filter(e => !e.responsavel_id);
 
     const hoje = new Date(); hoje.setHours(0,0,0,0);
     const total = etapas.length;
@@ -1186,15 +1227,16 @@ function renderProgresso(etapas) {
         <!-- Filtros -->
         <div class="prog-filters">
             <span style="font-size:.78rem;font-weight:600;color:var(--muted)">Filtrar:</span>
-            ${['todos','pendente','andamento','concluido'].map(f => `
+            ${['todos','pendente','andamento','concluido','sem-resp'].map(f => `
                 <button class="prog-filter-btn ${progressoFiltro===f?'active':''}"
                     onclick="progressoFiltro='${f}'; carregarProgresso()">
-                    ${f==='todos'?'Todos':f==='pendente'?'Não iniciado':f==='andamento'?'Em andamento':'Concluído'}
+                    ${f==='todos'?'Todos':f==='pendente'?'Não iniciado':f==='andamento'?'Em andamento':f==='concluido'?'Concluído':'👤 Sem responsável'}
                     <span style="margin-left:4px;opacity:.7">(${
                         f==='todos'?total:
                         f==='pendente'?etapas.filter(e=>e.status==='Não iniciado').length:
                         f==='andamento'?etapas.filter(e=>e.status==='Em andamento').length:
-                        concluidas
+                        f==='concluido'?concluidas:
+                        etapas.filter(e=>!e.responsavel_id).length
                     })</span>
                 </button>`).join('')}
         </div>
@@ -2238,20 +2280,19 @@ let notifTipoFiltro = '';
 
 // Mapa visual por tipo
 const NOTIF_TIPO = {
-    upload:  { label:'Arquivo',  cls:'background:#ede9fe;color:#5b21b6' },
-    membro:  { label:'Membro',   cls:'background:#dcfce7;color:#166534' },
-    evento:  { label:'Evento',   cls:'background:#fef3c7;color:#92400e' },
-    geral:   { label:'Geral',    cls:'background:#e0f2fe;color:#075985' },
+    upload:    { label:'Arquivo',  cls:'background:#ede9fe;color:#5b21b6' },
+    membro:    { label:'Membro',   cls:'background:#dcfce7;color:#166534' },
+    evento:    { label:'Evento',   cls:'background:#fef3c7;color:#92400e' },
+    geral:     { label:'Geral',    cls:'background:#e0f2fe;color:#075985' },
+    acesso:    { label:'Acesso',   cls:'background:#fef3c7;color:#92400e' },
 };
 
-async function pushNotificacao(icone, mensagem, tipo='geral') {
+async function pushNotificacao(icone, mensagem, tipo='geral', meta=null) {
     if (!currentUserIsWorkspaceAdmin && currentUser?.nivel !== 2) return; // só admin gera
     try {
-        await sb.from('notificacoes').insert({
-            workspace_id: currentWorkspace.id,
-            icone, mensagem, tipo, lida: false,
-            criado_por: currentUser.id
-        });
+        const payload = { workspace_id: currentWorkspace.id, icone, mensagem, tipo, lida: false, criado_por: currentUser.id };
+        if (meta) payload.meta = meta;
+        await sb.from('notificacoes').insert(payload);
         if (document.getElementById('bell-btn') && !document.getElementById('bell-btn').classList.contains('hidden')) {
             await atualizarBellBadge();
         }
@@ -2291,7 +2332,7 @@ async function carregarNotificacoes() {
     if (!list) return;
     list.innerHTML = '<div class="notif-empty">Carregando...</div>';
 
-    let q = sb.from('notificacoes').select('*')
+    let q = sb.from('notificacoes').select('id,icone,mensagem,tipo,lida,created_at,meta')
         .eq('workspace_id', currentWorkspace.id)
         .order('created_at', { ascending: false }).limit(80);
     if (notifTipoFiltro) q = q.eq('tipo', notifTipoFiltro);
@@ -2314,6 +2355,24 @@ async function carregarNotificacoes() {
 
     list.innerHTML = data.map(n => {
         const tipo = NOTIF_TIPO[n.tipo] || { label: n.tipo||'Geral', cls:'background:#f1f5f9;color:#64748b' };
+
+        // Card especial: solicitação de acesso
+        if (n.tipo === 'acesso' && !n.lida) {
+            const meta = n.meta || {};
+            return `<div class="notif-acesso-card" id="notif-${n.id}">
+                <div style="font-size:1.4rem">🔑</div>
+                <div class="na-body">
+                    <div class="na-nome">${escH(meta.usuario_nome || n.mensagem)}</div>
+                    <div class="na-info">@${escH(meta.usuario_username || '')} quer entrar no workspace</div>
+                    <div class="na-acts">
+                        <button class="btn btn-p btn-sm" onclick="responderAcesso(${n.id}, ${meta.pedido_id||'null'}, ${meta.usuario_id||'null'}, true)">✓ Aceitar</button>
+                        <button class="btn btn-sm" style="border:1px solid var(--danger);color:var(--danger);background:none" onclick="responderAcesso(${n.id}, ${meta.pedido_id||'null'}, ${meta.usuario_id||'null'}, false)">✕ Rejeitar</button>
+                    </div>
+                </div>
+                <span style="font-size:.68rem;color:#b45309;white-space:nowrap">${tempoRelativo(n.created_at)}</span>
+            </div>`;
+        }
+
         return `<div class="notif-item ${n.lida?'':'unread'}" onclick="marcarLida(${n.id}, this)">
             <div class="notif-icon">${escH(n.icone||'🔔')}</div>
             <div class="notif-text">
@@ -2360,7 +2419,6 @@ function abrirNotificacoes() {
     document.getElementById('notif-panel').classList.add('open');
     document.getElementById('notif-ov').classList.add('open');
     carregarNotificacoes();
-    // Preencher filtro de usuários nos logs ao mesmo tempo
     populaFiltroUsuariosLog();
     notifInterval = setInterval(atualizarBellBadge, 30000);
 }
