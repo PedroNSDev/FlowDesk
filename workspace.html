@@ -249,12 +249,41 @@
         .ev-mini-nome{font-weight:600;font-size:.86rem}
         .ev-mini-hora{font-size:.74rem;color:var(--acc);margin-top:2px}
         .ev-past .ev-mini-date{background:linear-gradient(135deg,#94a3b8,#64748b)}
-        .home-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+        .home-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
         .home-stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-align:center;box-shadow:var(--sh)}
         .home-stat-val{font-size:1.7rem;font-weight:800;color:var(--acc)}
         .home-stat-lbl{font-size:.72rem;color:var(--muted);margin-top:2px}
         /* staggered anim helpers */
         .anim-item{opacity:0;animation:fadeUp .4s ease forwards}
+
+        /* ── BELL / NOTIFICACOES ── */
+        .bell-btn{position:relative;background:rgba(255,255,255,.08);border:none;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:.15s;flex-shrink:0}
+        .bell-btn:hover{background:rgba(255,255,255,.16)}
+        .bell-badge{position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;font-size:.58rem;font-weight:800;min-width:16px;height:16px;border-radius:20px;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1;animation:bellPop .3s ease}
+        @keyframes bellPop{from{transform:scale(0)}to{transform:scale(1)}}
+        @keyframes bellRing{0%,100%{transform:rotate(0)}20%{transform:rotate(-15deg)}40%{transform:rotate(15deg)}60%{transform:rotate(-10deg)}80%{transform:rotate(10deg)}}
+        .bell-ring{animation:bellRing .5s ease}
+        .notif-panel{position:fixed;top:0;right:0;width:360px;height:100vh;background:var(--surface);box-shadow:-4px 0 24px rgba(0,0,0,.15);z-index:1500;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+        .notif-panel.open{transform:translateX(0)}
+        .notif-ov{position:fixed;inset:0;z-index:1499;display:none}
+        .notif-ov.open{display:block}
+        .notif-hdr{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+        .notif-hdr-title{font-weight:800;font-size:.95rem}
+        .notif-list{flex:1;overflow-y:auto;padding:8px}
+        .notif-item{display:flex;gap:11px;padding:12px 12px;border-radius:10px;margin-bottom:4px;cursor:pointer;transition:.15s;border:1px solid transparent}
+        .notif-item:hover{background:var(--bg);border-color:var(--border)}
+        .notif-item.unread{background:#eef2ff;border-color:#c7d2fe}
+        .notif-item.unread:hover{background:#e0e7ff}
+        .notif-icon{font-size:1.3rem;flex-shrink:0;margin-top:1px}
+        .notif-text{flex:1;min-width:0}
+        .notif-msg{font-size:.84rem;font-weight:500;line-height:1.4}
+        .notif-time{font-size:.72rem;color:var(--muted);margin-top:3px}
+        .notif-dot{width:8px;height:8px;background:var(--acc);border-radius:50%;flex-shrink:0;margin-top:5px}
+        .notif-empty{text-align:center;padding:50px 20px;color:var(--muted)}
+        .notif-footer{padding:12px 20px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px}
+        .notif-filter-btn{padding:4px 10px;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:.73rem;font-weight:600;cursor:pointer;transition:.15s;font-family:var(--font);color:var(--text)}
+        .notif-filter-btn.active,.notif-filter-btn:hover{background:var(--acc);color:#fff;border-color:var(--acc)}
+        .notif-tipo-badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:20px;font-size:.62rem;font-weight:700;margin-top:3px}
 
         /* ── PROGRESSO ── */
         .prog-table{width:100%;border-collapse:separate;border-spacing:0 6px}
@@ -320,8 +349,13 @@
         </div>
 
         <div class="sb-user">
-            <div class="un" id="sb-uname">—</div>
-            <div class="ur" id="sb-urole">—</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                <div>
+                    <div class="un" id="sb-uname">—</div>
+                    <div class="ur" id="sb-urole">—</div>
+                </div>
+                <button id="bell-btn" class="bell-btn hidden" onclick="abrirNotificacoes()" title="Notificações">🔔</button>
+            </div>
             <button class="lb" onclick="fazerLogout()">→ Sair da conta</button>
         </div>
     </nav>
@@ -417,10 +451,34 @@
         <!-- LOGS -->
         <div id="tab-logs" class="tab-c">
             <div class="ph">
-                <div><div class="pt">System Logs</div><div class="ps">Histórico de atividades</div></div>
-                <button class="btn btn-s btn-sm" onclick="carregarLogs()">↺ Atualizar</button>
+                <div><div class="pt">System Logs</div><div class="ps">Histórico estruturado de atividades</div></div>
+                <div style="display:flex;gap:8px">
+                    <button class="btn btn-s btn-sm" onclick="exportarLogs()">⬇️ Exportar CSV</button>
+                    <button class="btn btn-s btn-sm" onclick="carregarLogs()">↺ Atualizar</button>
+                </div>
             </div>
-            <div id="logs-panel" class="logs-panel"><div style="color:#475569">Carregando...</div></div>
+            <!-- Filtros -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+                <span style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Filtrar:</span>
+                <select id="log-filtro-acao" class="fsel" style="width:auto;padding:6px 10px;font-size:.8rem;border-radius:8px" onchange="logFiltroAcao=this.value;carregarLogs()">
+                    <option value="">Todas as ações</option>
+                    <option value="create">Criação</option>
+                    <option value="update">Edição</option>
+                    <option value="delete">Exclusão</option>
+                    <option value="upload">Upload</option>
+                    <option value="download">Download</option>
+                    <option value="login">Login</option>
+                    <option value="invite">Convite</option>
+                    <option value="role_change">Papel</option>
+                    <option value="aviso">Recado</option>
+                    <option value="status_change">Status</option>
+                </select>
+                <select id="log-filtro-usuario" class="fsel" style="width:auto;padding:6px 10px;font-size:.8rem;border-radius:8px" onchange="logFiltroUsuario=this.value;carregarLogs()">
+                    <option value="">Todos os usuários</option>
+                </select>
+                <button class="btn btn-s btn-sm" onclick="logFiltroAcao='';logFiltroUsuario='';document.getElementById('log-filtro-acao').value='';document.getElementById('log-filtro-usuario').value='';carregarLogs()">✕ Limpar</button>
+            </div>
+            <div id="logs-panel" class="logs-panel"><div style="color:#475569;padding:8px 0">Carregando...</div></div>
         </div>
     </main>
 </div>
@@ -454,6 +512,31 @@
 </div>
 
 <div class="toast-ctr" id="toast-ctr"></div>
+
+<!-- ═══════════ NOTIFICAÇÕES PANEL (admin only) ═══════════ -->
+<div class="notif-ov" id="notif-ov" onclick="fecharNotificacoes()"></div>
+<div class="notif-panel" id="notif-panel">
+    <div class="notif-hdr">
+        <div class="notif-hdr-title">🔔 Notificações</div>
+        <div style="display:flex;gap:7px;align-items:center">
+            <button class="btn btn-s btn-sm" onclick="marcarTodasLidas()">✓ Lidas</button>
+            <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem" onclick="fecharNotificacoes()">✕</button>
+        </div>
+    </div>
+    <!-- Filtros de tipo -->
+    <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap">
+        <button class="notif-filter-btn active" data-tipo="" onclick="filtrarNotif(this,'')">Todas</button>
+        <button class="notif-filter-btn" data-tipo="upload"  onclick="filtrarNotif(this,'upload')">📎 Arquivos</button>
+        <button class="notif-filter-btn" data-tipo="membro"  onclick="filtrarNotif(this,'membro')">👥 Membros</button>
+        <button class="notif-filter-btn" data-tipo="evento"  onclick="filtrarNotif(this,'evento')">📅 Eventos</button>
+        <button class="notif-filter-btn" data-tipo="geral"   onclick="filtrarNotif(this,'geral')">💬 Geral</button>
+    </div>
+    <div class="notif-list" id="notif-list"><div class="notif-empty">Carregando...</div></div>
+    <div class="notif-footer" style="display:flex;gap:8px">
+        <button class="btn btn-s btn-sm" style="flex:1" onclick="carregarNotificacoes()">↺ Atualizar</button>
+        <button class="btn btn-sm" style="flex:1;background:none;border:1px solid var(--danger);color:var(--danger);font-size:.75rem" onclick="limparNotificacoesLidas()">🗑 Limpar lidas</button>
+    </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════════════
@@ -512,6 +595,8 @@ async function entrarNoDashboard() {
     if (currentUserIsWorkspaceAdmin || currentUser.nivel === 2) {
         document.getElementById('nav-logs').classList.remove('hidden');
         document.getElementById('admin-section').classList.remove('hidden');
+        document.getElementById('bell-btn').classList.remove('hidden');
+        carregarNotificacoes();
     }
 
     const { data: users } = await sb.from('usuarios').select('*').in('id', memberIds);
@@ -536,7 +621,7 @@ function switchTab(tab) {
         if (b) b.classList.toggle('active', t===tab);
     });
     if (tab === 'contribuidores') renderContribuidor();
-    if (tab === 'logs') carregarLogs();
+    if (tab === 'logs') { carregarLogs(); populaFiltroUsuariosLog(); }
     if (tab === 'ferramentas') carregarFerramentas();
     if (tab === 'eventos') carregarEventos();
     if (tab === 'arquivos') carregarArquivosWorkspace();
@@ -594,12 +679,12 @@ async function salvarAviso() {
     if (!msg) { toast('Digite uma mensagem.', 'warning'); return; }
     await sb.from('avisos').update({ ativo: false }).eq('workspace_id', currentWorkspace.id).eq('ativo', true);
     await sb.from('avisos').insert({ mensagem: msg, ativo: true, criado_por: currentUser.id, workspace_id: currentWorkspace.id });
-    fecharModal(); await carregarAviso(); await addLog('Publicou um recado fixado'); toast('Recado publicado! 📌');
+    fecharModal(); await carregarAviso(); await addLog('aviso','aviso',avisoAtivo?.id,{acao:'publicou'}); toast('Recado publicado! 📌');
 }
 
 async function desativarAviso() {
     await sb.from('avisos').update({ ativo: false }).eq('id', avisoAtivo.id);
-    avisoAtivo = null; renderizarAviso(); await addLog('Removeu o recado fixado'); toast('Recado removido.');
+    avisoAtivo = null; renderizarAviso(); await addLog('aviso','aviso',avisoAtivo?.id,{acao:'removeu'}); toast('Recado removido.');
 }
 
 // ─── RENDER PROJECTS ──────────────────────────────
@@ -617,8 +702,6 @@ async function renderizarProjetos() {
     if (error) { c.innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><h3>Erro</h3><p>${escH(error.message)}</p></div>`; return; }
     if (!projs?.length) { c.innerHTML=`<div class="empty-state"><div class="ei">📁</div><h3>Nenhum projeto ainda</h3><p>Clique em "+ Novo Projeto" para começar.</p></div>`; return; }
     c.innerHTML = projs.map(renderProj).join('');
-    // Carregar arquivos de cada projeto
-    projs.forEach(p => carregarArquivosProjeto(p.id));
 }
 
 function renderProj(p) {
@@ -639,16 +722,7 @@ function renderProj(p) {
             ${p.descricao ? `<p class="proj-desc">${escH(p.descricao)}</p>` : ''}
             ${(p.sessoes||[]).map(s => renderSess(p.id, s)).join('')}
             ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="abrirModalSessao(${p.id})">+ Seção</button>` : ''}
-
-            <!-- Seção de arquivos do projeto -->
-            <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
-                <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px">📎 Arquivos do projeto</div>
-                <div class="upload-zone" style="padding:10px 14px">
-                    <input type="file" id="proj-file-input-${p.id}" multiple style="flex:1;font-size:.82rem">
-                    <button class="btn btn-s btn-sm" onclick="uploadArquivoProjeto(${p.id})">⬆️ Enviar</button>
-                </div>
-                <div id="proj-files-${p.id}"><div class="spinner" style="margin:8px 0"></div></div>
-            </div>
+            <button class="btn btn-s btn-sm" style="margin-left:6px" onclick="irParaAnexosProjeto(${p.id})">📎 Anexos do Projeto</button>
         </div>
     </div>`;
 }
@@ -727,7 +801,8 @@ async function criarProjeto() {
     const { data, error } = await sb.from('projetos').insert({ nome, descricao: desc, workspace_id: currentWorkspace.id }).select().single();
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     await sb.from('projeto_usuarios').insert({ projeto_id: data.id, usuario_id: currentUser.id });
-    await addLog(`Criou projeto: ${nome}`);
+    await addLog('create','projeto',null,{nome});
+    await pushNotificacao('📁', `${currentUser.nome} criou o projeto "${nome}".`, 'projeto');
     fecharModal(); toast(`Projeto "${nome}" criado! 🎉`); await renderizarProjetos(); popularSelectProjetos();
 }
 
@@ -750,7 +825,7 @@ async function salvarEdicaoProjeto(projId) {
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
     const { error } = await sb.from('projetos').update({ nome, descricao: desc }).eq('id', projId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog('Editou projeto'); fecharModal(); toast('Projeto atualizado!'); await renderizarProjetos(); popularSelectProjetos();
+    await addLog('update','projeto',null); fecharModal(); toast('Projeto atualizado!'); await renderizarProjetos(); popularSelectProjetos();
 }
 
 async function deletarProjetoConfirm(projId) {
@@ -758,7 +833,7 @@ async function deletarProjetoConfirm(projId) {
     fecharModal();
     const { error } = await sb.from('projetos').delete().eq('id', projId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog('Deletou projeto'); toast('Projeto deletado.'); await renderizarProjetos(); popularSelectProjetos();
+    await addLog('delete','projeto',null); toast('Projeto deletado.'); await renderizarProjetos(); popularSelectProjetos();
 }
 
 // ─── CRUD SEÇÕES ──────────────────────────────────
@@ -785,7 +860,7 @@ async function criarSessao(pId) {
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     const users = [...new Set([currentUser.id, ...sel])];
     await sb.from('sessao_usuarios').insert(users.map(uid => ({ sessao_id: data.id, usuario_id: uid })));
-    await addLog(`Criou seção: ${nome}`); fecharModal(); toast(`Seção "${nome}" criada!`); await renderizarProjetos();
+    await addLog('create','sessao',null,{nome}); fecharModal(); toast(`Seção "${nome}" criada!`); await renderizarProjetos();
 }
 
 async function editarSessao(sessId, projId) {
@@ -821,7 +896,7 @@ async function salvarEdicaoSessao(sessId) {
     await sb.from('sessao_usuarios').delete().eq('sessao_id', sessId);
     const users = [...new Set([currentUser.id, ...sel])];
     await sb.from('sessao_usuarios').insert(users.map(uid => ({ sessao_id: sessId, usuario_id: uid })));
-    await addLog('Editou seção'); fecharModal(); toast('Seção atualizada!'); await renderizarProjetos();
+    await addLog('update','sessao',null); fecharModal(); toast('Seção atualizada!'); await renderizarProjetos();
 }
 
 async function deletarSessaoConfirm(sessId) {
@@ -829,7 +904,7 @@ async function deletarSessaoConfirm(sessId) {
     fecharModal();
     const { error } = await sb.from('sessoes').delete().eq('id', sessId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog('Deletou seção'); toast('Seção deletada.'); await renderizarProjetos();
+    await addLog('delete','sessao',null); toast('Seção deletada.'); await renderizarProjetos();
 }
 
 // ─── CRUD ETAPAS ──────────────────────────────────
@@ -873,7 +948,7 @@ async function criarEtapa(pId, sId) {
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
     const { error } = await sb.from('etapas').insert({ sessao_id: sId, nome, descricao: desc, responsavel_id: resp, status, prioridade: prio, prazo });
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog(`Criou etapa: ${nome}`); fecharModal(); toast(`Etapa "${nome}" criada!`); await renderizarProjetos();
+    await addLog('create','etapa',null,{nome}); fecharModal(); toast(`Etapa "${nome}" criada!`); await renderizarProjetos();
 }
 
 function editarEtapa(eId) {
@@ -896,7 +971,7 @@ async function editarEtapaSave(eId) {
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
     const { error } = await sb.from('etapas').update({ nome, descricao: desc, responsavel_id: resp, status, prioridade: prio, prazo }).eq('id', eId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog(`Editou etapa: ${nome}`); fecharModal(); toast('Etapa atualizada!'); await renderizarProjetos();
+    await addLog('update','etapa',null,{nome}); fecharModal(); toast('Etapa atualizada!'); await renderizarProjetos();
 }
 
 async function updateEtapaPrio(eId, prio) {
@@ -938,9 +1013,10 @@ async function carregarHome() {
 
     // Stats rápidas
     const minhasEtapas = etapas || [];
-    const pendentes = minhasEtapas.filter(e => e.status !== 'Concluído');
-    const concluidas = minhasEtapas.filter(e => e.status === 'Concluído');
-    const vencidas = pendentes.filter(e => e.prazo && new Date(e.prazo+'T00:00:00') < hoje);
+    const pendentes   = minhasEtapas.filter(e => e.status === 'Não iniciado');
+    const emAndamento = minhasEtapas.filter(e => e.status === 'Em andamento');
+    const concluidas  = minhasEtapas.filter(e => e.status === 'Concluído');
+    const vencidas    = minhasEtapas.filter(e => e.status !== 'Concluído' && e.prazo && new Date(e.prazo+'T00:00:00') < hoje);
 
     function statusColor(s) {
         return s==='Concluído' ? 'var(--ok)' : s==='Em andamento' ? 'var(--warn)' : 'var(--muted)';
@@ -1002,8 +1078,12 @@ async function carregarHome() {
 
         <div class="home-stat-row anim-item" style="animation-delay:.04s">
             <div class="home-stat">
-                <div class="home-stat-val" style="color:var(--acc)">${pendentes.length}</div>
-                <div class="home-stat-lbl">Pendentes</div>
+                <div class="home-stat-val" style="color:var(--muted)">${pendentes.length}</div>
+                <div class="home-stat-lbl">Não iniciadas</div>
+            </div>
+            <div class="home-stat">
+                <div class="home-stat-val" style="color:var(--warn)">${emAndamento.length}</div>
+                <div class="home-stat-lbl">Em andamento</div>
             </div>
             <div class="home-stat">
                 <div class="home-stat-val" style="color:var(--ok)">${concluidas.length}</div>
@@ -1139,8 +1219,15 @@ function renderProgresso(etapas) {
 }
 
 // ─── ARQUIVO MANAGER ──────────────────────────────
-let arkPastas = [];        // pastas carregadas
-let arkPastaAtual = null;  // null = raiz (todos visíveis ao usuário)
+let arkPastas = [];        // pastas criadas pelo usuário
+let arkPastaAtual = null;  // null = raiz | number = pasta_id | 'proj_N' = projeto
+let arkProjFiles = {};     // { projeto_id: count } — projetos com pelo menos 1 arquivo
+
+function irParaAnexosProjeto(projetoId) {
+    switchTab('arquivos');
+    // pequeno delay para a aba renderizar antes de navegar
+    setTimeout(() => navPasta(`proj_${projetoId}`), 120);
+}
 
 function fileIcon(nome) {
     const ext = (nome||'').split('.').pop().toLowerCase();
@@ -1162,103 +1249,146 @@ function fmtBytes(b) {
 }
 
 async function carregarArquivosWorkspace() {
-    // Carregar pastas e ir para raiz
-    const { data: pastas } = await sb.from('pastas_arquivos')
-        .select('*')
-        .eq('workspace_id', currentWorkspace.id)
-        .order('nome');
+    // Carregar pastas e contagens de arquivos por projeto em paralelo
+    const [{ data: pastas }, { data: projArqs }] = await Promise.all([
+        sb.from('pastas_arquivos').select('*').eq('workspace_id', currentWorkspace.id).order('nome'),
+        sb.from('arquivos').select('projeto_id').eq('workspace_id', currentWorkspace.id).not('projeto_id', 'is', null)
+    ]);
 
-    // Filtrar: públicas para todos, privadas só pro dono
+    // Filtrar pastas visíveis
     arkPastas = (pastas || []).filter(p =>
         p.visibilidade === 'publico' || p.criado_por === currentUser.id
     );
 
+    // Contar arquivos por projeto
+    arkProjFiles = {};
+    (projArqs || []).forEach(a => {
+        arkProjFiles[a.projeto_id] = (arkProjFiles[a.projeto_id] || 0) + 1;
+    });
+
     renderArkPastas();
-    await renderArkFiles(null);
+    await renderArkFiles(arkPastaAtual);
 }
 
 function renderArkPastas() {
     const el = document.getElementById('ark-pastas-list');
     if (!el) return;
 
-    const rows = [
-        `<button class="ark-pasta-btn ${arkPastaAtual===null?'active':''}" onclick="navPasta(null)">
-            <span>🗂</span> Todos os arquivos
-         </button>`
-    ];
+    // Projetos que têm arquivos
+    const projsComArquivos = wsProjetos.filter(p => arkProjFiles[p.id] > 0);
 
+    let html = `<button class="ark-pasta-btn ${arkPastaAtual===null?'active':''}" onclick="navPasta(null)">
+        <span>🗂</span> <span style="flex:1">Todos os arquivos</span>
+    </button>`;
+
+    // ── Seção: Anexos de Projeto ──────────────────
+    html += `<div style="padding:10px 6px 4px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Anexos de Projeto</div>`;
+    if (projsComArquivos.length === 0) {
+        html += `<div style="padding:4px 10px 8px;font-size:.77rem;color:var(--muted)">Nenhum projeto com arquivos.</div>`;
+    } else {
+        projsComArquivos.forEach(p => {
+            const key = `proj_${p.id}`;
+            const count = arkProjFiles[p.id] || 0;
+            html += `<button class="ark-pasta-btn ${arkPastaAtual===key?'active':''}" onclick="navPasta('${key}')">
+                <span>🔗</span>
+                <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(p.nome)}</span>
+                <span class="ark-vis">${count} arq.</span>
+            </button>`;
+        });
+    }
+
+    // ── Seção: Pastas ─────────────────────────────
+    html += `<div style="padding:10px 6px 4px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Pastas</div>`;
     if (!arkPastas.length) {
-        rows.push(`<div style="padding:8px 10px;font-size:.77rem;color:var(--muted)">Nenhuma pasta ainda.</div>`);
+        html += `<div style="padding:4px 10px 8px;font-size:.77rem;color:var(--muted)">Nenhuma pasta ainda.</div>`;
     } else {
         arkPastas.forEach(p => {
             const isOwner = p.criado_por === currentUser.id;
-            rows.push(`<button class="ark-pasta-btn ${arkPastaAtual===p.id?'active':''}" onclick="navPasta(${p.id})">
+            html += `<button class="ark-pasta-btn ${arkPastaAtual===p.id?'active':''}" onclick="navPasta(${p.id})">
                 <span>${p.visibilidade==='privado'?'🔒':'📁'}</span>
                 <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(p.nome)}</span>
                 <span class="ark-vis">${p.visibilidade==='privado'?'privada':''}</span>
                 ${isOwner&&currentUserCanEdit?`<span onclick="event.stopPropagation();menuPasta(${p.id})" style="padding:0 3px;border-radius:4px;opacity:.5;transition:.1s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.5">⋯</span>`:''}
-            </button>`);
+            </button>`;
         });
     }
 
-    el.innerHTML = rows.join('');
+    el.innerHTML = html;
 }
 
-async function navPasta(pastaId) {
-    arkPastaAtual = pastaId;
+async function navPasta(key) {
+    arkPastaAtual = key;
     renderArkPastas();
-    await renderArkFiles(pastaId);
+    await renderArkFiles(key);
 }
 
-async function renderArkFiles(pastaId) {
+async function renderArkFiles(key) {
     const grid = document.getElementById('ark-files-grid');
     const bc   = document.getElementById('ark-breadcrumb');
     if (!grid) return;
 
     grid.innerHTML = '<div class="loading-c"><div class="spinner"></div></div>';
 
-    // Breadcrumb
-    if (pastaId === null) {
-        bc.innerHTML = `<span style="color:var(--text);font-weight:600">Todos os arquivos</span>`;
-    } else {
-        const pasta = arkPastas.find(p => p.id === pastaId);
+    const isProjKey   = typeof key === 'string' && key.startsWith('proj_');
+    const projetoId   = isProjKey ? parseInt(key.replace('proj_','')) : null;
+    const isPastaKey  = typeof key === 'number';
+
+    // ── Breadcrumb ─────────────────────────────────
+    if (key === null) {
+        bc.innerHTML = `<span style="font-weight:600">🗂 Todos os arquivos</span>`;
+    } else if (isProjKey) {
+        const proj = wsProjetos.find(p => p.id === projetoId);
         bc.innerHTML = `<span style="cursor:pointer;color:var(--acc)" onclick="navPasta(null)">Todos os arquivos</span>
-            <span>›</span>
-            <span style="font-weight:600">${escH(pasta?.nome||'Pasta')}</span>
-            ${pasta?.visibilidade==='privado'?'<span class="badge b-rose" style="font-size:.65rem">🔒 Privada</span>':'<span class="badge b-green" style="font-size:.65rem">🌐 Pública</span>'}`;
+            <span>›</span> <span style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Anexos de Projeto</span>
+            <span>›</span> <span style="font-weight:700">🔗 ${escH(proj?.nome||'Projeto')}</span>`;
+    } else {
+        const pasta = arkPastas.find(p => p.id === key);
+        bc.innerHTML = `<span style="cursor:pointer;color:var(--acc)" onclick="navPasta(null)">Todos os arquivos</span>
+            <span>›</span> <span style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Pastas</span>
+            <span>›</span> <span style="font-weight:700">${escH(pasta?.nome||'Pasta')}</span>
+            ${pasta?.visibilidade==='privado'?'<span class="badge b-rose" style="font-size:.65rem;margin-left:4px">🔒 Privada</span>':'<span class="badge b-green" style="font-size:.65rem;margin-left:4px">🌐 Pública</span>'}`;
     }
 
-    // Query
+    // ── Query ──────────────────────────────────────
     let query = sb.from('arquivos').select('*').eq('workspace_id', currentWorkspace.id);
 
-    if (pastaId === null) {
-        // Raiz: mostrar arquivos públicos + privados do próprio usuário
-        // sem filtro de pasta (mostra todos de todas as pastas + sem pasta)
-        // mas filtra visibilidade
-    } else {
-        query = query.eq('pasta_id', pastaId);
+    if (isProjKey) {
+        query = query.eq('projeto_id', projetoId);
+    } else if (isPastaKey) {
+        query = query.eq('pasta_id', key);
     }
+    // null = raiz: sem filtro adicional (mostra tudo, visibilidade filtra client-side)
 
     query = query.order('created_at', { ascending: false });
     const { data: arquivos, error } = await query;
 
     if (error) { grid.innerHTML = `<div class="ark-empty">⚠️ Erro: ${escH(error.message)}</div>`; return; }
 
-    // Filtro de visibilidade client-side
+    // Visibilidade client-side
     const visiveis = (arquivos || []).filter(f =>
         f.visibilidade === 'publico' || f.criado_por === currentUser.id
     );
 
+    // Barra de ação de upload contextual para projeto
+    const uploadBtn = isProjKey && currentUserCanEdit
+        ? `<div style="margin-bottom:14px">
+            <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer" class="btn btn-s btn-sm">
+                <input type="file" multiple style="display:none" onchange="uploadParaProjeto(${projetoId}, this)">
+                ⬆️ Enviar arquivo para este projeto
+            </label>
+           </div>`
+        : '';
+
     if (!visiveis.length) {
-        grid.innerHTML = `<div class="ark-empty">
+        grid.innerHTML = uploadBtn + `<div class="ark-empty">
             <div style="font-size:2.5rem;margin-bottom:10px">📭</div>
             <div style="font-weight:600">Nenhum arquivo aqui</div>
-            <div style="font-size:.82rem;margin-top:4px">Clique em "⬆️ Upload" para adicionar arquivos.</div>
+            <div style="font-size:.82rem;margin-top:4px">${isProjKey ? 'Use o botão acima para enviar arquivos ao projeto.' : 'Clique em "⬆️ Upload" para adicionar arquivos.'}</div>
         </div>`;
         return;
     }
 
-    grid.innerHTML = `<div class="ark-file-grid">${visiveis.map(f => renderArkFileCard(f)).join('')}</div>`;
+    grid.innerHTML = uploadBtn + `<div class="ark-file-grid">${visiveis.map(f => renderArkFileCard(f)).join('')}</div>`;
 }
 
 function renderArkFileCard(f) {
@@ -1295,7 +1425,6 @@ function renderArkFileCard(f) {
 }
 
 async function toggleVisArquivo(arquivoId) {
-    // Buscar visibilidade atual
     const { data: arq } = await sb.from('arquivos').select('visibilidade').eq('id', arquivoId).single();
     const novaVis = arq?.visibilidade === 'publico' ? 'privado' : 'publico';
     await sb.from('arquivos').update({ visibilidade: novaVis }).eq('id', arquivoId);
@@ -1307,20 +1436,41 @@ async function deletarArquivo2(arquivoId, path) {
     if (!confirm('Deletar este arquivo permanentemente?')) return;
     await sb.storage.from('workspace-files').remove([path]);
     await sb.from('arquivos').delete().eq('id', arquivoId);
-    await addLog('Deletou arquivo');
+    await addLog('delete','arquivo',null);
     toast('Arquivo removido.');
-    await renderArkFiles(arkPastaAtual);
+    await carregarArquivosWorkspace(); // recarrega contagens + sidebar
 }
 
-// Manter compatibilidade com upload dentro de projetos
+// Upload rápido dentro da visualização de projeto na aba Arquivos
+async function uploadParaProjeto(projetoId, input) {
+    const files = Array.from(input?.files || []);
+    if (!files.length) return;
+    let sucesso = 0;
+    for (const file of files) {
+        const filePath = `${currentWorkspace.id}/projetos/${projetoId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+        const { error: upErr } = await sb.storage.from('workspace-files').upload(filePath, file);
+        if (upErr) continue;
+        await sb.from('arquivos').insert({
+            nome: file.name, path: filePath,
+            projeto_id: projetoId, workspace_id: currentWorkspace.id,
+            criado_por: currentUser.id, visibilidade: 'publico', tamanho: file.size
+        });
+        sucesso++;
+    }
+    input.value = '';
+    if (sucesso) { toast(`${sucesso} arquivo(s) enviado(s)!`); await addLog('upload','arquivo',null,{quantidade:sucesso,projeto_id:projetoId}); }
+    await carregarArquivosWorkspace();
+    navPasta(`proj_${projetoId}`);
+}
+
+// Compatibilidade (chamado de dentro de cards de projeto na aba Projetos — removido, mas mantido por segurança)
 async function deletarArquivo(arquivoId, path, projetoId) {
     if (!confirm('Deletar este arquivo permanentemente?')) return;
     await sb.storage.from('workspace-files').remove([path]);
     await sb.from('arquivos').delete().eq('id', arquivoId);
-    await addLog('Deletou arquivo');
+    await addLog('delete','arquivo',null);
     toast('Arquivo removido.');
-    if (projetoId) carregarArquivosProjeto(projetoId);
-    else await renderArkFiles(arkPastaAtual);
+    await carregarArquivosWorkspace();
 }
 
 // ─── MODAL: NOVA PASTA ────────────────────────────
@@ -1353,7 +1503,7 @@ async function criarPasta() {
         nome, visibilidade: vis, workspace_id: currentWorkspace.id, criado_por: currentUser.id
     });
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog(`Criou pasta: ${nome}`);
+    await addLog('create','pasta',null,{nome});
     fecharModal(); toast('Pasta criada! 📁');
     await carregarArquivosWorkspace();
 }
@@ -1373,7 +1523,7 @@ async function deletarPasta(pastaId) {
     if (!confirm('Deletar a pasta? Os arquivos dentro perderão a associação mas não serão excluídos.')) return;
     await sb.from('arquivos').update({ pasta_id: null }).eq('pasta_id', pastaId);
     await sb.from('pastas_arquivos').delete().eq('id', pastaId);
-    await addLog('Deletou pasta');
+    await addLog('delete','pasta',null);
     fecharModal(); toast('Pasta removida.');
     if (arkPastaAtual === pastaId) arkPastaAtual = null;
     await carregarArquivosWorkspace();
@@ -1385,18 +1535,26 @@ function menuPasta(pastaId) {
 
 // ─── MODAL: UPLOAD ────────────────────────────────
 function abrirModalUpload() {
+    const isProjAtual = typeof arkPastaAtual === 'string' && arkPastaAtual.startsWith('proj_');
+    const projAtualId = isProjAtual ? parseInt(arkPastaAtual.replace('proj_','')) : null;
+
     const pastasOpts = arkPastas
         .filter(p => p.visibilidade === 'publico' || p.criado_por === currentUser.id)
-        .map(p => `<option value="${p.id}" ${arkPastaAtual===p.id?'selected':''}>${escH(p.nome)} ${p.visibilidade==='privado'?'🔒':''}</option>`)
+        .map(p => `<option value="pasta_${p.id}" ${(!isProjAtual && arkPastaAtual===p.id)?'selected':''}>${escH(p.nome)} ${p.visibilidade==='privado'?'🔒':''}</option>`)
+        .join('');
+
+    const projOpts = wsProjetos
+        .map(p => `<option value="proj_${p.id}" ${projAtualId===p.id?'selected':''}>${escH(p.nome)}</option>`)
         .join('');
 
     abrirModal('⬆️ Upload de Arquivos', `
         <div class="fg"><label class="fl">Arquivos</label>
             <input id="m-upload-files" type="file" class="fi" multiple/></div>
-        <div class="fg"><label class="fl">Pasta de destino</label>
-            <select id="m-upload-pasta" class="fsel">
+        <div class="fg"><label class="fl">Destino</label>
+            <select id="m-upload-destino" class="fsel">
                 <option value="">📂 Sem pasta (raiz)</option>
-                ${pastasOpts}
+                <optgroup label="🔗 Anexos de Projeto">${projOpts}</optgroup>
+                <optgroup label="📁 Pastas">${pastasOpts}</optgroup>
             </select></div>
         <div class="fg"><label class="fl">Visibilidade dos arquivos</label>
             <select id="m-upload-vis" class="fsel">
@@ -1418,51 +1576,93 @@ function abrirModalUpload() {
 
 async function executarUpload() {
     const input   = document.getElementById('m-upload-files');
-    const pastaId = document.getElementById('m-upload-pasta')?.value || null;
+    const destino = document.getElementById('m-upload-destino')?.value || '';
     const vis     = document.getElementById('m-upload-vis')?.value || 'publico';
     const files   = Array.from(input?.files || []);
     if (!files.length) { toast('Selecione ao menos um arquivo.', 'warning'); return; }
 
-    const progBar  = document.getElementById('m-upload-progress');
-    const bar      = document.getElementById('m-upload-bar');
-    const status   = document.getElementById('m-upload-status');
+    // Parsear destino: '' = raiz, 'proj_N' = projeto, 'pasta_N' = pasta
+    let pastaId   = null;
+    let projetoId = null;
+    if (destino.startsWith('proj_'))  projetoId = parseInt(destino.replace('proj_',''));
+    if (destino.startsWith('pasta_')) pastaId   = parseInt(destino.replace('pasta_',''));
+
+    // ── FIX: projeto_id é NOT NULL no banco.
+    // Quando o destino é raiz ou pasta (sem projeto), usamos o primeiro projeto
+    // do workspace como referência interna. Se não houver nenhum projeto, bloqueamos.
+    if (!projetoId) {
+        if (!wsProjetos.length) {
+            toast('Crie ao menos um projeto antes de enviar arquivos para a raiz ou pasta.', 'warning');
+            return;
+        }
+        // Projeto sentinela: usa o primeiro projeto do workspace para satisfazer o NOT NULL
+        projetoId = wsProjetos[0].id;
+    }
+
+    const progBar = document.getElementById('m-upload-progress');
+    const bar     = document.getElementById('m-upload-bar');
+    const status  = document.getElementById('m-upload-status');
     progBar.style.display = 'block';
 
-    let sucesso = 0, erros = 0;
+    const btnEnviar = document.querySelector('#m-foot .btn-p');
+    if (btnEnviar) btnEnviar.disabled = true;
+
+    let sucesso = 0, erros = 0, erroMsgs = [];
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
         status.textContent = `Enviando ${i+1}/${files.length}: ${file.name}`;
         bar.style.width = `${Math.round((i/files.length)*100)}%`;
 
         const slug = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-        const filePath = `${currentWorkspace.id}/${pastaId ? `pasta_${pastaId}` : 'raiz'}/${slug}`;
+        let folder = pastaId ? `pasta_${pastaId}` : destino.startsWith('proj_') ? `projetos/${projetoId}` : 'raiz';
+        const filePath = `${currentWorkspace.id}/${folder}/${slug}`;
 
         const { error: upErr } = await sb.storage.from('workspace-files').upload(filePath, file);
-        if (upErr) { erros++; console.error(upErr); continue; }
+        if (upErr) { erros++; erroMsgs.push(`Storage: ${upErr.message}`); console.error('Upload storage error:', upErr.message); continue; }
 
         const { error: dbErr } = await sb.from('arquivos').insert({
             nome: file.name,
             path: filePath,
-            pasta_id: pastaId ? parseInt(pastaId) : null,
+            pasta_id: pastaId,
+            projeto_id: projetoId,
             workspace_id: currentWorkspace.id,
             criado_por: currentUser.id,
             visibilidade: vis,
             tamanho: file.size
         });
-        if (dbErr) { erros++; continue; }
+        if (dbErr) {
+            erros++;
+            erroMsgs.push(`DB (${file.name}): ${dbErr.message}`);
+            console.error('Upload DB error:', dbErr.message);
+            // Limpar arquivo do storage se falhou no banco
+            await sb.storage.from('workspace-files').remove([filePath]);
+            continue;
+        }
         sucesso++;
     }
 
     bar.style.width = '100%';
-    status.textContent = `${sucesso} enviado(s)${erros ? ', '+erros+' erro(s)' : ''}.`;
+    status.textContent = `${sucesso} enviado(s)${erros ? `, ${erros} erro(s)` : ''}.`;
 
-    if (sucesso) await addLog(`Enviou ${sucesso} arquivo(s)`);
+    if (sucesso) {
+        await addLog('upload', 'arquivo', null, { quantidade: sucesso, destino: destino || 'raiz' });
+        await pushNotificacao('📎', `${currentUser.nome} enviou ${sucesso} arquivo(s) ao workspace.`);
+    }
+    if (erroMsgs.length) console.error('Upload errors:', erroMsgs);
+
+    // Determinar para qual aba navegar após upload
+    const destinoOriginal = document.getElementById('m-upload-destino')?.value || '';
+    const pastaIdOriginal = destinoOriginal.startsWith('pasta_') ? parseInt(destinoOriginal.replace('pasta_','')) : null;
+    const projIdOriginal  = destinoOriginal.startsWith('proj_')  ? parseInt(destinoOriginal.replace('proj_',''))  : null;
+
     setTimeout(async () => {
         fecharModal();
         toast(sucesso ? `${sucesso} arquivo(s) enviado(s)! 📎` : 'Nenhum arquivo enviado.', sucesso ? 'success' : 'warning');
         await carregarArquivosWorkspace();
-        if (pastaId) await navPasta(parseInt(pastaId));
-    }, 600);
+        if (projIdOriginal) navPasta(`proj_${projIdOriginal}`);
+        else if (pastaIdOriginal) navPasta(pastaIdOriginal);
+        else navPasta(null);
+    }, 700);
 }
 
 // Upload de projeto (mantido compatível)
@@ -1483,7 +1683,7 @@ async function uploadArquivoProjeto(projetoId) {
         sucesso++;
     }
     input.value = '';
-    if (sucesso) { toast(`${sucesso} arquivo(s) enviado(s)!`); await addLog(`Enviou ${sucesso} arquivo(s) ao projeto #${projetoId}`); }
+    if (sucesso) { toast(`${sucesso} arquivo(s) enviado(s)!`); await addLog('upload','arquivo',null,{quantidade:sucesso,projeto_id:projetoId}); }
     if (erros) toast(`${erros} falharam.`, 'error');
     await carregarArquivosProjeto(projetoId);
 }
@@ -1693,7 +1893,8 @@ async function salvarEvento() {
         workspace_id: currentWorkspace.id, criado_por: currentUser.id
     });
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog(`Criou evento: ${nome}`);
+    await addLog('create','evento',null,{nome});
+    await pushNotificacao('📅', `${currentUser.nome} criou o evento "${nome}" para ${data}.`, 'evento');
     fecharModal(); toast('Evento criado! 📅'); await carregarEventos();
 }
 
@@ -1712,7 +1913,7 @@ async function salvarEdicaoEvento(eventoId) {
 
     const { error } = await sb.from('eventos').update({ nome, descricao: desc, data, hora }).eq('id', eventoId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog(`Editou evento: ${nome}`);
+    await addLog('update','evento',null,{nome});
     fecharModal(); toast('Evento atualizado!'); await carregarEventos();
 }
 
@@ -1720,7 +1921,7 @@ async function deletarEvento(eventoId) {
     if (!confirm('Deletar este evento?')) return;
     const { error } = await sb.from('eventos').delete().eq('id', eventoId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog('Deletou evento'); toast('Evento removido.'); await carregarEventos();
+    await addLog('delete','evento',null); toast('Evento removido.'); await carregarEventos();
 }
 
 // ─── CONTRIBUTORS ─────────────────────────────────
@@ -1800,25 +2001,127 @@ async function adicionarMembro() {
     if (exist) { errEl.textContent='Este usuário já é membro.'; errEl.style.display='block'; return; }
     await sb.from('workspace_usuarios').insert({ workspace_id: currentWorkspace.id, usuario_id: user.id, role: 'member' });
     wsMembers.push({ ...user, wsAdmin: false, wsRole: 'member' });
-    await addLog(`Adicionou @${user.username} ao workspace`);
+    await addLog('invite','usuario',user.id,{username:user.username});
+    await pushNotificacao('👤', `${currentUser.nome} adicionou @${user.username} ao workspace.`, 'membro');
     fecharModal(); toast(`@${user.username} adicionado! 👋`); await renderContribuidor();
 }
 
-// ─── LOGS ─────────────────────────────────────────
-async function addLog(msg) {
-    try { await sb.from('logs').insert({ usuario_id: currentUser.id, usuario_nome: currentUser.nome, mensagem: msg, workspace_id: currentWorkspace.id }); } catch {}
+// ─── LOGS (estruturado) ───────────────────────────
+// SQL necessário para ativar logs estruturados:
+// ALTER TABLE logs ADD COLUMN IF NOT EXISTS acao varchar(50);
+// ALTER TABLE logs ADD COLUMN IF NOT EXISTS entidade varchar(50);
+// ALTER TABLE logs ADD COLUMN IF NOT EXISTS entidade_id bigint;
+// ALTER TABLE logs ADD COLUMN IF NOT EXISTS payload jsonb;
+// ALTER TABLE logs ADD COLUMN IF NOT EXISTS ip_address text;
+//
+// addLog(acao, entidade?, entidade_id?, payload?)
+// Exemplos:
+//   addLog('upload',  'arquivo',  null,   { quantidade: 3, destino: 'raiz' })
+//   addLog('create',  'projeto',  proj.id, { nome: proj.nome })
+//   addLog('delete',  'etapa',    etapa.id)
+//   addLog('login',   'usuario',  user.id)
+
+const LOG_ACOES = {
+    'login':'Login', 'logout':'Logout', 'create':'Criação', 'update':'Edição',
+    'delete':'Exclusão', 'upload':'Upload', 'download':'Download',
+    'invite':'Convite', 'role_change':'Papel alterado', 'aviso':'Recado',
+    'status_change':'Status', 'prazo':'Prazo'
+};
+
+const LOG_ENTIDADES = {
+    'usuario':'Usuário', 'workspace':'Workspace', 'projeto':'Projeto',
+    'sessao':'Seção', 'etapa':'Etapa', 'arquivo':'Arquivo',
+    'pasta':'Pasta', 'evento':'Evento', 'aviso':'Recado', 'nota':'Nota'
+};
+
+async function addLog(acao, entidade=null, entidadeId=null, payload=null) {
+    try {
+        // Montar mensagem legível automaticamente
+        const aLabel = LOG_ACOES[acao] || acao;
+        const eLabel = entidade ? (LOG_ENTIDADES[entidade] || entidade) : null;
+        let mensagem = aLabel;
+        if (payload?.nome)   mensagem += `: ${payload.nome}`;
+        else if (eLabel)     mensagem += ` de ${eLabel}`;
+        if (payload?.status) mensagem += ` → ${payload.status}`;
+
+        await sb.from('logs').insert({
+            usuario_id:   currentUser.id,
+            usuario_nome: currentUser.nome,
+            mensagem,
+            workspace_id: currentWorkspace.id,
+            acao,
+            entidade:     entidade   || null,
+            entidade_id:  entidadeId || null,
+            payload:      payload    || null
+        });
+    } catch(e) { console.warn('addLog falhou:', e?.message); }
 }
 
+// Filtro ativo de logs
+let logFiltroAcao = '';
+let logFiltroUsuario = '';
+
 async function carregarLogs() {
+    if (!currentUserIsWorkspaceAdmin && currentUser?.nivel !== 2) return;
     const p = document.getElementById('logs-panel');
-    p.innerHTML = '<div style="color:#475569">Carregando...</div>';
-    const { data } = await sb.from('logs').select('*').eq('workspace_id', currentWorkspace.id).order('created_at', { ascending: false }).limit(200);
-    if (!data?.length) { p.innerHTML='<div style="color:#475569">Nenhum log.</div>'; return; }
-    p.innerHTML = data.map(l => `<div class="log-e">
-        <span class="lt">[${new Date(l.created_at).toLocaleString('pt-BR')}]</span>
-        <span class="lu"> ${escH(l.usuario_nome||'?')}:</span>
-        <span class="lm"> ${escH(l.mensagem)}</span>
-    </div>`).join('');
+    p.innerHTML = '<div style="color:#475569;padding:8px 0">Carregando...</div>';
+
+    let q = sb.from('logs').select('*').eq('workspace_id', currentWorkspace.id)
+        .order('created_at', { ascending: false }).limit(300);
+
+    if (logFiltroAcao)     q = q.eq('acao', logFiltroAcao);
+    if (logFiltroUsuario)  q = q.eq('usuario_id', parseInt(logFiltroUsuario));
+
+    const { data, error } = await q;
+    if (error) { p.innerHTML=`<div style="color:#ef4444">Erro: ${escH(error.message)}</div>`; return; }
+    if (!data?.length) { p.innerHTML='<div style="color:#475569;padding:8px 0">Nenhum log encontrado.</div>'; return; }
+
+    const actionColor = {
+        create:'#3fb950', update:'#58a6ff', delete:'#f85149', upload:'#d2a8ff',
+        login:'#56d364', logout:'#8b949e', invite:'#79c0ff', role_change:'#e3b341',
+        aviso:'#f0883e', status_change:'#a8daff', prazo:'#ffa657', download:'#bc8cff'
+    };
+
+    p.innerHTML = data.map(l => {
+        const aColor = actionColor[l.acao] || '#8b949e';
+        const aLabel = LOG_ACOES[l.acao] || l.acao || '—';
+        const eLabel = l.entidade ? (LOG_ENTIDADES[l.entidade] || l.entidade) : null;
+        const dt = new Date(l.created_at);
+        const dtStr = dt.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+
+        let payloadStr = '';
+        if (l.payload) {
+            try {
+                const p = typeof l.payload === 'string' ? JSON.parse(l.payload) : l.payload;
+                payloadStr = Object.entries(p).map(([k,v]) => `<span style="color:#3fb950">${escH(k)}</span>=<span style="color:#d2a8ff">${escH(String(v))}</span>`).join(' ');
+                payloadStr = ` <span style="color:#30363d;user-select:none">|</span> ${payloadStr}`;
+            } catch {}
+        }
+
+        return `<div class="log-e" style="display:flex;gap:0;flex-wrap:wrap;align-items:baseline">
+            <span class="lt" style="margin-right:8px">${dtStr}</span>
+            <span style="background:${aColor}22;color:${aColor};border-radius:4px;padding:0 6px;font-size:.68rem;font-weight:700;margin-right:7px;flex-shrink:0">${escH(aLabel)}</span>
+            ${eLabel ? `<span style="color:#8b949e;font-size:.7rem;margin-right:6px">[${escH(eLabel)}${l.entidade_id?` #${l.entidade_id}`:''}]</span>` : ''}
+            <span class="lu" style="margin-right:6px">@${escH(l.usuario_nome||'?')}</span>
+            <span class="lm">${escH(l.mensagem||'')}${payloadStr}</span>
+        </div>`;
+    }).join('');
+}
+
+async function exportarLogs() {
+    const { data } = await sb.from('logs').select('*').eq('workspace_id', currentWorkspace.id).order('created_at', { ascending: false }).limit(1000);
+    if (!data?.length) { toast('Nenhum log para exportar.', 'warning'); return; }
+    const header = 'data_hora,acao,entidade,entidade_id,usuario,mensagem,payload\n';
+    const rows = data.map(l => [
+        new Date(l.created_at).toLocaleString('pt-BR'),
+        l.acao||'', l.entidade||'', l.entidade_id||'',
+        l.usuario_nome||'', `"${(l.mensagem||'').replace(/"/g,'""')}"`,
+        l.payload ? `"${JSON.stringify(l.payload).replace(/"/g,'""')}"` : ''
+    ].join(',')).join('\n');
+    const blob = new Blob([header+rows], { type:'text/csv;charset=utf-8;' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `logs-${currentWorkspace.codigo}-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click(); toast('Logs exportados! 📥');
 }
 
 // ─── NOTAS ────────────────────────────────────────
@@ -1928,6 +2231,153 @@ async function carregarFerramentas() {
 }
 
 function abrirFerramenta(path) { window.open(path, '_blank'); }
+
+// ─── NOTIFICAÇÕES (admin only) ────────────────────
+let notifInterval = null;
+let notifTipoFiltro = '';
+
+// Mapa visual por tipo
+const NOTIF_TIPO = {
+    upload:  { label:'Arquivo',  cls:'background:#ede9fe;color:#5b21b6' },
+    membro:  { label:'Membro',   cls:'background:#dcfce7;color:#166534' },
+    evento:  { label:'Evento',   cls:'background:#fef3c7;color:#92400e' },
+    geral:   { label:'Geral',    cls:'background:#e0f2fe;color:#075985' },
+};
+
+async function pushNotificacao(icone, mensagem, tipo='geral') {
+    if (!currentUserIsWorkspaceAdmin && currentUser?.nivel !== 2) return; // só admin gera
+    try {
+        await sb.from('notificacoes').insert({
+            workspace_id: currentWorkspace.id,
+            icone, mensagem, tipo, lida: false,
+            criado_por: currentUser.id
+        });
+        if (document.getElementById('bell-btn') && !document.getElementById('bell-btn').classList.contains('hidden')) {
+            await atualizarBellBadge();
+        }
+    } catch(e) { console.warn('pushNotificacao:', e?.message); }
+}
+
+async function atualizarBellBadge() {
+    if (!currentUserIsWorkspaceAdmin && currentUser?.nivel !== 2) return;
+    let q = sb.from('notificacoes').select('*', { count: 'exact', head: true })
+        .eq('workspace_id', currentWorkspace.id).eq('lida', false);
+    if (notifTipoFiltro) q = q.eq('tipo', notifTipoFiltro);
+    const { count } = await q;
+    const btn = document.getElementById('bell-btn');
+    if (!btn) return;
+    btn.querySelector('.bell-badge')?.remove();
+    if (count > 0) {
+        const badge = document.createElement('span');
+        badge.className = 'bell-badge';
+        badge.textContent = count > 99 ? '99+' : count;
+        btn.appendChild(badge);
+        btn.classList.add('bell-ring');
+        setTimeout(() => btn.classList.remove('bell-ring'), 600);
+    }
+}
+
+function filtrarNotif(btn, tipo) {
+    notifTipoFiltro = tipo;
+    document.querySelectorAll('.notif-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    carregarNotificacoes();
+}
+
+async function carregarNotificacoes() {
+    if (!currentUserIsWorkspaceAdmin && currentUser?.nivel !== 2) return;
+    await atualizarBellBadge();
+    const list = document.getElementById('notif-list');
+    if (!list) return;
+    list.innerHTML = '<div class="notif-empty">Carregando...</div>';
+
+    let q = sb.from('notificacoes').select('*')
+        .eq('workspace_id', currentWorkspace.id)
+        .order('created_at', { ascending: false }).limit(80);
+    if (notifTipoFiltro) q = q.eq('tipo', notifTipoFiltro);
+    const { data } = await q;
+
+    if (!data?.length) {
+        list.innerHTML = '<div class="notif-empty"><div style="font-size:2rem;margin-bottom:8px">🔕</div>Nenhuma notificação' + (notifTipoFiltro ? ' neste filtro' : ' ainda') + '.</div>';
+        return;
+    }
+
+    const agora = new Date();
+    function tempoRelativo(iso) {
+        const d = new Date(iso);
+        const diff = Math.floor((agora - d) / 1000);
+        if (diff < 60)    return 'agora mesmo';
+        if (diff < 3600)  return `${Math.floor(diff/60)}min atrás`;
+        if (diff < 86400) return `${Math.floor(diff/3600)}h atrás`;
+        return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'short' });
+    }
+
+    list.innerHTML = data.map(n => {
+        const tipo = NOTIF_TIPO[n.tipo] || { label: n.tipo||'Geral', cls:'background:#f1f5f9;color:#64748b' };
+        return `<div class="notif-item ${n.lida?'':'unread'}" onclick="marcarLida(${n.id}, this)">
+            <div class="notif-icon">${escH(n.icone||'🔔')}</div>
+            <div class="notif-text">
+                <div class="notif-msg">${escH(n.mensagem)}</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+                    <span class="notif-tipo-badge" style="${tipo.cls}">${escH(tipo.label)}</span>
+                    <span class="notif-time">${tempoRelativo(n.created_at)}</span>
+                </div>
+            </div>
+            ${!n.lida ? '<div class="notif-dot"></div>' : ''}
+        </div>`;
+    }).join('');
+}
+
+async function marcarLida(id, el) {
+    await sb.from('notificacoes').update({ lida: true }).eq('id', id);
+    el?.classList.remove('unread');
+    el?.querySelector('.notif-dot')?.remove();
+    await atualizarBellBadge();
+}
+
+async function marcarTodasLidas() {
+    let q = sb.from('notificacoes').update({ lida: true })
+        .eq('workspace_id', currentWorkspace.id).eq('lida', false);
+    if (notifTipoFiltro) q = q.eq('tipo', notifTipoFiltro);
+    await q;
+    await carregarNotificacoes();
+    toast('Notificações marcadas como lidas.');
+}
+
+async function limparNotificacoesLidas() {
+    if (!confirm('Remover todas as notificações já lidas?')) return;
+    let q = sb.from('notificacoes').delete()
+        .eq('workspace_id', currentWorkspace.id).eq('lida', true);
+    if (notifTipoFiltro) q = q.eq('tipo', notifTipoFiltro);
+    const { error } = await q;
+    if (error) { toast('Erro ao limpar.', 'error'); return; }
+    await carregarNotificacoes();
+    toast('Notificações lidas removidas. 🗑');
+}
+
+function abrirNotificacoes() {
+    if (!currentUserIsWorkspaceAdmin && currentUser?.nivel !== 2) return;
+    document.getElementById('notif-panel').classList.add('open');
+    document.getElementById('notif-ov').classList.add('open');
+    carregarNotificacoes();
+    // Preencher filtro de usuários nos logs ao mesmo tempo
+    populaFiltroUsuariosLog();
+    notifInterval = setInterval(atualizarBellBadge, 30000);
+}
+
+function fecharNotificacoes() {
+    document.getElementById('notif-panel').classList.remove('open');
+    document.getElementById('notif-ov').classList.remove('open');
+    clearInterval(notifInterval);
+}
+
+function populaFiltroUsuariosLog() {
+    const sel = document.getElementById('log-filtro-usuario');
+    if (!sel || wsMembers.length === 0) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Todos os usuários</option>' +
+        wsMembers.map(u => `<option value="${u.id}" ${current==u.id?'selected':''}>${escH(u.nome)} (@${u.username})</option>`).join('');
+}
 
 // ─── MODAL ────────────────────────────────────────
 function abrirModal(title, body, buttons=[]) {
