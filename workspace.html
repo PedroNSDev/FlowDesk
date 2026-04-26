@@ -2287,12 +2287,10 @@ const NOTIF_TIPO = {
     acesso:    { label:'Acesso',   cls:'background:#fef3c7;color:#92400e' },
 };
 
-async function pushNotificacao(icone, mensagem, tipo='geral', meta=null) {
-    if (!currentUserIsWorkspaceAdmin && currentUser?.nivel !== 2) return; // só admin gera
+async function pushNotificacao(icone, mensagem, tipo='geral') {
+    if (!currentUserIsWorkspaceAdmin && currentUser?.nivel !== 2) return;
     try {
-        const payload = { workspace_id: currentWorkspace.id, icone, mensagem, tipo, lida: false, criado_por: currentUser.id };
-        if (meta) payload.meta = meta;
-        await sb.from('notificacoes').insert(payload);
+        await sb.from('notificacoes').insert({ workspace_id: currentWorkspace.id, icone, mensagem, tipo, lida: false });
         if (document.getElementById('bell-btn') && !document.getElementById('bell-btn').classList.contains('hidden')) {
             await atualizarBellBadge();
         }
@@ -2332,7 +2330,7 @@ async function carregarNotificacoes() {
     if (!list) return;
     list.innerHTML = '<div class="notif-empty">Carregando...</div>';
 
-    let q = sb.from('notificacoes').select('id,icone,mensagem,tipo,lida,created_at,meta')
+    let q = sb.from('notificacoes').select('id,icone,mensagem,tipo,lida,created_at')
         .eq('workspace_id', currentWorkspace.id)
         .order('created_at', { ascending: false }).limit(80);
     if (notifTipoFiltro) q = q.eq('tipo', notifTipoFiltro);
@@ -2356,17 +2354,20 @@ async function carregarNotificacoes() {
     list.innerHTML = data.map(n => {
         const tipo = NOTIF_TIPO[n.tipo] || { label: n.tipo||'Geral', cls:'background:#f1f5f9;color:#64748b' };
 
-        // Card especial: solicitação de acesso
+        // Card especial: solicitação de acesso (ainda não respondida)
         if (n.tipo === 'acesso' && !n.lida) {
-            const meta = n.meta || {};
+            // icone guarda "usuario_id:pedido_id" quando vem do homepage
+            const parts = (n.icone||'').split(':');
+            const usuarioId = parts[1] || null;
+            const pedidoId  = parts[2] || null;
             return `<div class="notif-acesso-card" id="notif-${n.id}">
                 <div style="font-size:1.4rem">🔑</div>
                 <div class="na-body">
-                    <div class="na-nome">${escH(meta.usuario_nome || n.mensagem)}</div>
-                    <div class="na-info">@${escH(meta.usuario_username || '')} quer entrar no workspace</div>
+                    <div class="na-nome">${escH(n.mensagem)}</div>
+                    <div class="na-info">Solicitação de entrada no workspace</div>
                     <div class="na-acts">
-                        <button class="btn btn-p btn-sm" onclick="responderAcesso(${n.id}, ${meta.pedido_id||'null'}, ${meta.usuario_id||'null'}, true)">✓ Aceitar</button>
-                        <button class="btn btn-sm" style="border:1px solid var(--danger);color:var(--danger);background:none" onclick="responderAcesso(${n.id}, ${meta.pedido_id||'null'}, ${meta.usuario_id||'null'}, false)">✕ Rejeitar</button>
+                        <button class="btn btn-p btn-sm" onclick="responderAcesso(${n.id}, ${pedidoId||'null'}, ${usuarioId||'null'}, true)">✓ Aceitar</button>
+                        <button class="btn btn-sm" style="border:1px solid var(--danger);color:var(--danger);background:none" onclick="responderAcesso(${n.id}, ${pedidoId||'null'}, ${usuarioId||'null'}, false)">✕ Rejeitar</button>
                     </div>
                 </div>
                 <span style="font-size:.68rem;color:#b45309;white-space:nowrap">${tempoRelativo(n.created_at)}</span>
@@ -2374,7 +2375,7 @@ async function carregarNotificacoes() {
         }
 
         return `<div class="notif-item ${n.lida?'':'unread'}" onclick="marcarLida(${n.id}, this)">
-            <div class="notif-icon">${escH(n.icone||'🔔')}</div>
+            <div class="notif-icon">${escH((n.icone||'🔔').split(':')[0])}</div>
             <div class="notif-text">
                 <div class="notif-msg">${escH(n.mensagem)}</div>
                 <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
@@ -2419,6 +2420,7 @@ function abrirNotificacoes() {
     document.getElementById('notif-panel').classList.add('open');
     document.getElementById('notif-ov').classList.add('open');
     carregarNotificacoes();
+    // Preencher filtro de usuários nos logs ao mesmo tempo
     populaFiltroUsuariosLog();
     notifInterval = setInterval(atualizarBellBadge, 30000);
 }
