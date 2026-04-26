@@ -162,6 +162,46 @@
         .file-preview img{width:90px;height:90px;object-fit:cover;border-radius:12px;border:2px solid var(--border);transition:.15s}
         .file-preview img:hover{border-color:var(--acc)}
 
+        /* ── ARQUIVOS ── */
+        .file-list-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:7px;transition:.15s}
+        .file-list-item:hover{box-shadow:var(--sh);border-color:#c7d2fe}
+        .file-icon{font-size:1.2rem;flex-shrink:0}
+        .file-info{flex:1;min-width:0}
+        .file-name{font-weight:600;font-size:.87rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .file-date{font-size:.74rem;color:var(--muted);margin-top:2px}
+        .file-acts{display:flex;gap:6px;align-items:center;flex-shrink:0}
+        .upload-zone{border:2px dashed var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:12px;background:#fafbff;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+        .upload-zone input[type=file]{flex:1;font-size:.84rem;font-family:var(--font)}
+
+        /* ── EVENTOS ── */
+        .evento-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);margin-bottom:13px;overflow:hidden;display:flex;align-items:stretch}
+        .evento-date-strip{background:linear-gradient(135deg,var(--acc),#6366f1);color:#fff;padding:14px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:72px;flex-shrink:0}
+        .evento-date-strip .ev-day{font-size:1.6rem;font-weight:800;line-height:1}
+        .evento-date-strip .ev-month{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;opacity:.85;margin-top:2px}
+        .evento-info{flex:1;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+        .evento-nome{font-weight:700;font-size:.97rem}
+        .evento-desc{font-size:.8rem;color:var(--muted);margin-top:3px}
+        .evento-hora{font-size:.78rem;color:var(--acc);font-weight:600;margin-top:4px;display:flex;align-items:center;gap:4px}
+        .evento-past{opacity:.55}
+        .evento-past .evento-date-strip{background:linear-gradient(135deg,var(--muted),#94a3b8)}
+        .eventos-section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:4px 0 10px;border-bottom:1px solid var(--border);margin-bottom:14px;margin-top:6px}
+
+        /* ── PRAZOS DE ETAPAS NOS EVENTOS ── */
+        .prazo-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);margin-bottom:10px;overflow:hidden;display:flex;align-items:stretch}
+        .prazo-date-strip{padding:12px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:68px;flex-shrink:0;font-weight:800}
+        .prazo-date-strip .ev-day{font-size:1.4rem;line-height:1;color:#fff}
+        .prazo-date-strip .ev-month{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.85);margin-top:2px}
+        .prazo-info{flex:1;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+        .prazo-nome{font-weight:600;font-size:.9rem}
+        .prazo-proj{font-size:.76rem;color:var(--muted);margin-top:2px}
+        .prazo-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-right:4px;display:inline-block}
+        .prazo-urgente .prazo-date-strip{background:linear-gradient(135deg,var(--danger),#f87171)}
+        .prazo-proximo .prazo-date-strip{background:linear-gradient(135deg,var(--warn),#fbbf24)}
+        .prazo-ok .prazo-date-strip{background:linear-gradient(135deg,var(--acc),#6366f1)}
+        .prazo-concluido .prazo-date-strip{background:linear-gradient(135deg,var(--ok),#34d399)}
+        .prazo-vencido .prazo-date-strip{background:linear-gradient(135deg,#94a3b8,#64748b)}
+        .prazo-vencido{opacity:.6}
+
         /* ── MODAL ── */
         .modal-ov{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(5px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
         .modal-box{background:#fff;border-radius:14px;width:100%;max-width:460px;box-shadow:var(--sh-lg);animation:mIn .2s ease}
@@ -178,7 +218,7 @@
         .toast{background:#1e293b;color:#fff;padding:10px 15px;border-radius:var(--rsm);font-size:.83rem;box-shadow:var(--sh-md);animation:tIn .3s ease;border-left:3px solid var(--ok);max-width:290px}
         .toast.error{border-left-color:var(--danger)} .toast.warning{border-left-color:var(--warn)}
         @keyframes tIn{from{opacity:0;transform:translateX(110%)}to{opacity:1;transform:translateX(0)}}
-
+        
         /* ── MISC ── */
         .empty-state{text-align:center;padding:46px 20px;color:var(--muted)}
         .ei{font-size:2.3rem;margin-bottom:11px} .empty-state h3{font-weight:600;margin-bottom:4px} .empty-state p{font-size:.82rem}
@@ -208,17 +248,14 @@
         <button id="nav-contribuidores" class="nav-btn"        onclick="switchTab('contribuidores')"><span class="ni">👥</span> Contribuidores</button>
         <button id="nav-anotacoes"      class="nav-btn"        onclick="switchTab('anotacoes')"><span class="ni">📝</span> Anotações</button>
         <button id="nav-arquivos"       class="nav-btn"        onclick="switchTab('arquivos')"><span class="ni">📂</span> Arquivos</button>
-        <button id="nav-eventos" class="nav-btn" onclick="switchTab('eventos')"><span class="ni">📅</span> Eventos </button>
-        <button id="nav-ferramentas" class="nav-btn" onclick="switchTab('ferramentas')">
-            <span class="ni">🛠️</span> Ferramentas
-        </button>
-      
+        <button id="nav-eventos"        class="nav-btn"        onclick="switchTab('eventos')"><span class="ni">📅</span> Eventos</button>
+        <button id="nav-ferramentas"    class="nav-btn"        onclick="switchTab('ferramentas')"><span class="ni">🛠️</span> Ferramentas</button>
 
         <hr class="sb-div">
 
         <div id="admin-section" class="hidden">
             <div class="sb-sec">Admin</div>
-              <button id="nav-logs"           class="nav-btn hidden" onclick="switchTab('logs')"><span class="ni">📋</span> System Logs</button>
+            <button id="nav-logs" class="nav-btn hidden" onclick="switchTab('logs')"><span class="ni">📋</span> System Logs</button>
             <button class="nav-btn" onclick="abrirModalAviso()"><span class="ni">📌</span> Recado Fixado</button>
             <button class="nav-btn" onclick="abrirModalAddMembro()"><span class="ni">➕</span> Adicionar Membro</button>
         </div>
@@ -231,7 +268,7 @@
     </nav>
 
     <main class="main">
-        <!-- PROJETOS  📊    🛠️ -->
+        <!-- PROJETOS -->
         <div id="tab-projetos" class="tab-c active">
             <div class="ph">
                 <div><div class="pt">Projetos</div><div class="ps">Projetos do workspace atual</div></div>
@@ -250,50 +287,49 @@
             </div>
             <div id="contrib-container"><div class="loading-c"><div class="spinner"></div></div></div>
         </div>
-        
-       <!-- ARQUIVOS(NAO FUNCIONAL ) -->
+
+        <!-- ARQUIVOS -->
         <div id="tab-arquivos" class="tab-c">
             <div class="ph">
-                <div>
-                    <div class="pt">Arquivos🚧</div>
-                    <div class="ps">Upload e gerenciamento de arquivos</div>
+                <div><div class="pt">Arquivos</div><div class="ps">Upload e gerenciamento de arquivos do workspace</div></div>
+            </div>
+            <div style="margin-bottom:18px">
+                <div class="upload-zone">
+                    <span style="font-size:1.4rem">📂</span>
+                    <div style="flex:1">
+                        <div style="font-weight:600;font-size:.88rem;margin-bottom:4px">Selecione arquivos para upload</div>
+                        <input type="file" id="ws-file-input" multiple>
+                    </div>
+                    <select id="ws-file-proj" class="fsel" style="width:180px;padding:8px 12px">
+                        <option value="">— Projeto (opcional) —</option>
+                    </select>
+                    <button class="btn btn-p btn-sm" onclick="uploadArquivoWorkspace()">⬆️ Upload</button>
                 </div>
             </div>
-
-            <div style="margin-bottom:15px">
-                <input type="file" id="file-input" multiple>
-                <button class="btn btn-p" onclick="uploadArquivo()">Upload</button>
+            <div id="ws-files-container">
+                <div class="loading-c"><div class="spinner"></div></div>
             </div>
+        </div>
 
-            <div id="files-container"></div>
-        </div>  <!-- EVENTOS -->
+        <!-- EVENTOS -->
         <div id="tab-eventos" class="tab-c">
-        <div class="ph">
-            <div>
-                <div class="pt">Eventos</div>
-                <div class="ps">Gerencie eventos do workspace</div>
+            <div class="ph">
+                <div><div class="pt">Eventos</div><div class="ps">Gerencie eventos do workspace</div></div>
+                <button class="btn btn-p" onclick="abrirModalEvento()">+ Novo Evento</button>
             </div>
-            <button class="btn btn-p" onclick="criarEvento()">+ Novo Evento</button>
-        </div>
-
-        <div id="eventos-container">
-            <div class="empty-state">
-                <div class="ei">📅</div>
-                <h3>Nenhum evento ainda</h3>
-                <p>Crie eventos para organizar atividades</p>
+            <div id="eventos-container">
+                <div class="loading-c"><div class="spinner"></div></div>
             </div>
         </div>
-    </div>  <!-- QUIM DESK -->
-    <div id="tab-ferramentas" class="tab-c">
-    <div class="ph">
-        <div>
-            <div class="pt">Ferramentas</div>
-            <div class="ps">Apps locais carregados automaticamente</div>
-        </div>
-    </div>
 
-    <div id="ferramentas-container" class="notes-grid"></div>
-</div>
+        <!-- FERRAMENTAS -->
+        <div id="tab-ferramentas" class="tab-c">
+            <div class="ph">
+                <div><div class="pt">Ferramentas</div><div class="ps">Apps locais carregados automaticamente</div></div>
+            </div>
+            <div id="ferramentas-container" class="notes-grid"></div>
+        </div>
+
         <!-- ANOTAÇÕES -->
         <div id="tab-anotacoes" class="tab-c">
             <div class="ph"><div><div class="pt">Minhas Anotações</div><div class="ps">Salvas localmente no navegador</div></div></div>
@@ -349,12 +385,11 @@
 
 <script>
 // ═══════════════════════════════════════════════════
-//   Cliente Supabase carregado de check_login.js
+//   Estado global
 // ═══════════════════════════════════════════════════
-
 let currentUser = null, currentWorkspace = null, currentWorkspaceCreatorId = null;
-let wsMembers = [];    // { id, nome, username, nivel, wsAdmin }
-let wsProjetos = [];   // cache dos projetos do workspace
+let wsMembers = [];
+let wsProjetos = [];
 let avisoAtivo = null;
 let currentUserCanEdit = false;
 let currentUserIsWorkspaceAdmin = false;
@@ -363,44 +398,24 @@ let pendingNoteAttachments = [];
 const NOTES_KEY_BASE = 'fd-notes';
 function notesStorageKey() { return `${NOTES_KEY_BASE}-${currentWorkspace?.codigo||'global'}`; }
 
+// ─── INIT ─────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-    // Carregar workspace do URL
     const urlParams = new URLSearchParams(window.location.search);
     const wsCode = urlParams.get('codigo');
-    if (!wsCode) {
-        alert('Código do workspace não encontrado.');
-        window.location.href = 'index.html';
-        return;
-    }
+    if (!wsCode) { alert('Código do workspace não encontrado.'); window.location.href = 'index.html'; return; }
 
     const userId = localStorage.getItem('fd-user-id');
-    if (!userId) {
-        window.location.href = 'index.html';
-        return;
-    }
+    if (!userId) { window.location.href = 'index.html'; return; }
 
     const { data: user } = await sb.from('usuarios').select('*').eq('id', userId).single();
-    if (!user) {
-        localStorage.removeItem('fd-user-id');
-        window.location.href = 'index.html';
-        return;
-    }
+    if (!user) { localStorage.removeItem('fd-user-id'); window.location.href = 'index.html'; return; }
     currentUser = user;
 
     const { data: ws } = await sb.from('workspaces').select('*').eq('codigo', wsCode).single();
-    if (!ws) {
-        alert('Workspace não encontrado.');
-        window.location.href = 'index.html';
-        return;
-    }
+    if (!ws) { alert('Workspace não encontrado.'); window.location.href = 'index.html'; return; }
 
-    // Verificar se usuário é membro
     const { data: membership } = await sb.from('workspace_usuarios').select('role').eq('workspace_id', ws.id).eq('usuario_id', user.id).maybeSingle();
-    if (!membership) {
-        alert('Você não tem acesso a este workspace.');
-        window.location.href = 'index.html';
-        return;
-    }
+    if (!membership) { alert('Você não tem acesso a este workspace.'); window.location.href = 'index.html'; return; }
 
     currentWorkspace = ws;
     currentWorkspaceCreatorId = ws.criado_por;
@@ -408,11 +423,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     await entrarNoDashboard();
 });
 
-// ─── DASHBOARD ──────────────────────────────
-async function entrarNoDashboard() {// USUARIO PAINELZIN
+// ─── DASHBOARD ────────────────────────────────────
+async function entrarNoDashboard() {
     const nlTxt = { 0:'Visitante', 1:'Colaborador', 2:'Administrador' };
     document.getElementById('sb-uname').textContent  = currentUser.nome;
-    document.getElementById('sb-urole').textContent  = `${nlTxt[currentUser.nivel]||'Usuário'}`;
+    document.getElementById('sb-urole').textContent  = nlTxt[currentUser.nivel] || 'Usuário';
     document.getElementById('sb-ws-name').textContent = currentWorkspace.nome;
     document.getElementById('sb-ws-code').textContent = `#${currentWorkspace.codigo}`;
 
@@ -429,16 +444,17 @@ async function entrarNoDashboard() {// USUARIO PAINELZIN
 
     const { data: users } = await sb.from('usuarios').select('*').in('id', memberIds);
     wsMembers = (users || []).map(u => {
-        const membership = memberships.find(m => m.usuario_id === u.id);
-        return { ...u, wsAdmin: membership?.role === 'admin', wsRole: membership?.role || 'member' };
+        const m = memberships.find(m => m.usuario_id === u.id);
+        return { ...u, wsAdmin: m?.role === 'admin', wsRole: m?.role || 'member' };
     });
 
     await carregarAviso();
     await renderizarProjetos();
     carregarNotas();
+    popularSelectProjetos();
 }
 
-// ─── TABS───────────────────────────────────── FRENDER TABS
+// ─── TABS ─────────────────────────────────────────
 function switchTab(tab) {
     ['projetos','contribuidores','anotacoes','arquivos','logs','eventos','ferramentas'].forEach(t => {
         const c = document.getElementById(`tab-${t}`);
@@ -446,19 +462,21 @@ function switchTab(tab) {
         if (c) c.classList.toggle('active', t===tab);
         if (b) b.classList.toggle('active', t===tab);
     });
-    if (tab==='contribuidores') renderContribuidor();
-    if (tab==='logs') carregarLogs();
+    if (tab === 'contribuidores') renderContribuidor();
+    if (tab === 'logs') carregarLogs();
     if (tab === 'ferramentas') carregarFerramentas();
+    if (tab === 'eventos') carregarEventos();
+    if (tab === 'arquivos') carregarArquivosWorkspace();
 }
 
-// ─── LOGOUT ──────────────────────────────────────
+// ─── LOGOUT ───────────────────────────────────────
 function fazerLogout() {
     currentUser = currentWorkspace = null; wsMembers = []; wsProjetos = [];
     localStorage.removeItem('fd-user-id');
-    window.location.href = 'index.html';    
+    window.location.href = 'index.html';
 }
 
-// ─── PINNED NOTICE ───────────────────────────────
+// ─── PINNED NOTICE ────────────────────────────────
 async function carregarAviso() {
     const { data } = await sb.from('avisos').select('*')
         .eq('ativo', true).eq('workspace_id', currentWorkspace.id)
@@ -477,7 +495,7 @@ function renderizarAviso() {
             <span class="n-msg">${escH(avisoAtivo.mensagem)}</span>
         </div>
         ${adm ? `<div class="n-acts">
-            <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border:none" onclick="abrirModalAviso()">✏️️</button>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border:none" onclick="abrirModalAviso()">✏️</button>
             <button class="btn btn-sm" style="background:rgba(255,255,255,.12);color:#fff;border:none" onclick="desativarAviso()">✕</button>
         </div>` : ''}
     </div>`;
@@ -509,7 +527,7 @@ async function desativarAviso() {
     avisoAtivo = null; renderizarAviso(); await addLog('Removeu o recado fixado'); toast('Recado removido.');
 }
 
-// ─── RENDER PROJECTS ─────────────────────────────
+// ─── RENDER PROJECTS ──────────────────────────────
 async function renderizarProjetos() {
     const c = document.getElementById('projetos-container');
     c.innerHTML = `<div class="loading-c"><div class="spinner"></div><p style="margin-top:10px">Carregando...</p></div>`;
@@ -518,12 +536,14 @@ async function renderizarProjetos() {
             projeto_usuarios(usuario_id),
             sessoes(id, nome, descricao,
                 sessao_usuarios(usuario_id),
-                etapas(id, nome, descricao, status, responsavel_id, prioridade))`)
+                etapas(id, nome, descricao, status, responsavel_id, prioridade, prazo))`)
         .eq('workspace_id', currentWorkspace.id).order('id');
     wsProjetos = projs || [];
     if (error) { c.innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><h3>Erro</h3><p>${escH(error.message)}</p></div>`; return; }
     if (!projs?.length) { c.innerHTML=`<div class="empty-state"><div class="ei">📁</div><h3>Nenhum projeto ainda</h3><p>Clique em "+ Novo Projeto" para começar.</p></div>`; return; }
     c.innerHTML = projs.map(renderProj).join('');
+    // Carregar arquivos de cada projeto
+    projs.forEach(p => carregarArquivosProjeto(p.id));
 }
 
 function renderProj(p) {
@@ -537,22 +557,24 @@ function renderProj(p) {
             <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
                 <span class="badge b-acc">${(p.sessoes||[]).length} seções</span>
                 <span class="badge b-gray">${total} etapas</span>
-                ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="event.stopPropagation(); editarProjeto(${p.id})">✏️️</button>` : ''}
+                ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="event.stopPropagation(); editarProjeto(${p.id})">✏️</button>` : ''}
             </div>
         </div>
         <div id="pb-${p.id}" class="proj-body">
             ${p.descricao ? `<p class="proj-desc">${escH(p.descricao)}</p>` : ''}
             ${(p.sessoes||[]).map(s => renderSess(p.id, s)).join('')}
             ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="abrirModalSessao(${p.id})">+ Seção</button>` : ''}
-        </div>
-        <div style="margin-top:12px">
-    <input type="file" id="file-input-${p.id}" multiple>
-    <button class="btn btn-s btn-sm" onclick="UploadArquivo(${p.id})">
-        ⬆️ Upload
-    </button>
 
-    <div id="files-${p.id}" style="margin-top:10px"></div>
-</div>
+            <!-- Seção de arquivos do projeto -->
+            <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+                <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px">📎 Arquivos do projeto</div>
+                <div class="upload-zone" style="padding:10px 14px">
+                    <input type="file" id="proj-file-input-${p.id}" multiple style="flex:1;font-size:.82rem">
+                    <button class="btn btn-s btn-sm" onclick="uploadArquivoProjeto(${p.id})">⬆️ Enviar</button>
+                </div>
+                <div id="proj-files-${p.id}"><div class="spinner" style="margin:8px 0"></div></div>
+            </div>
+        </div>
     </div>`;
 }
 
@@ -574,7 +596,7 @@ function renderSess(pId, s) {
         <div id="sb-${s.id}" class="sess-body">
             ${colabs ? `<div class="colab-list">${colabs}</div>` : ''}
             <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
-                ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarSessao(${s.id}, ${pId})">✏️️ Editar</button>` : ''}
+                ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarSessao(${s.id}, ${pId})">✏️ Editar</button>` : ''}
             </div>
             ${(s.etapas||[]).map(e => renderEtapa(pId, s.id, e)).join('')}
             ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" style="margin-top:5px" onclick="abrirModalEtapa(${pId}, ${s.id})">+ Etapa</button>` : ''}
@@ -588,22 +610,19 @@ function renderEtapa(pId, sId, e) {
     const statusOptions = ['Não iniciado','Em andamento','Concluído'].map(s => `<option value="${s}" ${e.status==s?'selected':''}>${s}</option>`).join('');
     const doneClass = e.status === 'Concluído' ? ' done' : '';
     return `<div class="step-item${doneClass}">
-        <div class="step-bar" style="background:${e.status==='Concluído'?'var(--ok)':e.status==='Em andamento'?'var(--warn)':'var(--muted)'}"></div>
-        <div class="step-info">
-            <div class="step-name">${escH(e.nome)}</div>
-            ${e.descricao ? `<div class="step-desc">${escH(e.descricao)}</div>` : ''}
-            <div class="step-meta">
+        <div class="step-bar" style="width:4px;min-height:40px;border-radius:3px;background:${e.status==='Concluído'?'var(--ok)':e.status==='Em andamento'?'var(--warn)':'var(--muted)'}"></div>
+        <div class="step-info" style="flex:1;min-width:0">
+            <div class="step-name" style="font-weight:600;font-size:.87rem">${escH(e.nome)}</div>
+            ${e.descricao ? `<div class="step-desc" style="font-size:.78rem;color:var(--muted)">${escH(e.descricao)}</div>` : ''}
+            <div class="step-meta" style="display:flex;gap:5px;margin-top:3px;flex-wrap:wrap">
                 ${resp ? `<span class="badge b-purple">${escH(resp.nome)}</span>` : ''}
+                ${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : ''}
             </div>
         </div>
         <div class="step-acts">
-            <select class="fsel step-sel" onchange="updateEtapaPrio(${e.id}, this.value)">
-                ${prioOptions}
-            </select>
-            <select class="fsel step-sel" onchange="updateEtapaStatus(${e.id}, this.value)">
-                ${statusOptions}
-            </select>
-            ${currentUserCanEdit ? `<button class="btn btn-sm" onclick="editarEtapa(${e.id})">✏️️</button>` : ''}
+            <select class="fsel step-sel" onchange="updateEtapaPrio(${e.id}, this.value)">${prioOptions}</select>
+            <select class="fsel step-sel" onchange="updateEtapaStatus(${e.id}, this.value)">${statusOptions}</select>
+            ${currentUserCanEdit ? `<button class="btn btn-sm" onclick="editarEtapa(${e.id})">✏️</button>` : ''}
         </div>
     </div>`;
 }
@@ -611,14 +630,11 @@ function renderEtapa(pId, sId, e) {
 function toggleSec(bodyId, chevId) {
     const body = document.getElementById(bodyId);
     const chev = document.getElementById(chevId);
-    if (body.style.display === 'none') {
-        body.style.display = 'block'; chev.classList.add('open');
-    } else {
-        body.style.display = 'none'; chev.classList.remove('open');
-    }
+    if (body.style.display === 'none') { body.style.display = 'block'; chev.classList.add('open'); }
+    else { body.style.display = 'none'; chev.classList.remove('open'); }
 }
 
-// ─── CRUD PROJETOS ───────────────────────────────
+// ─── CRUD PROJETOS ────────────────────────────────
 function abrirModalProjeto() {
     abrirModal('📁 Novo Projeto', `
         <div class="fg"><label class="fl">Nome</label><input id="m-pnome" class="fi" placeholder="Ex: Sistema ERP..."/></div>
@@ -633,15 +649,44 @@ async function criarProjeto() {
     const nome = document.getElementById('m-pnome')?.value?.trim();
     const desc = document.getElementById('m-pdesc')?.value?.trim() || '';
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
-    const { data, error } = await sb.from('projetos')
-        .insert({ nome, descricao: desc, workspace_id: currentWorkspace.id }).select().single();
+    const { data, error } = await sb.from('projetos').insert({ nome, descricao: desc, workspace_id: currentWorkspace.id }).select().single();
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     await sb.from('projeto_usuarios').insert({ projeto_id: data.id, usuario_id: currentUser.id });
     await addLog(`Criou projeto: ${nome}`);
-    fecharModal(); toast(`Projeto "${nome}" criado! 🎉`); await renderizarProjetos();
+    fecharModal(); toast(`Projeto "${nome}" criado! 🎉`); await renderizarProjetos(); popularSelectProjetos();
 }
 
-// ─── CRUD SEÇÕES───────────────────────────────
+async function editarProjeto(projId) {
+    const proj = wsProjetos.find(p => p.id === projId); if (!proj) return;
+    const buttons = [
+        { label: '💾 Salvar', cls: 'btn-p', action: `salvarEdicaoProjeto(${projId})` },
+        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
+    ];
+    if (currentUserIsWorkspaceAdmin) buttons.push({ label: '🗑 Deletar', cls: 'btn-s', style: 'border-color:var(--danger);color:var(--danger)', action: `deletarProjetoConfirm(${projId})` });
+    abrirModal('✏️ Editar Projeto', `
+        <div class="fg"><label class="fl">Nome</label><input id="m-pnome-edit" class="fi" value="${escH(proj.nome)}"/></div>
+        <div class="fg"><label class="fl">Descrição</label><textarea id="m-pdesc-edit" class="fta">${escH(proj.descricao||'')}</textarea></div>
+    `, buttons);
+}
+
+async function salvarEdicaoProjeto(projId) {
+    const nome = document.getElementById('m-pnome-edit')?.value?.trim();
+    const desc = document.getElementById('m-pdesc-edit')?.value?.trim() || '';
+    if (!nome) { toast('Informe o nome.', 'warning'); return; }
+    const { error } = await sb.from('projetos').update({ nome, descricao: desc }).eq('id', projId);
+    if (error) { toast('Erro: '+error.message, 'error'); return; }
+    await addLog('Editou projeto'); fecharModal(); toast('Projeto atualizado!'); await renderizarProjetos(); popularSelectProjetos();
+}
+
+async function deletarProjetoConfirm(projId) {
+    if (!confirm('Tem certeza? Isso também deletará todas as seções, etapas e arquivos.')) return;
+    fecharModal();
+    const { error } = await sb.from('projetos').delete().eq('id', projId);
+    if (error) { toast('Erro: '+error.message, 'error'); return; }
+    await addLog('Deletou projeto'); toast('Projeto deletado.'); await renderizarProjetos(); popularSelectProjetos();
+}
+
+// ─── CRUD SEÇÕES ──────────────────────────────────
 function abrirModalSessao(pId) {
     const opts = wsMembers.map(u => `<option value="${u.id}">${escH(u.nome)} (${u.username})</option>`).join('');
     abrirModal('🗂 Nova Seção', `
@@ -665,39 +710,77 @@ async function criarSessao(pId) {
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     const users = [...new Set([currentUser.id, ...sel])];
     await sb.from('sessao_usuarios').insert(users.map(uid => ({ sessao_id: data.id, usuario_id: uid })));
-    await addLog(`Criou seção: ${nome}`);
-    fecharModal(); toast(`Seção "${nome}" criada!`); await renderizarProjetos();
+    await addLog(`Criou seção: ${nome}`); fecharModal(); toast(`Seção "${nome}" criada!`); await renderizarProjetos();
 }
 
-// ─── CRUD ETAPAS ─────────────────────────────────
+async function editarSessao(sessId, projId) {
+    const proj = wsProjetos.find(p => p.id === projId); if (!proj) return;
+    const sess = proj.sessoes?.find(s => s.id === sessId); if (!sess) return;
+    const opts = wsMembers.map(u => `<option value="${u.id}">${escH(u.nome)} (${u.username})</option>`).join('');
+    const selIds = (sess.sessao_usuarios||[]).map(su => su.usuario_id);
+    const buttons = [
+        { label: '💾 Salvar', cls: 'btn-p', action: `salvarEdicaoSessao(${sessId})` },
+        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
+    ];
+    if (currentUserIsWorkspaceAdmin) buttons.push({ label: '🗑 Deletar', cls: 'btn-s', style: 'border-color:var(--danger);color:var(--danger)', action: `deletarSessaoConfirm(${sessId})` });
+    abrirModal('✏️ Editar Seção', `
+        <div class="fg"><label class="fl">Nome</label><input id="m-snome-edit" class="fi" value="${escH(sess.nome)}"/></div>
+        <div class="fg"><label class="fl">Descrição</label><input id="m-sdesc-edit" class="fi" value="${escH(sess.descricao||'')}"/></div>
+        <div class="fg"><label class="fl">Colaboradores</label>
+            <select id="m-susers-edit" class="fsel" multiple>${opts}</select>
+            <p class="fhint">Ctrl/Cmd para múltiplos.</p></div>
+    `, buttons);
+    setTimeout(() => {
+        const sel = document.getElementById('m-susers-edit');
+        if (sel) Array.from(sel.options).forEach(opt => { opt.selected = selIds.includes(+opt.value); });
+    }, 0);
+}
+
+async function salvarEdicaoSessao(sessId) {
+    const nome = document.getElementById('m-snome-edit')?.value?.trim();
+    const desc = document.getElementById('m-sdesc-edit')?.value?.trim() || '';
+    const sel  = Array.from(document.getElementById('m-susers-edit')?.selectedOptions||[]).map(o=>+o.value);
+    if (!nome) { toast('Informe o nome.', 'warning'); return; }
+    const { error } = await sb.from('sessoes').update({ nome, descricao: desc }).eq('id', sessId);
+    if (error) { toast('Erro: '+error.message, 'error'); return; }
+    await sb.from('sessao_usuarios').delete().eq('sessao_id', sessId);
+    const users = [...new Set([currentUser.id, ...sel])];
+    await sb.from('sessao_usuarios').insert(users.map(uid => ({ sessao_id: sessId, usuario_id: uid })));
+    await addLog('Editou seção'); fecharModal(); toast('Seção atualizada!'); await renderizarProjetos();
+}
+
+async function deletarSessaoConfirm(sessId) {
+    if (!confirm('Tem certeza? Isso também deletará todas as etapas.')) return;
+    fecharModal();
+    const { error } = await sb.from('sessoes').delete().eq('id', sessId);
+    if (error) { toast('Erro: '+error.message, 'error'); return; }
+    await addLog('Deletou seção'); toast('Seção deletada.'); await renderizarProjetos();
+}
+
+// ─── CRUD ETAPAS ──────────────────────────────────
 function uSelect(id, selId=null) {
-    const opts = wsMembers.map(u =>
-        `<option value="${u.id}" ${selId==u.id?'selected':''}>${escH(u.nome)} (${u.username})</option>`).join('');
-    return `<select id="${id}" class="fsel" style="height:auto"><option value="">— Sem responsável —</option>${opts}</select>`;
+    const opts = wsMembers.map(u => `<option value="${u.id}" ${selId==u.id?'selected':''}>${escH(u.nome)} (${u.username})</option>`).join('');
+    return `<select id="${id}" class="fsel"><option value="">— Sem responsável —</option>${opts}</select>`;
 }
 
 function abrirModalEtapa(pId, sId, e=null) {
-    const title = e ? '✏️️ Editar Etapa' : '✅ Nova Etapa';
-    const nome = e?.nome || '';
-    const desc = e?.descricao || '';
-    const resp = e?.responsavel_id || '';
-    const status = e?.status || 'Não iniciado';
-    const prio = e?.prioridade || 0;
-    abrirModal(title, `
-        <div class="fg"><label class="fl">Nome</label><input id="m-enome" class="fi" value="${escH(nome)}" placeholder="Ex: Implementar tela de login..."/></div>
+    const nome = e?.nome || '', desc = e?.descricao || '', resp = e?.responsavel_id || '';
+    const status = e?.status || 'Não iniciado', prio = e?.prioridade || 0, prazo = e?.prazo || '';
+    abrirModal(e ? '✏️ Editar Etapa' : '✅ Nova Etapa', `
+        <div class="fg"><label class="fl">Nome</label><input id="m-enome" class="fi" value="${escH(nome)}" placeholder="Ex: Implementar tela..."/></div>
         <div class="fg"><label class="fl">Descrição</label><input id="m-edesc" class="fi" value="${escH(desc)}" placeholder="Critérios de aceite..."/></div>
         <div class="fg"><label class="fl">Responsável</label>${uSelect('m-eresp', resp)}</div>
-        <div class="fg"><label class="fl">Status</label><select id="m-estatus" class="fsel">
-            <option value="Não iniciado" ${status==='Não iniciado'?'selected':''}>Não iniciado</option>
-            <option value="Em andamento" ${status==='Em andamento'?'selected':''}>Em andamento</option>
-            <option value="Concluído" ${status==='Concluído'?'selected':''}>Concluído</option>
-        </select></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="fg"><label class="fl">Status</label><select id="m-estatus" class="fsel">
+                <option value="Não iniciado" ${status==='Não iniciado'?'selected':''}>Não iniciado</option>
+                <option value="Em andamento" ${status==='Em andamento'?'selected':''}>Em andamento</option>
+                <option value="Concluído" ${status==='Concluído'?'selected':''}>Concluído</option>
+            </select></div>
+            <div class="fg"><label class="fl">Prazo <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+                <input id="m-eprazo" type="date" class="fi" value="${prazo}"/></div>
+        </div>
         <div class="fg"><label class="fl">Prioridade (0-4)</label><select id="m-eprio" class="fsel">
-            <option value="0" ${prio==0?'selected':''}>0 - Baixa</option>
-            <option value="1" ${prio==1?'selected':''}>1</option>
-            <option value="2" ${prio==2?'selected':''}>2</option>
-            <option value="3" ${prio==3?'selected':''}>3</option>
-            <option value="4" ${prio==4?'selected':''}>4 - Alta</option>
+            ${[0,1,2,3,4].map(v => `<option value="${v}" ${prio==v?'selected':''}>${v}${v===0?' - Baixa':v===4?' - Alta':''}</option>`).join('')}
         </select></div>
     `, [
         { label: e ? 'Salvar' : '+ Criar', cls: 'btn-p', action: e ? `editarEtapaSave(${e.id})` : `criarEtapa(${pId}, ${sId})` },
@@ -711,23 +794,17 @@ async function criarEtapa(pId, sId) {
     const resp = document.getElementById('m-eresp')?.value || null;
     const status = document.getElementById('m-estatus')?.value || 'Não iniciado';
     const prio = +document.getElementById('m-eprio')?.value || 0;
+    const prazo = document.getElementById('m-eprazo')?.value || null;
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
-    const { data, error } = await sb.from('etapas').insert({
-        sessao_id: sId, nome, descricao: desc, responsavel_id: resp, status, prioridade: prio
-    }).select().single();
+    const { error } = await sb.from('etapas').insert({ sessao_id: sId, nome, descricao: desc, responsavel_id: resp, status, prioridade: prio, prazo });
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog(`Criou etapa: ${nome}`);
-    fecharModal(); toast(`Etapa "${nome}" criada!`); await renderizarProjetos();
+    await addLog(`Criou etapa: ${nome}`); fecharModal(); toast(`Etapa "${nome}" criada!`); await renderizarProjetos();
 }
 
 function editarEtapa(eId) {
-    // Buscar etapa
     let etapa = null;
     for (const p of wsProjetos) {
-        for (const s of p.sessoes || []) {
-            etapa = (s.etapas || []).find(e => e.id === eId);
-            if (etapa) break;
-        }
+        for (const s of p.sessoes||[]) { etapa = (s.etapas||[]).find(e => e.id===eId); if (etapa) break; }
         if (etapa) break;
     }
     if (!etapa) return;
@@ -740,117 +817,388 @@ async function editarEtapaSave(eId) {
     const resp = document.getElementById('m-eresp')?.value || null;
     const status = document.getElementById('m-estatus')?.value || 'Não iniciado';
     const prio = +document.getElementById('m-eprio')?.value || 0;
+    const prazo = document.getElementById('m-eprazo')?.value || null;
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
-    const { error } = await sb.from('etapas').update({
-        nome, descricao: desc, responsavel_id: resp, status, prioridade: prio
-    }).eq('id', eId);
+    const { error } = await sb.from('etapas').update({ nome, descricao: desc, responsavel_id: resp, status, prioridade: prio, prazo }).eq('id', eId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog(`Editou etapa: ${nome}`);
-    fecharModal(); toast('Etapa atualizada!'); await renderizarProjetos();
-}
-// ─── EDITAR/DELETAR PROJETOS ──────────────────
-async function editarProjeto(projId) {
-    const proj = wsProjetos.find(p => p.id === projId);
-    if (!proj) return;
-    const buttons = [
-        { label: '💾 Salvar', cls: 'btn-p', action: `salvarEdicaoProjeto(${projId})` },
-        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
-    ];
-    if (currentUserIsWorkspaceAdmin) {
-        buttons.push({ label: '🗑 Deletar Projeto', cls: 'btn-s', style: 'border-color:var(--danger);color:var(--danger)', action: `deletarProjetoConfirm(${projId})` });
-    }
-    abrirModal('✏️️ Editar Projeto', `
-        <div class="fg"><label class="fl">Nome</label><input id="m-pnome-edit" class="fi" value="${escH(proj.nome)}"/></div>
-        <div class="fg"><label class="fl">Descrição</label><textarea id="m-pdesc-edit" class="fta">${escH(proj.descricao||'')}</textarea></div>
-    `, buttons);
+    await addLog(`Editou etapa: ${nome}`); fecharModal(); toast('Etapa atualizada!'); await renderizarProjetos();
 }
 
-async function salvarEdicaoProjeto(projId) {
-    const nome = document.getElementById('m-pnome-edit')?.value?.trim();
-    const desc = document.getElementById('m-pdesc-edit')?.value?.trim() || '';
-    if (!nome) { toast('Informe o nome.', 'warning'); return; }
-    const { error } = await sb.from('projetos').update({ nome, descricao: desc }).eq('id', projId);
-    if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog(`Editou projeto`);
-    fecharModal(); toast('Projeto atualizado!'); await renderizarProjetos();
-}
-
-async function deletarProjetoConfirm(projId) {
-    if (!confirm('Tem certeza que deseja deletar este projeto? Isso também deletará todas as seções e etapas.')) return;
-    fecharModal();
-    const { error } = await sb.from('projetos').delete().eq('id', projId);
-    if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog('Deletou projeto');
-    toast('Projeto deletado.'); await renderizarProjetos();
-}
-
-// ─── EDITAR/DELETAR SEÇÕES ───────────────────
-async function editarSessao(sessId, projId) {
-    const proj = wsProjetos.find(p => p.id === projId);
-    if (!proj) return;
-    const sess = proj.sessoes?.find(s => s.id === sessId);
-    if (!sess) return;
-    const opts = wsMembers.map(u => `<option value="${u.id}">${escH(u.nome)} (${u.username})</option>`).join('');
-    const selIds = (sess.sessao_usuarios||[]).map(su => su.usuario_id);
-    const buttons = [
-        { label: '💾 Salvar', cls: 'btn-p', action: `salvarEdicaoSessao(${sessId})` },
-        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
-    ];
-    if (currentUserIsWorkspaceAdmin) {
-        buttons.push({ label: '🗑 Deletar Seção', cls: 'btn-s', style: 'border-color:var(--danger);color:var(--danger)', action: `deletarSessaoConfirm(${sessId})` });
-    }
-    abrirModal('✏️️ Editar Seção', `
-        <div class="fg"><label class="fl">Nome</label><input id="m-snome-edit" class="fi" value="${escH(sess.nome)}"/></div>
-        <div class="fg"><label class="fl">Descrição</label><input id="m-sdesc-edit" class="fi" value="${escH(sess.descricao||'')}"/></div>
-        <div class="fg"><label class="fl">Colaboradores</label>
-            <select id="m-susers-edit" class="fsel" multiple>${opts}</select>
-            <p class="fhint">Ctrl/Cmd para múltiplos.</p></div>
-    `, buttons);
-    // Prselecionar colaboradores
-    setTimeout(() => {
-        const sel = document.getElementById('m-susers-edit');
-        if (sel) {
-            Array.from(sel.options).forEach(opt => {
-                opt.selected = selIds.includes(+opt.value);
-            });
-        }
-    }, 0);
-}
-
-async function salvarEdicaoSessao(sessId) {
-    const nome = document.getElementById('m-snome-edit')?.value?.trim();
-    const desc = document.getElementById('m-sdesc-edit')?.value?.trim() || '';
-    const sel  = Array.from(document.getElementById('m-susers-edit')?.selectedOptions||[]).map(o=>+o.value);
-    if (!nome) { toast('Informe o nome.', 'warning'); return; }
-    const { error: errUpdate } = await sb.from('sessoes').update({ nome, descricao: desc }).eq('id', sessId);
-    if (errUpdate) { toast('Erro: '+errUpdate.message, 'error'); return; }
-    // Atualizar colaboradores
-    await sb.from('sessao_usuarios').delete().eq('sessao_id', sessId);
-    const users = [...new Set([currentUser.id, ...sel])];
-    await sb.from('sessao_usuarios').insert(users.map(uid => ({ sessao_id: sessId, usuario_id: uid })));
-    await addLog('Editou seção');
-    fecharModal(); toast('Seção atualizada!'); await renderizarProjetos();
-}
-
-async function deletarSessaoConfirm(sessId) {
-    if (!confirm('Tem certeza que deseja deletar esta seção? Isso também deletará todas as etapas.')) return;
-    fecharModal();
-    const { error } = await sb.from('sessoes').delete().eq('id', sessId);
-    if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog('Deletou seção');
-    toast('Seção deletada.'); await renderizarProjetos();
-}
 async function updateEtapaPrio(eId, prio) {
-    const { error } = await sb.from('etapas').update({ prioridade: +prio }).eq('id', eId);
-    if (error) { toast('Erro ao atualizar prioridade.', 'error'); return; }
-    await renderizarProjetos(); // re-render to update colors
+    await sb.from('etapas').update({ prioridade: +prio }).eq('id', eId);
 }
 
 async function updateEtapaStatus(eId, status) {
     const { error } = await sb.from('etapas').update({ status }).eq('id', eId);
     if (error) { toast('Erro ao atualizar status.', 'error'); return; }
-    await renderizarProjetos(); 
+    await renderizarProjetos();
 }
+
+// ─── ARQUIVOS ─────────────────────────────────────
+function fileIcon(nome) {
+    const ext = nome.split('.').pop().toLowerCase();
+    const map = { pdf:'📄', doc:'📝', docx:'📝', xls:'📊', xlsx:'📊', ppt:'📋', pptx:'📋',
+        png:'🖼️', jpg:'🖼️', jpeg:'🖼️', gif:'🖼️', webp:'🖼️', svg:'🎨',
+        mp4:'🎬', mov:'🎬', avi:'🎬', mp3:'🎵', zip:'🗜️', rar:'🗜️', txt:'📃' };
+    return map[ext] || '📁';
+}
+
+// Upload na aba de projetos (por projeto)
+async function uploadArquivoProjeto(projetoId) {
+    const input = document.getElementById(`proj-file-input-${projetoId}`);
+    const files = Array.from(input?.files || []);
+    if (!files.length) { toast('Selecione ao menos um arquivo.', 'warning'); return; }
+
+    let sucesso = 0, erros = 0;
+    for (const file of files) {
+        const filePath = `${currentWorkspace.id}/projetos/${projetoId}/${Date.now()}-${file.name}`;
+        const { error: uploadErr } = await sb.storage.from('workspace-files').upload(filePath, file);
+        if (uploadErr) { erros++; console.error(uploadErr); continue; }
+        const { error: dbErr } = await sb.from('arquivos').insert({
+            nome: file.name, path: filePath,
+            projeto_id: projetoId, workspace_id: currentWorkspace.id, criado_por: currentUser.id
+        });
+        if (dbErr) { erros++; continue; }
+        sucesso++;
+    }
+    input.value = '';
+    if (sucesso) { toast(`${sucesso} arquivo(s) enviado(s)! 📎`); await addLog(`Enviou ${sucesso} arquivo(s) para projeto #${projetoId}`); }
+    if (erros) toast(`${erros} arquivo(s) falharam.`, 'error');
+    await carregarArquivosProjeto(projetoId);
+}
+
+// Carregar arquivos de um projeto específico (dentro do card)
+async function carregarArquivosProjeto(projetoId) {
+    const container = document.getElementById(`proj-files-${projetoId}`);
+    if (!container) return;
+
+    const { data, error } = await sb.from('arquivos').select('*')
+        .eq('projeto_id', projetoId)
+        .order('created_at', { ascending: false });
+
+    if (error) { container.innerHTML = '<div style="font-size:.8rem;color:var(--danger)">Erro ao carregar arquivos.</div>'; return; }
+    if (!data?.length) { container.innerHTML = '<div style="font-size:.8rem;color:var(--muted);padding:4px 0">Nenhum arquivo ainda.</div>'; return; }
+
+    container.innerHTML = data.map(f => {
+        const { data: urlData } = sb.storage.from('workspace-files').getPublicUrl(f.path);
+        return `<div class="file-list-item">
+            <span class="file-icon">${fileIcon(f.nome)}</span>
+            <div class="file-info">
+                <div class="file-name">${escH(f.nome)}</div>
+                <div class="file-date">${new Date(f.created_at).toLocaleDateString('pt-BR')}</div>
+            </div>
+            <div class="file-acts">
+                <a href="${urlData.publicUrl}" target="_blank" class="btn btn-s btn-sm">Abrir</a>
+                ${currentUserCanEdit ? `<button class="btn btn-sm" style="background:none;border:1px solid var(--danger);color:var(--danger)" onclick="deletarArquivo(${f.id},'${f.path}',${projetoId})">🗑</button>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// Upload na aba de Arquivos (workspace geral)
+async function uploadArquivoWorkspace() {
+    const input = document.getElementById('ws-file-input');
+    const files = Array.from(input?.files || []);
+    const projId = document.getElementById('ws-file-proj')?.value || null;
+    if (!files.length) { toast('Selecione ao menos um arquivo.', 'warning'); return; }
+
+    let sucesso = 0, erros = 0;
+    for (const file of files) {
+        const pasta = projId ? `projetos/${projId}` : 'geral';
+        const filePath = `${currentWorkspace.id}/${pasta}/${Date.now()}-${file.name}`;
+        const { error: uploadErr } = await sb.storage.from('workspace-files').upload(filePath, file);
+        if (uploadErr) { erros++; continue; }
+        const { error: dbErr } = await sb.from('arquivos').insert({
+            nome: file.name, path: filePath,
+            projeto_id: projId ? parseInt(projId) : null,
+            workspace_id: currentWorkspace.id, criado_por: currentUser.id
+        });
+        if (dbErr) { erros++; continue; }
+        sucesso++;
+    }
+    input.value = '';
+    if (sucesso) { toast(`${sucesso} arquivo(s) enviado(s)! 📎`); await addLog(`Enviou ${sucesso} arquivo(s) ao workspace`); }
+    if (erros) toast(`${erros} arquivo(s) falharam.`, 'error');
+    await carregarArquivosWorkspace();
+}
+
+// Carregar todos os arquivos do workspace (aba Arquivos)
+async function carregarArquivosWorkspace() {
+    const c = document.getElementById('ws-files-container');
+    c.innerHTML = '<div class="loading-c"><div class="spinner"></div></div>';
+
+    const { data, error } = await sb.from('arquivos').select('*, projetos(nome)')
+        .eq('workspace_id', currentWorkspace.id)
+        .order('created_at', { ascending: false });
+
+    if (error) { c.innerHTML = '<div class="empty-state"><h3>Erro ao carregar</h3></div>'; return; }
+    if (!data?.length) {
+        c.innerHTML = `<div class="empty-state"><div class="ei">📂</div><h3>Nenhum arquivo ainda</h3><p>Faça upload de arquivos acima.</p></div>`;
+        return;
+    }
+
+    // Agrupar por projeto
+    const grupos = {};
+    data.forEach(f => {
+        const key = f.projeto_id ? `projeto_${f.projeto_id}` : 'geral';
+        const label = f.projetos?.nome || 'Geral (sem projeto)';
+        if (!grupos[key]) grupos[key] = { label, items: [] };
+        grupos[key].items.push(f);
+    });
+
+    c.innerHTML = Object.values(grupos).map(g => `
+        <div style="margin-bottom:20px">
+            <div class="eventos-section-label">📁 ${escH(g.label)}</div>
+            ${g.items.map(f => {
+                const { data: urlData } = sb.storage.from('workspace-files').getPublicUrl(f.path);
+                const criador = wsMembers.find(u => u.id === f.criado_por);
+                return `<div class="file-list-item">
+                    <span class="file-icon">${fileIcon(f.nome)}</span>
+                    <div class="file-info">
+                        <div class="file-name">${escH(f.nome)}</div>
+                        <div class="file-date">${criador ? escH(criador.nome) + ' · ' : ''}${new Date(f.created_at).toLocaleDateString('pt-BR')}</div>
+                    </div>
+                    <div class="file-acts">
+                        <a href="${urlData.publicUrl}" target="_blank" class="btn btn-s btn-sm">Abrir</a>
+                        ${currentUserCanEdit ? `<button class="btn btn-sm" style="background:none;border:1px solid var(--danger);color:var(--danger)" onclick="deletarArquivo(${f.id},'${f.path}',null)">🗑</button>` : ''}
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>
+    `).join('');
+}
+
+async function deletarArquivo(arquivoId, path, projetoId) {
+    if (!confirm('Deletar este arquivo permanentemente?')) return;
+    await sb.storage.from('workspace-files').remove([path]);
+    await sb.from('arquivos').delete().eq('id', arquivoId);
+    await addLog('Deletou arquivo');
+    toast('Arquivo removido.');
+    if (projetoId) carregarArquivosProjeto(projetoId);
+    else carregarArquivosWorkspace();
+}
+
+// Popular o select de projetos na aba de arquivos
+function popularSelectProjetos() {
+    const sel = document.getElementById('ws-file-proj');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Projeto (opcional) —</option>' +
+        wsProjetos.map(p => `<option value="${p.id}">${escH(p.nome)}</option>`).join('');
+}
+
+// ─── HELPERS DE PRAZO ─────────────────────────────
+function prazoClass(prazo, status) {
+    if (status === 'Concluído') return 'b-green';
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const d = new Date(prazo + 'T00:00:00');
+    const diff = Math.floor((d - hoje) / 86400000);
+    if (d < hoje) return 'b-rose';        // vencido
+    if (diff <= 2) return 'b-amber';      // urgente (≤2 dias)
+    if (diff <= 7) return 'b-amber';      // próximo (≤7 dias)
+    return 'b-acc';
+}
+function prazoLabel(prazo, status) {
+    if (status === 'Concluído') return '✅ Concluído';
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const d = new Date(prazo + 'T00:00:00');
+    const diff = Math.floor((d - hoje) / 86400000);
+    const fmt = d.toLocaleDateString('pt-BR', { day:'2-digit', month:'short' });
+    if (d < hoje) return `⚠️ Venceu ${fmt}`;
+    if (diff === 0) return `🔴 Hoje!`;
+    if (diff === 1) return `🟠 Amanhã`;
+    if (diff <= 7) return `🟡 ${fmt} (${diff}d)`;
+    return `📅 ${fmt}`;
+}
+
+// ─── EVENTOS ──────────────────────────────────────
+async function carregarEventos() {
+    const c = document.getElementById('eventos-container');
+    c.innerHTML = '<div class="loading-c"><div class="spinner"></div></div>';
+
+    // Carregar eventos e etapas com prazo em paralelo
+    const [{ data: eventos, error: evErr }, { data: etapasComPrazo, error: etErr }] = await Promise.all([
+        sb.from('eventos').select('*')
+            .eq('workspace_id', currentWorkspace.id)
+            .order('data', { ascending: true }),
+        sb.from('etapas')
+            .select('id, nome, status, prazo, responsavel_id, sessoes!inner(id, nome, projeto_id, projetos!inner(id, nome, workspace_id))')
+            .not('prazo', 'is', null)
+            .eq('sessoes.projetos.workspace_id', currentWorkspace.id)
+            .order('prazo', { ascending: true })
+    ]);
+
+    if (evErr) { c.innerHTML = `<div class="empty-state"><div class="ei">⚠️</div><h3>Erro ao carregar</h3><p>${escH(evErr.message)}</p></div>`; return; }
+
+    renderEventos(eventos || [], etapasComPrazo || []);
+}
+
+function renderEventos(eventos, etapasComPrazo) {
+    const c = document.getElementById('eventos-container');
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+
+    // ── Seção de Eventos ──────────────────────────
+    let html = '';
+    const futuros = eventos.filter(e => new Date(e.data + 'T00:00:00') >= hoje);
+    const passados = eventos.filter(e => new Date(e.data + 'T00:00:00') < hoje);
+
+    function renderEventoCard(e) {
+        const d = new Date(e.data + 'T00:00:00');
+        const passado = d < hoje;
+        const dia = d.getDate().toString().padStart(2,'0');
+        const mes = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.','');
+        return `<div class="evento-card${passado?' evento-past':''}">
+            <div class="evento-date-strip">
+                <div class="ev-day">${dia}</div>
+                <div class="ev-month">${mes}</div>
+            </div>
+            <div class="evento-info">
+                <div>
+                    <div class="evento-nome">${escH(e.nome)}</div>
+                    ${e.descricao ? `<div class="evento-desc">${escH(e.descricao)}</div>` : ''}
+                    ${e.hora ? `<div class="evento-hora">🕐 ${e.hora.slice(0,5)}</div>` : ''}
+                </div>
+                <div style="display:flex;gap:6px;flex-shrink:0">
+                    ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarEvento(${e.id})">✏️</button>` : ''}
+                    ${currentUserIsWorkspaceAdmin ? `<button class="btn btn-sm" style="background:none;border:1px solid var(--danger);color:var(--danger)" onclick="deletarEvento(${e.id})">🗑</button>` : ''}
+                </div>
+            </div>
+        </div>`;
+    }
+
+    if (!eventos.length && !etapasComPrazo.length) {
+        c.innerHTML = `<div class="empty-state"><div class="ei">📅</div><h3>Nenhum evento ainda</h3><p>Crie eventos ou adicione prazos às etapas dos projetos.</p></div>`;
+        return;
+    }
+
+    if (futuros.length) {
+        html += `<div class="eventos-section-label">📅 Próximos eventos (${futuros.length})</div>`;
+        html += futuros.map(renderEventoCard).join('');
+    }
+    if (passados.length) {
+        html += `<div class="eventos-section-label" style="margin-top:${futuros.length?'24px':'0'}">🕓 Eventos passados (${passados.length})</div>`;
+        html += passados.map(renderEventoCard).join('');
+    }
+
+    // ── Seção de Prazos de Etapas ─────────────────
+    if (etapasComPrazo.length) {
+        const pendentes = etapasComPrazo.filter(e => e.status !== 'Concluído');
+        const concluidas = etapasComPrazo.filter(e => e.status === 'Concluído');
+
+        function renderPrazoCard(e) {
+            const d = new Date(e.prazo + 'T00:00:00');
+            const dia = d.getDate().toString().padStart(2,'0');
+            const mes = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.','');
+            const diff = Math.floor((d - hoje) / 86400000);
+            const vencido = d < hoje && e.status !== 'Concluído';
+            const resp = wsMembers.find(u => u.id === e.responsavel_id);
+            const projNome = e.sessoes?.projetos?.nome || '—';
+            const sessNome = e.sessoes?.nome || '—';
+
+            let stripClass = 'prazo-ok';
+            if (e.status === 'Concluído') stripClass = 'prazo-concluido';
+            else if (vencido) stripClass = 'prazo-vencido';
+            else if (diff <= 2) stripClass = 'prazo-urgente';
+            else if (diff <= 7) stripClass = 'prazo-proximo';
+
+            return `<div class="prazo-card ${stripClass}${vencido?' prazo-vencido':''}">
+                <div class="prazo-date-strip">
+                    <div class="ev-day">${dia}</div>
+                    <div class="ev-month">${mes}</div>
+                </div>
+                <div class="prazo-info">
+                    <div style="min-width:0">
+                        <div class="prazo-nome">${escH(e.nome)}</div>
+                        <div class="prazo-proj">📁 ${escH(projNome)} › ${escH(sessNome)}</div>
+                        ${resp ? `<div style="margin-top:4px"><span class="badge b-purple">${escH(resp.nome)}</span></div>` : ''}
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
+                        <span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>
+                        <span class="badge ${e.status==='Concluído'?'b-green':e.status==='Em andamento'?'b-amber':'b-gray'}">${e.status}</span>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        html += `<div class="eventos-section-label" style="margin-top:${(futuros.length||passados.length)?'28px':'0'}">⏰ Prazos de etapas (${pendentes.length} pendente${pendentes.length!==1?'s':''})</div>`;
+
+        if (pendentes.length) {
+            html += pendentes.map(renderPrazoCard).join('');
+        } else {
+            html += `<div style="padding:12px;color:var(--ok);font-size:.85rem;font-weight:600">✅ Todas as etapas com prazo estão concluídas!</div>`;
+        }
+
+        if (concluidas.length) {
+            html += `<div class="eventos-section-label" style="margin-top:20px">✅ Prazos concluídos (${concluidas.length})</div>`;
+            html += concluidas.map(renderPrazoCard).join('');
+        }
+    }
+
+    c.innerHTML = html;
+}
+
+function abrirModalEvento(ev=null) {
+    const nome = ev?.nome || '', desc = ev?.descricao || '';
+    const data = ev?.data || '', hora = ev?.hora ? ev.hora.slice(0,5) : '';
+    abrirModal(ev ? '✏️ Editar Evento' : '📅 Novo Evento', `
+        <div class="fg"><label class="fl">Nome do evento</label>
+            <input id="ev-nome" class="fi" value="${escH(nome)}" placeholder="Ex: Sprint Review, Reunião mensal..."/></div>
+        <div class="fg"><label class="fl">Descrição <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+            <input id="ev-desc" class="fi" value="${escH(desc)}" placeholder="Detalhes do evento..."/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="fg"><label class="fl">Data</label>
+                <input id="ev-data" type="date" class="fi" value="${data}"/></div>
+            <div class="fg"><label class="fl">Horário <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+                <input id="ev-hora" type="time" class="fi" value="${hora}"/></div>
+        </div>
+    `, [
+        { label: ev ? '💾 Salvar' : '+ Criar', cls: 'btn-p', action: ev ? `salvarEdicaoEvento(${ev.id})` : 'salvarEvento()' },
+        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
+    ]);
+}
+
+async function salvarEvento() {
+    const nome = document.getElementById('ev-nome')?.value?.trim();
+    const desc = document.getElementById('ev-desc')?.value?.trim() || null;
+    const data = document.getElementById('ev-data')?.value;
+    const hora = document.getElementById('ev-hora')?.value || null;
+    if (!nome || !data) { toast('Preencha nome e data.', 'warning'); return; }
+
+    const { error } = await sb.from('eventos').insert({
+        nome, descricao: desc, data, hora,
+        workspace_id: currentWorkspace.id, criado_por: currentUser.id
+    });
+    if (error) { toast('Erro: '+error.message, 'error'); return; }
+    await addLog(`Criou evento: ${nome}`);
+    fecharModal(); toast('Evento criado! 📅'); await carregarEventos();
+}
+
+async function editarEvento(eventoId) {
+    const { data: ev, error } = await sb.from('eventos').select('*').eq('id', eventoId).single();
+    if (error || !ev) { toast('Erro ao carregar evento.', 'error'); return; }
+    abrirModalEvento(ev);
+}
+
+async function salvarEdicaoEvento(eventoId) {
+    const nome = document.getElementById('ev-nome')?.value?.trim();
+    const desc = document.getElementById('ev-desc')?.value?.trim() || null;
+    const data = document.getElementById('ev-data')?.value;
+    const hora = document.getElementById('ev-hora')?.value || null;
+    if (!nome || !data) { toast('Preencha nome e data.', 'warning'); return; }
+
+    const { error } = await sb.from('eventos').update({ nome, descricao: desc, data, hora }).eq('id', eventoId);
+    if (error) { toast('Erro: '+error.message, 'error'); return; }
+    await addLog(`Editou evento: ${nome}`);
+    fecharModal(); toast('Evento atualizado!'); await carregarEventos();
+}
+
+async function deletarEvento(eventoId) {
+    if (!confirm('Deletar este evento?')) return;
+    const { error } = await sb.from('eventos').delete().eq('id', eventoId);
+    if (error) { toast('Erro: '+error.message, 'error'); return; }
+    await addLog('Deletou evento'); toast('Evento removido.'); await carregarEventos();
+}
+
+// ─── CONTRIBUTORS ─────────────────────────────────
 async function renderContribuidor() {
     const c = document.getElementById('contrib-container');
     c.innerHTML = '<div class="loading-c"><div class="spinner"></div></div>';
@@ -861,11 +1209,10 @@ async function renderContribuidor() {
             <div class="contrib-name">${escH(u.nome)}</div>
             <div class="contrib-user">@${u.username}</div>
             <div class="contrib-meta">
-                <span class="badge ${u.wsRole === 'admin' ? 'b-acc' : u.wsRole === 'member' ? 'b-gray' : 'b-purple'}">${u.wsRole === 'admin' ? 'Admin' : u.wsRole === 'member' ? 'Membro' : 'Visitante'}</span>
+                <span class="badge ${u.wsRole==='admin'?'b-acc':u.wsRole==='member'?'b-gray':'b-purple'}">${u.wsRole==='admin'?'Admin':u.wsRole==='member'?'Membro':'Visitante'}</span>
                 <span class="badge b-purple">Nível ${u.nivel}</span>
             </div>
-        </div>
-    `).join('')}</div>`;
+        </div>`).join('')}</div>`;
 }
 
 async function verContribuidor(userId) {
@@ -875,17 +1222,15 @@ async function verContribuidor(userId) {
     document.getElementById('cpop-name').textContent = u.nome;
     document.getElementById('cpop-user').textContent = `@${u.username}`;
     const roleOptions = ['visitor','member','admin'].map(r => `<option value="${r}" ${u.wsRole===r?'selected':''}>${r==='visitor'?'Visitante':r==='member'?'Membro':'Admin'}</option>`).join('');
-    const roleSelect = currentUserIsWorkspaceAdmin ? `<select class="fsel" onchange="alterarRole(${u.id}, this.value)">${roleOptions}</select>` : `<span class="badge ${u.wsAdmin ? 'b-acc' : 'b-gray'}">${u.wsAdmin ? 'Admin' : 'Membro'}</span>`;
+    const roleSelect = currentUserIsWorkspaceAdmin
+        ? `<select class="fsel" onchange="alterarRole(${u.id}, this.value)">${roleOptions}</select>`
+        : `<span class="badge ${u.wsAdmin?'b-acc':'b-gray'}">${u.wsAdmin?'Admin':'Membro'}</span>`;
     document.getElementById('cpop-badges').innerHTML = roleSelect;
     document.getElementById('cpop-projs').innerHTML = '<div class="spinner"></div>';
     document.getElementById('cpop-ov').classList.remove('hidden');
-
-    // Projetos do usuário neste workspace via inner join
     const { data: rows } = await sb.from('projeto_usuarios')
         .select('projetos!inner(id, nome, workspace_id)')
-        .eq('usuario_id', userId)
-        .eq('projetos.workspace_id', currentWorkspace.id);
-
+        .eq('usuario_id', userId).eq('projetos.workspace_id', currentWorkspace.id);
     const el = document.getElementById('cpop-projs');
     if (!rows?.length) { el.innerHTML = `<p style="font-size:.82rem;color:var(--muted)">Não está em nenhum projeto ainda.</p>`; return; }
     el.innerHTML = rows.map(r => `<div class="cpop-proj"><span>📁</span> ${escH(r.projetos.nome)}</div>`).join('');
@@ -895,98 +1240,23 @@ function fecharCpop() { document.getElementById('cpop-ov').classList.add('hidden
 
 async function alterarRole(userId, newRole) {
     if (!currentUserIsWorkspaceAdmin) return;
-    if (userId === currentWorkspaceCreatorId) {
-        toast('Não é possível alterar o role do criador do workspace.', 'error');
-        return;
-    }
-    if (userId === currentUser.id && newRole !== 'admin') {
-        toast('Você não pode remover seu próprio status de admin.', 'error');
-        return;
-    }
+    if (userId === currentWorkspaceCreatorId) { toast('Não é possível alterar o role do criador.', 'error'); return; }
+    if (userId === currentUser.id && newRole !== 'admin') { toast('Você não pode remover seu próprio admin.', 'error'); return; }
     const { error } = await sb.from('workspace_usuarios').update({ role: newRole }).eq('workspace_id', currentWorkspace.id).eq('usuario_id', userId);
     if (error) { toast('Erro ao alterar role.', 'error'); return; }
     toast('Role alterado com sucesso.');
-    // Recarregar wsMembers
     const { data: memberships } = await sb.from('workspace_usuarios').select('usuario_id, role').eq('workspace_id', currentWorkspace.id);
     const memberIds = memberships.map(m => m.usuario_id);
     const { data: users } = await sb.from('usuarios').select('*').in('id', memberIds);
-    wsMembers = (users || []).map(u => {
-        const membership = memberships.find(m => m.usuario_id === u.id);
-        return { ...u, wsAdmin: membership?.role === 'admin', wsRole: membership?.role || 'member' };
-    });
+    wsMembers = (users||[]).map(u => { const m = memberships.find(m => m.usuario_id===u.id); return { ...u, wsAdmin: m?.role==='admin', wsRole: m?.role||'member' }; });
     await renderContribuidor();
-    // Atualizar currentUserIsWorkspaceAdmin se for o próprio
-    if (userId === currentUser.id) {
-        currentUserIsWorkspaceAdmin = newRole === 'admin';
-        // Talvez recarregar dashboard se necessário
-    }
+    if (userId === currentUser.id) currentUserIsWorkspaceAdmin = newRole === 'admin';
 }
-// ─────  UPLOAD ARQUIVO  E RENDER──────────────────
-async function UploadArquivo(projetoId, inputElement) {
-    const files = inputElement.files;
 
-
-    if (!files.length) {
-        toast('Selecione arquivos.', 'warning');
-        return;
-    }
-    for (const file of files) {
-        const filePath = `${currentWorkspace.id}/projetos/${projetoId}/${Date.now()}-${file.name}`;
-
-        const { error } = await sb.storage
-            .from('workspace-files')
-            .upload(filePath, file);
-
-        if (error) {
-            toast(`Erro ao enviar ${file.name}`, 'error');
-            continue;
-        }
-        await sb.from('arquivos').insert({
-            nome: file.name,
-            path: filePath,
-            projeto_id: projetoId,
-            workspace_id: currentWorkspace.id,
-            criado_por: currentUser.id
-        });
-    }
-    toast('Upload concluído!');
-    inputElement.value = '';
-}
-async function CarregarArquivos(projetoId, containerElement) {
-    containerElement.innerHTML = 'Carregando...';
-
-    const { data, error } = await sb
-        .from('arquivos')
-        .select('*')
-        .eq('projeto_id', projetoId)
-        .order('created_at', { ascending: false });
-
-    if (error) {
-        containerElement.innerHTML = 'Erro ao carregar';
-        return;
-    }
-
-    if (!data.length) {
-        containerElement.innerHTML = '<div class="fhint">Sem arquivos</div>';
-        return;
-    }
-
-    containerElement.innerHTML = data.map(f => {
-        const { data: urlData } = sb.storage
-            .from('workspace-files')
-            .getPublicUrl(f.path);
-
-        return `
-        <div style="margin-top:6px">
-            📄 ${f.nome}
-            <a href="${urlData.publicUrl}" target="_blank">Abrir</a>
-        </div>`;
-    }).join('');
-}
-// ─── ADMIN: ADICIONAR COLABORADOR ─────────────────────
+// ─── ADMIN: ADICIONAR MEMBRO ──────────────────────
 function abrirModalAddMembro() {
     abrirModal('➕ Adicionar Membro', `
-        <p class="fhint" style="margin-bottom:11px">Informe o username de um usuário existente no sistema.</p>
+        <p class="fhint" style="margin-bottom:11px">Informe o username de um usuário existente.</p>
         <div class="fg"><label class="fl">Username</label><input id="m-adduser" class="fi" placeholder="username_do_usuario"/></div>
         <div id="m-add-err" class="err">Usuário não encontrado.</div>
     `, [
@@ -1001,20 +1271,15 @@ async function adicionarMembro() {
     if (!uname) return;
     const { data: user } = await sb.from('usuarios').select('id,nome,username,nivel').eq('username', uname).single();
     if (!user) { errEl.textContent='Usuário não encontrado.'; errEl.style.display='block'; return; }
-    const { data: exist } = await sb.from('workspace_usuarios')
-        .select('*').eq('workspace_id', currentWorkspace.id).eq('usuario_id', user.id).maybeSingle();
+    const { data: exist } = await sb.from('workspace_usuarios').select('*').eq('workspace_id', currentWorkspace.id).eq('usuario_id', user.id).maybeSingle();
     if (exist) { errEl.textContent='Este usuário já é membro.'; errEl.style.display='block'; return; }
-    await sb.from('workspace_usuarios').insert({
-        workspace_id: currentWorkspace.id,
-        usuario_id: user.id,
-        role: 'member'
-    });
-    wsMembers.push({ ...user, wsAdmin: false });
+    await sb.from('workspace_usuarios').insert({ workspace_id: currentWorkspace.id, usuario_id: user.id, role: 'member' });
+    wsMembers.push({ ...user, wsAdmin: false, wsRole: 'member' });
     await addLog(`Adicionou @${user.username} ao workspace`);
     fecharModal(); toast(`@${user.username} adicionado! 👋`); await renderContribuidor();
 }
 
-// ─── LOGS ────────────────────────────────────────
+// ─── LOGS ─────────────────────────────────────────
 async function addLog(msg) {
     try { await sb.from('logs').insert({ usuario_id: currentUser.id, usuario_nome: currentUser.nome, mensagem: msg, workspace_id: currentWorkspace.id }); } catch {}
 }
@@ -1022,9 +1287,7 @@ async function addLog(msg) {
 async function carregarLogs() {
     const p = document.getElementById('logs-panel');
     p.innerHTML = '<div style="color:#475569">Carregando...</div>';
-    const { data } = await sb.from('logs').select('*')
-        .eq('workspace_id', currentWorkspace.id)
-        .order('created_at', { ascending: false }).limit(200);
+    const { data } = await sb.from('logs').select('*').eq('workspace_id', currentWorkspace.id).order('created_at', { ascending: false }).limit(200);
     if (!data?.length) { p.innerHTML='<div style="color:#475569">Nenhum log.</div>'; return; }
     p.innerHTML = data.map(l => `<div class="log-e">
         <span class="lt">[${new Date(l.created_at).toLocaleString('pt-BR')}]</span>
@@ -1033,7 +1296,7 @@ async function carregarLogs() {
     </div>`).join('');
 }
 
-// ─── NOTAS ───────────────────────────────────────
+// ─── NOTAS ────────────────────────────────────────
 function carregarNotas() {
     const stored = localStorage.getItem(notesStorageKey());
     notes = stored ? JSON.parse(stored) : [];
@@ -1059,15 +1322,13 @@ function renderNotes() {
 }
 
 function abrirModalNota(note=null) {
-    const title = note?.title || '';
-    const content = note?.content || '';
+    const title = note?.title || '', content = note?.content || '';
     pendingNoteAttachments = note?.attachments ? [...note.attachments] : [];
-    const previewHtml = renderAttachmentPreview();
     abrirModal(note ? '📝 Editar Nota' : '📝 Nova Nota', `
         <div class="fg"><label class="fl">Título</label><input id="m-note-title" class="fi" value="${escH(title)}" placeholder="Ex: Brainstorm"/></div>
         <div class="fg"><label class="fl">Conteúdo</label><textarea id="m-note-body" class="fta" style="min-height:130px" placeholder="Descreva sua ideia...">${escH(content)}</textarea></div>
         <div class="fg"><label class="fl">Anexar imagens</label><input id="m-note-files" class="fi" type="file" accept="image/*" multiple onchange="previewNoteFiles(event)"/></div>
-        <div id="m-note-files-preview">${previewHtml}</div>
+        <div id="m-note-files-preview">${renderAttachmentPreview()}</div>
     `, [
         { label: note ? 'Salvar' : 'Criar', cls: 'btn-p', action: `salvarNota(${note?.id})` },
         { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
@@ -1082,50 +1343,33 @@ function renderAttachmentPreview() {
 function previewNoteFiles(event) {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
-
-    const readers = files.map(file => new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.readAsDataURL(file);
-    }));
-
-    Promise.all(readers).then(results => {
+    Promise.all(files.map(f => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); }))).then(results => {
         pendingNoteAttachments = pendingNoteAttachments.concat(results.filter(Boolean));
         document.getElementById('m-note-files-preview').innerHTML = renderAttachmentPreview();
     });
 }
 
-function salvarNota(id = null) {
+function salvarNota(id=null) {
     const title = document.getElementById('m-note-title')?.value?.trim();
     const content = document.getElementById('m-note-body')?.value?.trim();
     if (!title && !content) { toast('Informe título ou conteúdo.', 'warning'); return; }
-
     const now = new Date().toISOString();
     if (id) {
-        notes = notes.map(n => n.id === id ? { ...n, title, content, attachments: pendingNoteAttachments, updated_at: now } : n);
+        notes = notes.map(n => n.id===id ? { ...n, title, content, attachments: pendingNoteAttachments, updated_at: now } : n);
         toast('Nota atualizada.');
     } else {
-        notes.push({
-            id: Date.now(),
-            title,
-            content,
-            attachments: pendingNoteAttachments,
-            created_at: now,
-            updated_at: now
-        });
+        notes.push({ id: Date.now(), title, content, attachments: pendingNoteAttachments, created_at: now, updated_at: now });
         toast('Nota criada!');
     }
     localStorage.setItem(notesStorageKey(), JSON.stringify(notes));
-    fecharModal();
-    renderNotes();
+    fecharModal(); renderNotes();
 }
 
 function verNota(id) {
-    const note = notes.find(n => n.id === id);
-    if (!note) return;
+    const note = notes.find(n => n.id===id); if (!note) return;
     abrirModal('📝 Visualizar Nota', `
-        <div class="fg"><label class="fl">Título</label><div style="padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface)">${escH(note.title)}</div></div>
-        <div class="fg"><label class="fl">Conteúdo</label><div style="padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);min-height:120px">${escH(note.content)}</div></div>
+        <div class="fg"><label class="fl">Título</label><div style="padding:12px 14px;border:1px solid var(--border);border-radius:12px">${escH(note.title)}</div></div>
+        <div class="fg"><label class="fl">Conteúdo</label><div style="padding:12px 14px;border:1px solid var(--border);border-radius:12px;min-height:120px">${escH(note.content)}</div></div>
         ${note.attachments?.length ? `<div class="fg"><label class="fl">Anexos</label><div class="note-att">${note.attachments.map(a => `<div class="note-attach"><img src="${a}" alt="Anexo"/></div>`).join('')}</div></div>` : ''}
     `, [
         { label: 'Editar', cls: 'btn-p', action: `fecharModal(); abrirModalNota(notes.find(n => n.id === ${id}))` },
@@ -1135,56 +1379,43 @@ function verNota(id) {
 }
 
 function deletarNota(id) {
-    notes = notes.filter(n => n.id !== id);
+    notes = notes.filter(n => n.id!==id);
     localStorage.setItem(notesStorageKey(), JSON.stringify(notes));
-    renderNotes();
-    toast('Nota removida.');
+    renderNotes(); toast('Nota removida.');
 }
-// ─── FERRAMENTAS LOAD ───────────────────────────────────────
+
+// ─── FERRAMENTAS ──────────────────────────────────
 async function carregarFerramentas() {
     const container = document.getElementById('ferramentas-container');
     container.innerHTML = '<div class="loading-c"><div class="spinner"></div></div>';
-
     try {
         const res = await fetch('Ferramentas/ferramentas.json');
         const tools = await res.json();
-
-        if (!tools.length) {
-            container.innerHTML = '<div class="empty-state">Nenhuma ferramenta encontrada</div>';
-            return;
-        }
-
+        if (!tools.length) { container.innerHTML = '<div class="empty-state">Nenhuma ferramenta encontrada</div>'; return; }
         container.innerHTML = tools.map(t => `
             <div class="note-card" onclick="abrirFerramenta('${t.path}')">
                 <div class="note-title">${t.icone || '🛠️'} ${t.nome}</div>
                 <div class="note-meta">Clique para abrir</div>
-            </div>
-        `).join('');
-
-    } catch (err) {
+            </div>`).join('');
+    } catch {
         container.innerHTML = '<div class="empty-state">Erro ao carregar ferramentas</div>';
     }
 }
 
-function abrirFerramenta(path) {
-    window.open(path, '_blank');
-}
-// ─── MODAL ───────────────────────────────────────
+function abrirFerramenta(path) { window.open(path, '_blank'); }
+
+// ─── MODAL ────────────────────────────────────────
 function abrirModal(title, body, buttons=[]) {
-    const modalTitle = document.getElementById('m-title');
-    const modalBody = document.getElementById('m-body');
-    const modalFoot = document.getElementById('m-foot');
-    modalTitle.textContent = title;
-    modalBody.innerHTML = body;
-    modalFoot.innerHTML = buttons.map(b =>
-        `<button class="btn ${b.cls}" ${b.style ? `style="${b.style}"` : ''} onclick="${b.action}">${b.label}</button>`
-    ).join('');
+    document.getElementById('m-title').textContent = title;
+    document.getElementById('m-body').innerHTML = body;
+    document.getElementById('m-foot').innerHTML = buttons.map(b =>
+        `<button class="btn ${b.cls}" ${b.style?`style="${b.style}"`:''} onclick="${b.action}">${b.label}</button>`).join('');
     document.getElementById('modal-ov').classList.remove('hidden');
 }
 
 function fecharModal() { document.getElementById('modal-ov').classList.add('hidden'); }
 
-// ─── TOAST ───────────────────────────────────────
+// ─── TOAST ────────────────────────────────────────
 function toast(msg, type='success') {
     const t = document.createElement('div');
     t.className = `toast ${type==='error'?'error':type==='warning'?'warning':''}`;
@@ -1192,64 +1423,17 @@ function toast(msg, type='success') {
     document.getElementById('toast-ctr').appendChild(t);
     setTimeout(() => t.remove(), 4000);
 }
-// ─── EVENTOS so em JS por enquanto     ───────────────────────────────────────
-let eventos = [];
 
-function criarEvento() {
-    abrirModal('📅 Novo Evento', `
-        <div class="fg">
-            <label class="fl">Nome</label>
-            <input id="ev-nome" class="fi">
-        </div>
-        <div class="fg">
-            <label class="fl">Data</label>
-            <input id="ev-data" type="date" class="fi">
-        </div>
-    `, [
-        { label: 'Criar', cls: 'btn-p', action: 'salvarEvento()' },
-        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
-    ]);
+// ─── UTILS ────────────────────────────────────────
+function escH(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
-function salvarEvento() {
-    const nome = document.getElementById('ev-nome').value;
-    const data = document.getElementById('ev-data').value;
-
-    if (!nome || !data) {
-        toast('Preencha tudo', 'warning');
-        return;
-    }
-
-    eventos.push({ nome, data });
-    fecharModal();
-    renderEventos();
-}
-
-function renderEventos() {
-    const container = document.getElementById('eventos-container');
-
-    if (!eventos.length) {
-        container.innerHTML = `<div class="empty-state">Sem eventos</div>`;
-        return;
-    }
-
-    container.innerHTML = eventos.map(e => `
-        <div class="proj-card">
-            <div class="proj-hdr">
-                <div class="proj-name">📅 ${e.nome}</div>
-                <div class="badge b-acc">${e.data}</div>
-            </div>
-        </div>
-    `).join('');
-}
-// ─── UTILS ───────────────────────────────────────
-function escH(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function userColor(name) {
     const colors = ['#4f46e5','#7c3aed','#ec4899','#f59e0b','#10b981','#ef4444','#8b5cf6','#06b6d4'];
     return colors[name.charCodeAt(0) % colors.length];
 }
 function initials(name) { return name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2); }
 </script>
-
 </body>
 </html>
