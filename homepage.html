@@ -372,7 +372,6 @@ function renderNavProfile() {
     document.getElementById('nav-name').textContent = currentUser.nome.split(' ')[0];
     document.getElementById('pd-name').textContent  = currentUser.nome;
     document.getElementById('pd-user').textContent  = '@'+currentUser.username;
-   // document.getElementById('pd-level').innerHTML   = `<span class="badge ${LEVEL_CLS[currentUser.nivel]||'b-level-0'}">${LEVEL_LABELS[currentUser.nivel]||'Usuário'}</span>`;
     const hn = document.getElementById('hero-name');
     if (hn) hn.textContent = `, ${currentUser.nome.split(' ')[0]}`;
 }

@@ -366,6 +366,7 @@
                 <div>
                     <div class="un" id="sb-uname">—</div>
                     <div class="ur" id="sb-urole">—</div>
+                    <div class="ur">1.5.7</div>
                 </div>
                 <button id="bell-btn" class="bell-btn hidden" onclick="abrirNotificacoes()" title="Notificações">🔔</button>
             </div>
@@ -890,7 +891,7 @@ async function editarSessao(sessId, projId) {
     abrirModal('✏️ Editar Seção', `
         <div class="fg"><label class="fl">Nome</label><input id="m-snome-edit" class="fi" value="${escH(sess.nome)}"/></div>
         <div class="fg"><label class="fl">Descrição</label><input id="m-sdesc-edit" class="fi" value="${escH(sess.descricao||'')}"/></div>
-        <div class="fg"><label class="fl">Colaboradores</label>
+        <div class="fg"><label class="fl">Colaborador</label>
             <select id="m-susers-edit" class="fsel" multiple>${opts}</select>
             <p class="fhint">Ctrl/Cmd para múltiplos.</p></div>
     `, buttons);
