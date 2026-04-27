@@ -291,7 +291,6 @@
                 <div class="pd-header">
                     <div class="pd-name" id="pd-name">—</div>
                     <div class="pd-user" id="pd-user">—</div>
-                    <div class="pd-level" id="pd-level"></div>
                 </div>
                 <button class="pd-item" onclick="abrirPerfil()">👤 &nbsp;Ver Perfil</button>
                 <button class="pd-item" onclick="abrirModalCriarWorkspace()">✦ &nbsp;Novo Workspace</button>
@@ -544,11 +543,10 @@ function abrirPerfil() {
             <div class="profile-modal-av" style="background:${color}">${initials(currentUser.nome)}</div>
             <div style="font-weight:700;font-size:1.05rem;margin-bottom:3px">${escH(currentUser.nome)}</div>
             <div style="font-family:var(--mono);font-size:.76rem;color:var(--muted2);margin-bottom:9px">@${escH(currentUser.username)}</div>
-            <span class="badge ${LEVEL_CLS[currentUser.nivel]||'b-level-0'}">${LEVEL_LABELS[currentUser.nivel]||'Usuário'}</span>
         </div>
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rsm);padding:13px 15px;margin-top:13px;font-size:.8rem;color:var(--muted2);display:flex;flex-direction:column;gap:8px">
             <div style="display:flex;justify-content:space-between"><span>ID</span><span style="font-family:var(--mono);color:var(--text)">#${currentUser.id}</span></div>
-            <div style="display:flex;justify-content:space-between"><span>Membro desde</span><span style="color:var(--text)">${new Date(currentUser.created_at).toLocaleDateString('pt-BR')}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>criação da conta  </span><span style="color:var(--text)">${new Date(currentUser.created_at).toLocaleDateString('pt-BR')}</span></div>
         </div>
     `, [{ label: 'Fechar', cls: 'btn-ghost', action: fecharModal }]);
 }
