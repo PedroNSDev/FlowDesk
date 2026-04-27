@@ -88,7 +88,11 @@
         .proj-hdr.done{background:var(--session-done-header);color:#fff}
         .proj-hdr.done:hover{background:var(--session-done-header)}
         .proj-name{font-weight:700;font-size:1.05rem;display:flex;align-items:center;gap:10px;flex:1;padding:8px 0}
-        .proj-body{padding:0 19px 17px;border-top:1px solid var(--border)}
+        .proj-body{padding:0 19px 17px;border-top:1px solid var(--border);  background:linear-gradient(
+    to bottom,
+    rgba(71,85,105,.08),
+    rgba(71,85,105,.11)
+  );;margin-top:15px}
         .proj-desc{font-size:.8rem;color:var(--muted);padding:10px 0 7px}
         .sess-box{background:#f8fafc;border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:9px;overflow:hidden}
         .sess-box.done{background:var(--session-done);border-color:var(--session-done-header)}
@@ -137,7 +141,7 @@
         .cpop-x:hover{background:var(--bg)}
 
         /* ── LOGS ── */
-        .logs-panel{background:#0d1117;border-radius:var(--r);padding:18px;font-family:var(--mono);font-size:.77rem;color:#8b949e;max-height:500px;overflow-y:auto;line-height:1.65}
+        .logs-panel{background:#212224;border-radius:var(--r);padding:18px;font-family:var(--mono);font-size:.77rem;color:#8b949e;max-height:500px;overflow-y:auto;line-height:1.65}
         .log-e{padding:4px 0;border-bottom:1px solid #161b22} .log-e:last-child{border-bottom:none}
         .lt{color:#3fb950} .lu{color:#58a6ff} .lm{color:#f0f6fc}
 
@@ -339,11 +343,13 @@
         <div class="sb-sec">Principal</div>
         <button id="nav-home"           class="nav-btn active" onclick="switchTab('home')"><span class="ni">🏠</span> Início</button>
         <button id="nav-projetos"       class="nav-btn"        onclick="switchTab('projetos')"><span class="ni">📁</span> Projetos</button>
+        <button id="nav-eventos"        class="nav-btn"        onclick="switchTab('eventos')"><span class="ni">📅</span> Agenda</button>
         <button id="nav-progresso"      class="nav-btn"        onclick="switchTab('progresso')"><span class="ni">📊</span> Progresso</button>
         <button id="nav-contribuidores" class="nav-btn"        onclick="switchTab('contribuidores')"><span class="ni">👥</span> Colaboradores</button>
+         <hr class="sb-div">
+        <div class="sb-sec">Arquivos</div>
         <button id="nav-anotacoes"      class="nav-btn"        onclick="switchTab('anotacoes')"><span class="ni">📝</span> Anotações</button>
-        <button id="nav-arquivos"       class="nav-btn"        onclick="switchTab('arquivos')"><span class="ni">📂</span> Arquivos</button>
-        <button id="nav-eventos"        class="nav-btn"        onclick="switchTab('eventos')"><span class="ni">📅</span> Eventos</button>
+        <button id="nav-arquivos"       class="nav-btn"        onclick="switchTab('arquivos')"><span class="ni">📂</span> Anexos</button>
         <button id="nav-ferramentas"    class="nav-btn"        onclick="switchTab('ferramentas')"><span class="ni">🛠️</span> Ferramentas</button>
 
         <hr class="sb-div">
@@ -404,7 +410,7 @@
         <!-- ARQUIVOS -->
         <div id="tab-arquivos" class="tab-c">
             <div class="ph">
-                <div><div class="pt">Arquivos</div><div class="ps">Gerencie pastas e arquivos do workspace</div></div>
+                <div><div class="pt">Anexos</div><div class="ps">Gerencie pastas e arquivos do workspace</div></div>
                 <div style="display:flex;gap:8px">
                     <button class="btn btn-s btn-sm" onclick="abrirModalPasta()">📁 Nova Pasta</button>
                     <button class="btn btn-p btn-sm" onclick="abrirModalUpload()">⬆️ Upload</button>
@@ -533,7 +539,7 @@
     <!-- Filtros de tipo -->
     <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap">
         <button class="notif-filter-btn active" data-tipo="" onclick="filtrarNotif(this,'')">Todas</button>
-        <button class="notif-filter-btn" data-tipo="upload"  onclick="filtrarNotif(this,'upload')">📎 Arquivos</button>
+        <button class="notif-filter-btn" data-tipo="upload"  onclick="filtrarNotif(this,'upload')">🔗 Arquivos</button>
         <button class="notif-filter-btn" data-tipo="membro"  onclick="filtrarNotif(this,'membro')">👥 Membros</button>
         <button class="notif-filter-btn" data-tipo="evento"  onclick="filtrarNotif(this,'evento')">📅 Eventos</button>
         <button class="notif-filter-btn" data-tipo="geral"   onclick="filtrarNotif(this,'geral')">💬 Geral</button>
@@ -730,7 +736,7 @@ function renderProj(p) {
             ${p.descricao ? `<p class="proj-desc">${escH(p.descricao)}</p>` : ''}
             ${(p.sessoes||[]).map(s => renderSess(p.id, s)).join('')}
             ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="abrirModalSessao(${p.id})">+ Seção</button>` : ''}
-            <button class="btn btn-s btn-sm" style="margin-left:6px" onclick="irParaAnexosProjeto(${p.id})">📎 Anexos do Projeto</button>
+            <button class="btn btn-s btn-sm" style="margin-left:6px" onclick="irParaAnexosProjeto(${p.id})">🔗 Anexos do Projeto</button>
         </div>
     </div>`;
 }
@@ -752,8 +758,8 @@ function renderSess(pId, s) {
         </div>
         <div id="sb-${s.id}" class="sess-body">
             ${colabs ? `<div class="colab-list">${colabs}</div>` : ''}
-            <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
-                ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarSessao(${s.id}, ${pId})">✏️ Editar</button>` : ''}
+            <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:flex-end">
+                ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarSessao(${s.id}, ${pId})">✏️</button>` : ''}
             </div>
             ${(s.etapas||[]).map(e => renderEtapa(pId, s.id, e)).join('')}
             ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" style="margin-top:5px" onclick="abrirModalEtapa(${pId}, ${s.id})">+ Etapa</button>` : ''}
@@ -1320,7 +1326,7 @@ function renderArkPastas() {
     const projsComArquivos = wsProjetos.filter(p => arkProjFiles[p.id] > 0);
 
     let html = `<button class="ark-pasta-btn ${arkPastaAtual===null?'active':''}" onclick="navPasta(null)">
-        <span>🗂</span> <span style="flex:1">Todos os arquivos</span>
+        <span>🗂</span> <span style="flex:1">Todos os Anexos</span>
     </button>`;
 
     // ── Seção: Anexos de Projeto ──────────────────
@@ -1688,7 +1694,7 @@ async function executarUpload() {
 
     if (sucesso) {
         await addLog('upload', 'arquivo', null, { quantidade: sucesso, destino: destino || 'raiz' });
-        await pushNotificacao('📎', `${currentUser.nome} enviou ${sucesso} arquivo(s) ao workspace.`);
+        await pushNotificacao('🔗', `${currentUser.nome} enviou ${sucesso} arquivo(s) ao workspace.`);
     }
     if (erroMsgs.length) console.error('Upload errors:', erroMsgs);
 
@@ -1699,7 +1705,7 @@ async function executarUpload() {
 
     setTimeout(async () => {
         fecharModal();
-        toast(sucesso ? `${sucesso} arquivo(s) enviado(s)! 📎` : 'Nenhum arquivo enviado.', sucesso ? 'success' : 'warning');
+        toast(sucesso ? `${sucesso} arquivo(s) enviado(s)! 🔗` : 'Nenhum arquivo enviado.', sucesso ? 'success' : 'warning');
         await carregarArquivosWorkspace();
         if (projIdOriginal) navPasta(`proj_${projIdOriginal}`);
         else if (pastaIdOriginal) navPasta(pastaIdOriginal);
@@ -1778,6 +1784,57 @@ function prazoLabel(prazo, status) {
 }
 
 // ─── EVENTOS ──────────────────────────────────────
+function gerarCalendario(eventos) {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = hoje.getMonth();
+
+    const primeiroDia = new Date(ano, mes, 1);
+    const ultimoDia = new Date(ano, mes + 1, 0);
+
+    const startWeekDay = primeiroDia.getDay(); // 0=domingo
+    const totalDias = ultimoDia.getDate();
+
+    // ── Indexar eventos por data ──
+    const eventosPorDia = {};
+    eventos.forEach(e => {
+        const key = e.data; 
+        if (!eventosPorDia[key]) eventosPorDia[key] = [];
+        eventosPorDia[key].push(e);
+    });
+
+    let html = `<div class="calendar">`;
+
+    // HEADER
+    const diasSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+    html += `<div class="cal-header">` +
+        diasSemana.map(d => `<div>${d}</div>`).join('') +
+    `</div>`;
+
+    html += `<div class="cal-grid">`;
+    for (let i = 0; i < startWeekDay; i++) {
+        html += `<div class="cal-day empty"></div>`;
+    }
+    for (let d = 1; d <= totalDias; d++) {
+        const dataStr = `${ano}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const temEvento = eventosPorDia[dataStr];
+
+        let tooltip = '';
+        if (temEvento) {
+            tooltip = temEvento.map(ev => escH(ev.nome)).join(' | ');
+        }
+
+        html += `
+        <div class="cal-day ${temEvento ? 'has-event' : ''}">
+            <span>${d}</span>
+            ${temEvento ? `<div class="tooltip">${tooltip}</div>` : ''}
+        </div>`;
+    }
+
+    html += `</div></div>`;
+
+    return html;
+}
 async function carregarEventos() {
     const c = document.getElementById('eventos-container');
     c.innerHTML = '<div class="loading-c"><div class="spinner"></div></div>';
@@ -1804,7 +1861,7 @@ function renderEventos(eventos, etapasComPrazo) {
     const hoje = new Date(); hoje.setHours(0,0,0,0);
 
     // ── Seção de Eventos ──────────────────────────
-    let html = '';
+    let html = ''
     const futuros = eventos.filter(e => new Date(e.data + 'T00:00:00') >= hoje);
     const passados = eventos.filter(e => new Date(e.data + 'T00:00:00') < hoje);
 
