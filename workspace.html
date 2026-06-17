@@ -1310,7 +1310,7 @@ async function carregarArquivosWorkspace() {
     );
 
     // Contar arquivos por projeto
-    arkProjFiles = {};
+    arkProjFiles = {}; 
     (projArqs || []).forEach(a => {
         arkProjFiles[a.projeto_id] = (arkProjFiles[a.projeto_id] || 0) + 1;
     });
@@ -1490,7 +1490,6 @@ async function deletarArquivo2(arquivoId, path) {
     await carregarArquivosWorkspace(); // recarrega contagens + sidebar
 }
 
-// Upload rápido dentro da visualização de projeto na aba Arquivos
 async function uploadParaProjeto(projetoId, input) {
     const files = Array.from(input?.files || []);
     if (!files.length) return;
@@ -1512,7 +1511,6 @@ async function uploadParaProjeto(projetoId, input) {
     navPasta(`proj_${projetoId}`);
 }
 
-// Compatibilidade (chamado de dentro de cards de projeto na aba Projetos — removido, mas mantido por segurança)
 async function deletarArquivo(arquivoId, path, projetoId) {
     if (!confirm('Deletar este arquivo permanentemente?')) return;
     await sb.storage.from('workspace-files').remove([path]);
@@ -1636,15 +1634,13 @@ async function executarUpload() {
     if (destino.startsWith('proj_'))  projetoId = parseInt(destino.replace('proj_',''));
     if (destino.startsWith('pasta_')) pastaId   = parseInt(destino.replace('pasta_',''));
 
-    // ── FIX: projeto_id é NOT NULL no banco.
-    // Quando o destino é raiz ou pasta (sem projeto), usamos o primeiro projeto
-    // do workspace como referência interna. Se não houver nenhum projeto, bloqueamos.
+
     if (!projetoId) {
         if (!wsProjetos.length) {
             toast('Crie ao menos um projeto antes de enviar arquivos para a raiz ou pasta.', 'warning');
             return;
         }
-        // Projeto sentinela: usa o primeiro projeto do workspace para satisfazer o NOT NULL
+    
         projetoId = wsProjetos[0].id;
     }
 
@@ -1714,7 +1710,7 @@ async function executarUpload() {
     }, 700);
 }
 
-// Upload de projeto (mantido compatível)
+// Upload de projeto 
 async function uploadArquivoProjeto(projetoId) {
     const input = document.getElementById(`proj-file-input-${projetoId}`);
     const files = Array.from(input?.files || []);
@@ -1757,7 +1753,6 @@ async function carregarArquivosProjeto(projetoId) {
     }).join('');
 }
 
-// Manter compatibilidade com popularSelectProjetos (ainda usada no home)
 function popularSelectProjetos() {}
 
 // ─── HELPERS DE PRAZO ─────────────────────────────
@@ -2106,21 +2101,20 @@ async function adicionarMembro() {
     fecharModal(); toast(`@${user.username} adicionado! 👋`); await renderContribuidor();
 }
 
-// ─── LOGS (estruturado) ───────────────────────────
+// ─── LOGS (re-estruturado) ───────────────────────────
 // SQL necessário para ativar logs estruturados:
 // ALTER TABLE logs ADD COLUMN IF NOT EXISTS acao varchar(50);
 // ALTER TABLE logs ADD COLUMN IF NOT EXISTS entidade varchar(50);
 // ALTER TABLE logs ADD COLUMN IF NOT EXISTS entidade_id bigint;
 // ALTER TABLE logs ADD COLUMN IF NOT EXISTS payload jsonb;
 // ALTER TABLE logs ADD COLUMN IF NOT EXISTS ip_address text;
-//
 // addLog(acao, entidade?, entidade_id?, payload?)
 // Exemplos:
 //   addLog('upload',  'arquivo',  null,   { quantidade: 3, destino: 'raiz' })
 //   addLog('create',  'projeto',  proj.id, { nome: proj.nome })
 //   addLog('delete',  'etapa',    etapa.id)
 //   addLog('login',   'usuario',  user.id)
-
+    
 const LOG_ACOES = {
     'login':'Login', 'logout':'Logout', 'create':'Criação', 'update':'Edição',
     'delete':'Exclusão', 'upload':'Upload', 'download':'Download',
