@@ -83,24 +83,41 @@
         /* ── PROJECT CARD ── */
         .proj-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);margin-bottom:13px;overflow:hidden}
         .proj-card.done{background:var(--session-done);border-color:var(--session-done-header)}
-        .proj-hdr{display:flex;justify-content:space-between;align-items:center;padding:15px 19px;cursor:pointer;transition:background .1s}
+        .proj-hdr{display:flex;justify-content:space-between;align-items:center;padding:20px 22px;cursor:pointer;transition:background .1s}
         .proj-hdr:hover{background:#f8fafc}
         .proj-hdr.done{background:var(--session-done-header);color:#fff}
         .proj-hdr.done:hover{background:var(--session-done-header)}
-        .proj-name{font-weight:700;font-size:1.05rem;display:flex;align-items:center;gap:10px;flex:1;padding:8px 0}
+        .proj-name{font-weight:700;font-size:1.05rem;display:flex;align-items:center;gap:10px;flex:1;padding:10px 0}
+        .proj-card .btn{min-height:42px;padding:10px 14px}
+        .proj-hdr .btn{min-height:42px;padding:10px 14px}
         .proj-body{padding:0 19px 17px;border-top:1px solid var(--border);  background:linear-gradient(
     to bottom,
     rgba(71,85,105,.08),
     rgba(71,85,105,.11)
   );;margin-top:15px}
         .proj-desc{font-size:.8rem;color:var(--muted);padding:10px 0 7px}
-        .sess-box{background:#f8fafc;border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:9px;overflow:hidden}
+        .proj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+        .proj-grid .proj-card{width:100%}
+        .proj-grid .proj-card.selected{border-color:var(--acc);box-shadow:0 10px 24px rgba(79,70,229,.14)}
+        .proj-grid .proj-card.selected .proj-body{display:block}
+        .proj-grid .proj-body{display:none}
+        .proj-grid .proj-hdr{cursor:pointer}
+        .proj-grid .chev.open{transform:rotate(90deg)}
+        .proj-view-switch{display:flex;border:1px solid var(--border);border-radius:999px;overflow:hidden;background:#fff}
+        .proj-view-switch .btn{border-radius:0;margin:0;min-width:92px}
+        .proj-view-switch .btn:first-child{border-radius:999px 0 0 999px}
+        .proj-view-switch .btn:last-child{border-radius:0 999px 999px 0}
+        .proj-view-switch .btn.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+        .proj-view-switch .btn:not(.active){background:transparent;color:var(--text);border:none}
+        .proj-desc{font-size:.8rem;color:var(--muted);padding:10px 0 7px}
+        .sess-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:0 -9px 0 -9px}
+        .sess-box{background:#f8fafc;border:1px solid var(--border);border-radius:var(--rsm);overflow:hidden}
         .sess-box.done{background:var(--session-done);border-color:var(--session-done-header)}
         .sess-hdr.done{background:var(--session-done-header);color:#fff}
         .sess-hdr{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;cursor:pointer;transition:background .1s}
         .sess-hdr:hover{background:#f1f5f9}
         .sess-name{font-weight:600;font-size:.87rem;display:flex;align-items:center;gap:6px}
-        .sess-body{padding:9px 13px 13px}
+        .sess-body{padding:9px 13px 13px;display:none}
         .step-item{background:#fff;border:1px solid var(--border);border-radius:var(--rsm);padding:10px 12px;margin-bottom:6px;display:flex;align-items:flex-start;gap:10px;transition:box-shadow .15s}
         .step-item:hover{box-shadow:var(--sh)}
         .step-item.done{background:var(--session-done);border-color:var(--session-done-header)}
@@ -143,6 +160,8 @@
         /* ── LOGS ── */
         .logs-panel{background:#212224;border-radius:var(--r);padding:18px;font-family:var(--mono);font-size:.77rem;color:#8b949e;max-height:500px;overflow-y:auto;line-height:1.65}
         .log-e{padding:4px 0;border-bottom:1px solid #161b22} .log-e:last-child{border-bottom:none}
+        .log-group{margin-bottom:18px}
+        .log-group-title{font-size:.82rem;font-weight:700;color:#f8fafc;margin-bottom:10px}
         .lt{color:#3fb950} .lu{color:#58a6ff} .lm{color:#f0f6fc}
 
         /* ── NOTES ── */
@@ -382,9 +401,16 @@
 
         <!-- PROJETOS -->
         <div id="tab-projetos" class="tab-c">
-            <div class="ph">
+            <div class="ph" style="align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
                 <div><div class="pt">Projetos</div><div class="ps">Projetos do workspace atual</div></div>
-                <button id="btn-novo-proj" class="btn btn-p hidden" onclick="abrirModalProjeto()">+ Novo Projeto</button>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <button id="proj-back-btn" class="btn btn-s btn-sm hidden" onclick="exitProjFocus()">← Voltar</button>
+                    <div class="proj-view-switch">
+                        <button id="proj-view-list" class="btn btn-s btn-sm active" onclick="setProjetosViewMode('list')">Lista</button>
+                        <button id="proj-view-grid" class="btn btn-s btn-sm" onclick="setProjetosViewMode('grid')">Grade</button>
+                    </div>
+                    <button id="btn-novo-proj" class="btn btn-p hidden" onclick="abrirModalProjeto()">+ Novo Projeto</button>
+                </div>
             </div>
             <div id="pinned-notice"></div>
             <div id="projetos-container">
@@ -486,6 +512,7 @@
                     <option value="role_change">Papel</option>
                     <option value="aviso">Recado</option>
                     <option value="status_change">Status</option>
+                    <option value="prazo">Prazo</option>
                 </select>
                 <select id="log-filtro-usuario" class="fsel" style="width:auto;padding:6px 10px;font-size:.8rem;border-radius:8px" onchange="logFiltroUsuario=this.value;carregarLogs()">
                     <option value="">Todos os usuários</option>
@@ -563,10 +590,80 @@ let wsProjetos = [];
 let avisoAtivo = null;
 let currentUserCanEdit = false;
 let currentUserIsWorkspaceAdmin = false;
+let projetosViewMode = 'list';
+let selectedProjetoId = null;
 let notes = [];
 let pendingNoteAttachments = [];
 const NOTES_KEY_BASE = 'fd-notes';
 function notesStorageKey() { return `${NOTES_KEY_BASE}-${currentWorkspace?.codigo||'global'}`; }
+
+function setProjetosViewMode(mode) {
+    projetosViewMode = mode === 'grid' ? 'grid' : 'list';
+    if (projetosViewMode === 'list') selectedProjetoId = null;
+    applyProjetosViewMode();
+}
+
+function applyProjetosViewMode() {
+    const container = document.getElementById('projetos-container');
+    const backBtn = document.getElementById('proj-back-btn');
+    if (!container) return;
+    const showBack = projetosViewMode === 'grid' && selectedProjetoId !== null;
+    if (backBtn) backBtn.classList.toggle('hidden', !showBack);
+
+    container.classList.toggle('proj-grid', projetosViewMode === 'grid');
+    container.classList.toggle('proj-list', projetosViewMode === 'list');
+
+    container.querySelectorAll('.proj-card').forEach(card => {
+        const body = card.querySelector('.proj-body');
+        const chev = card.querySelector('.chev');
+        const thisId = Number(card.dataset.proj);
+        const isSelected = selectedProjetoId === thisId;
+
+        if (projetosViewMode === 'grid' && selectedProjetoId !== null) {
+            card.style.display = isSelected ? '' : 'none';
+        } else {
+            card.style.display = '';
+        }
+
+        if (!body || !chev) return;
+
+        if (projetosViewMode === 'grid') {
+            if (selectedProjetoId !== null && isSelected) {
+                body.style.display = 'block';
+                chev.classList.add('open');
+                card.classList.add('selected');
+            } else {
+                body.style.display = 'none';
+                chev.classList.remove('open');
+                card.classList.remove('selected');
+            }
+        } else {
+            body.style.display = 'block';
+            chev.classList.remove('open');
+            card.classList.remove('selected');
+        }
+    });
+
+    const btnList = document.getElementById('proj-view-list');
+    const btnGrid = document.getElementById('proj-view-grid');
+    if (btnList) btnList.classList.toggle('active', projetosViewMode === 'list');
+    if (btnGrid) btnGrid.classList.toggle('active', projetosViewMode === 'grid');
+}
+
+function onProjHeaderClick(projId) {
+    if (projetosViewMode !== 'grid') {
+        toggleSec(`pb-${projId}`, `pc-${projId}`);
+        return;
+    }
+    if (selectedProjetoId === projId) return;
+    selectedProjetoId = projId;
+    applyProjetosViewMode();
+}
+
+function exitProjFocus() {
+    selectedProjetoId = null;
+    applyProjetosViewMode();
+}
 
 // ─── INIT ─────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -717,14 +814,15 @@ async function renderizarProjetos() {
     if (error) { c.innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><h3>Erro</h3><p>${escH(error.message)}</p></div>`; return; }
     if (!projs?.length) { c.innerHTML=`<div class="empty-state"><div class="ei">📁</div><h3>Nenhum projeto ainda</h3><p>Clique em "+ Novo Projeto" para começar.</p></div>`; return; }
     c.innerHTML = projs.map(renderProj).join('');
+    applyProjetosViewMode();
 }
 
 function renderProj(p) {
     const total = (p.sessoes||[]).reduce((a,s) => a+(s.etapas||[]).length, 0);
     const allSessionsComplete = (p.sessoes||[]).length > 0 && (p.sessoes||[]).every(s => (s.etapas||[]).length > 0 && (s.etapas||[]).every(e => e.status === 'Concluído'));
     const doneClass = allSessionsComplete ? ' done' : '';
-    return `<div class="proj-card${doneClass}">
-        <div class="proj-hdr${doneClass}" onclick="toggleSec('pb-${p.id}','pc-${p.id}')">
+    return `<div class="proj-card${doneClass}" data-proj="${p.id}">
+        <div class="proj-hdr${doneClass}" onclick="onProjHeaderClick(${p.id})">
             <span class="chev open" id="pc-${p.id}" style="font-size:1.1rem;flex-shrink:0">▶</span>
             <div class="proj-name">${escH(p.nome)}</div>
             <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
@@ -735,7 +833,9 @@ function renderProj(p) {
         </div>
         <div id="pb-${p.id}" class="proj-body">
             ${p.descricao ? `<p class="proj-desc">${escH(p.descricao)}</p>` : ''}
-            ${(p.sessoes||[]).map(s => renderSess(p.id, s)).join('')}
+            <div class="sess-grid">
+                ${(p.sessoes||[]).map(s => renderSess(p.id, s)).join('')}
+            </div>
             ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="abrirModalSessao(${p.id})">+ Atividade</button>` : ''}
             <button class="btn btn-s btn-sm" style="margin-left:6px" onclick="irParaAnexosProjeto(${p.id})">🔗 Anexos do Projeto</button>
         </div>
@@ -749,15 +849,15 @@ function renderSess(pId, s) {
     }).join('');
     const allDone = (s.etapas||[]).length > 0 && (s.etapas||[]).every(e => e.status === 'Concluído');
     const doneClass = allDone ? ' done' : '';
-    return `<div class="sess-box${doneClass}">
-        <div class="sess-hdr${doneClass}" onclick="toggleSec('sb-${s.id}','sc-${s.id}')">
+    return `<div class="sess-box${doneClass}" data-proj="${pId}" data-sess="${s.id}">
+        <div class="sess-hdr${doneClass}" onclick="focusSess(${pId}, ${s.id})">
             <div class="sess-name"><span>🗂</span> ${escH(s.nome)}</div>
             <div style="display:flex;align-items:center;gap:7px">
                 <span class="badge b-gray">${(s.etapas||[]).length} etapas</span>
-                <span class="chev open" id="sc-${s.id}">▶</span>
+                <span class="chev" id="sc-${s.id}">▶</span>
             </div>
         </div>
-        <div id="sb-${s.id}" class="sess-body">
+        <div id="sb-${s.id}" class="sess-body" style="display:none;">
             ${colabs ? `<div class="colab-list">${colabs}</div>` : ''}
             <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:flex-end">
                 ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarSessao(${s.id}, ${pId})">✏️</button>` : ''}
@@ -796,6 +896,23 @@ function toggleSec(bodyId, chevId) {
     const chev = document.getElementById(chevId);
     if (body.style.display === 'none') { body.style.display = 'block'; chev.classList.add('open'); }
     else { body.style.display = 'none'; chev.classList.remove('open'); }
+}
+
+function focusSess(pId, sId) {
+    document.querySelectorAll(`.sess-box[data-proj="${pId}"]`).forEach(box => {
+        const body = box.querySelector('.sess-body');
+        const chev = box.querySelector('.chev');
+        const isTarget = box.dataset.sess === String(sId);
+        if (!body || !chev) return;
+        if (isTarget) {
+            const isOpen = body.style.display === 'block';
+            body.style.display = isOpen ? 'none' : 'block';
+            chev.classList.toggle('open', !isOpen);
+        } else {
+            body.style.display = 'none';
+            chev.classList.remove('open');
+        }
+    });
 }
 
 // ─── CRUD PROJETOS ────────────────────────────────
@@ -2176,28 +2293,42 @@ async function carregarLogs() {
         aviso:'#f0883e', status_change:'#a8daff', prazo:'#ffa657', download:'#bc8cff'
     };
 
-    p.innerHTML = data.map(l => {
-        const aColor = actionColor[l.acao] || '#8b949e';
-        const aLabel = LOG_ACOES[l.acao] || l.acao || '—';
-        const eLabel = l.entidade ? (LOG_ENTIDADES[l.entidade] || l.entidade) : null;
-        const dt = new Date(l.created_at);
-        const dtStr = dt.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    const grouped = data.reduce((acc, l) => {
+        const key = l.acao || 'outro';
+        acc[key] = acc[key] || [];
+        acc[key].push(l);
+        return acc;
+    }, {});
 
-        let payloadStr = '';
-        if (l.payload) {
-            try {
-                const p = typeof l.payload === 'string' ? JSON.parse(l.payload) : l.payload;
-                payloadStr = Object.entries(p).map(([k,v]) => `<span style="color:#3fb950">${escH(k)}</span>=<span style="color:#d2a8ff">${escH(String(v))}</span>`).join(' ');
-                payloadStr = ` <span style="color:#30363d;user-select:none">|</span> ${payloadStr}`;
-            } catch {}
-        }
-
-        return `<div class="log-e" style="display:flex;gap:0;flex-wrap:wrap;align-items:baseline">
-            <span class="lt" style="margin-right:8px">${dtStr}</span>
-            <span style="background:${aColor}22;color:${aColor};border-radius:4px;padding:0 6px;font-size:.68rem;font-weight:700;margin-right:7px;flex-shrink:0">${escH(aLabel)}</span>
-            ${eLabel ? `<span style="color:#8b949e;font-size:.7rem;margin-right:6px">[${escH(eLabel)}${l.entidade_id?` #${l.entidade_id}`:''}]</span>` : ''}
-            <span class="lu" style="margin-right:6px">@${escH(l.usuario_nome||'?')}</span>
-            <span class="lm">${escH(l.mensagem||'')}${payloadStr}</span>
+    p.innerHTML = Object.entries(grouped).map(([action, logs]) => {
+        const actionLabel = LOG_ACOES[action] || action || 'Outro';
+        const actionColor = actionColor = {
+            create:'#3fb950', update:'#58a6ff', delete:'#f85149', upload:'#d2a8ff',
+            login:'#56d364', logout:'#8b949e', invite:'#79c0ff', role_change:'#e3b341',
+            aviso:'#f0883e', status_change:'#a8daff', prazo:'#ffa657', download:'#bc8cff', outro:'#8b949e'
+        }[action] || '#8b949e';
+        return `<div class="log-group">
+            <div class="log-group-title">${escH(actionLabel)}</div>
+            ${logs.map(l => {
+                const eLabel = l.entidade ? (LOG_ENTIDADES[l.entidade] || l.entidade) : null;
+                const dt = new Date(l.created_at);
+                const dtStr = dt.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+                let payloadStr = '';
+                if (l.payload) {
+                    try {
+                        const payload = typeof l.payload === 'string' ? JSON.parse(l.payload) : l.payload;
+                        payloadStr = Object.entries(payload).map(([k,v]) => `<span style="color:#3fb950">${escH(k)}</span>=<span style="color:#d2a8ff">${escH(String(v))}</span>`).join(' ');
+                        payloadStr = ` <span style="color:#30363d;user-select:none">|</span> ${payloadStr}`;
+                    } catch {}
+                }
+                return `<div class="log-e" style="display:flex;gap:0;flex-wrap:wrap;align-items:baseline">
+                    <span class="lt" style="margin-right:8px">${dtStr}</span>
+                    <span style="background:${actionColor}22;color:${actionColor};border-radius:4px;padding:0 6px;font-size:.68rem;font-weight:700;margin-right:7px;flex-shrink:0">${escH(actionLabel)}</span>
+                    ${eLabel ? `<span style="color:#8b949e;font-size:.7rem;margin-right:6px">[${escH(eLabel)}${l.entidade_id?` #${l.entidade_id}`:''}]</span>` : ''}
+                    <span class="lu" style="margin-right:6px">@${escH(l.usuario_nome||'?')}</span>
+                    <span class="lm">${escH(l.mensagem||'')}${payloadStr}</span>
+                </div>`;
+            }).join('')}
         </div>`;
     }).join('');
 }

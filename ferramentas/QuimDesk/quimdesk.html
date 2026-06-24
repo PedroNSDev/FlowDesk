@@ -63,6 +63,21 @@ header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background
 .logo{font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--gold-light);white-space:nowrap;letter-spacing:.05em;display:flex;align-items:center;gap:.45rem;flex-shrink:0}
 .logo-dot{width:7px;height:7px;border-radius:50%;background:var(--gold-light)}
 .search-wrap{flex:1;max-width:500px;position:relative}
+.menu-toggle-btn{display:flex;align-items:center;justify-content:center;padding:.32rem .7rem;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);color:var(--text-muted);font-family:var(--font-mono);font-size:.68rem;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s,color .15s,border-color .15s}
+.menu-toggle-btn:hover{background:var(--border);color:var(--text)}
+.side-menu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.28);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease;z-index:190}
+.side-menu-backdrop.visible{opacity:1;visibility:visible}
+.side-menu{position:fixed;top:0;left:0;bottom:0;width:280px;max-width:100%;padding:1.1rem;background:var(--surface);border-right:1px solid var(--border);box-shadow:12px 0 34px rgba(0,0,0,.08);transform:translateX(-100%);transition:transform .25s ease;z-index:200;display:flex;flex-direction:column}
+.side-menu.open{transform:translateX(0)}
+.side-menu-inner{display:flex;flex-direction:column;height:100%}
+.side-menu-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:1rem;margin-bottom:1rem;border-bottom:1px solid var(--border)}
+.side-menu-header span{font-family:var(--font-mono);font-size:.82rem;color:var(--text);font-weight:600}
+.side-menu-close{border:none;background:transparent;color:var(--text);font-size:1rem;cursor:pointer;padding:.25rem .45rem}
+.side-menu-btn{width:100%;text-align:left;font-family:var(--font-mono);font-size:.92rem;padding:.85rem 1rem;margin-bottom:.6rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);color:var(--text);cursor:pointer;transition:background .18s,border-color .18s}
+.side-menu-btn:hover{background:var(--border)}
+.side-menu-spacer{flex:1}
+.side-menu-contact{margin-top:auto;background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue)}
+.side-menu-contact:hover{background:var(--blue)}
 .search-wrap input{width:100%;padding:.48rem 1rem .48rem 2.4rem;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);font-family:var(--font-serif);font-size:.93rem;outline:none;transition:border-color .2s,background .3s}
 .search-wrap input:focus{border-color:var(--border-light)}
 .search-wrap input::placeholder{color:var(--text-faint)}
@@ -242,6 +257,18 @@ header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background
 .sr-item-text{font-size:.78rem;color:var(--text-muted)}
 .sr-el{display:flex;align-items:center;gap:.75rem}
 .sr-el-sym{font-family:var(--font-mono);font-size:.95rem;font-weight:500;width:30px;text-align:center}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.36);backdrop-filter:blur(1px);opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease;z-index:250}
+.modal-backdrop.open{opacity:1;visibility:visible}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.95);width:min(92%,420px);max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.18);padding:1.4rem 1.35rem;opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease,transform .2s ease;z-index:260}
+.modal.open{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.modal-title{font-family:var(--font-display);font-size:1.05rem;color:var(--text)}
+.modal-close{border:none;background:transparent;color:var(--text);font-size:1.1rem;cursor:pointer;padding:.2rem .4rem}
+.modal-body{font-family:var(--font-mono);font-size:.95rem;color:var(--text-muted);line-height:1.65;display:grid;gap:.75rem}
+.modal-body strong{color:var(--text)}
+.modal-action{display:flex;justify-content:flex-end;margin-top:1rem}
+.modal-btn{padding:.62rem 1rem;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:var(--font-mono);cursor:pointer;transition:background .2s,border-color .2s}
+.modal-btn:hover{background:var(--border)}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
@@ -251,6 +278,9 @@ header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background
 <body>
 
 <header>
+  <button class="theme-btn" onclick="toggleSideMenu()">
+    <span>☰</span>
+  </button>
   <div class="logo"><div class="logo-dot"></div>QuimDesk</div>
   <div class="search-wrap">
     <span class="search-icon">⌕</span>
@@ -263,10 +293,38 @@ header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background
   </button>
 </header>
 
+<div class="side-menu-backdrop hidden" id="side-menu-backdrop" onclick="toggleSideMenu()"></div>
+<div class="side-menu" id="side-menu">
+  <div class="side-menu-inner">
+    <div class="side-menu-header">
+      <span>Menu</span>
+      <button class="side-menu-close" onclick="toggleSideMenu()" aria-label="Fechar menu">✕</button>
+    </div>
+    <button class="side-menu-btn">Salvos(em manutenção)</button>
+    <button class="side-menu-btn">Recentes(em manutenção)</button>
+    <div class="side-menu-spacer"></div>
+    <button class="side-menu-btn side-menu-contact" onclick="showContact()">Contato</button>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="contact-backdrop" onclick="closeContact()"></div>
+<div class="modal" id="contact-modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+  <div class="modal-header">
+    <div class="modal-title" id="contact-title">Contato</div>
+    <button class="modal-close" onclick="closeContact()" aria-label="Fechar modal">✕</button>
+  </div>
+  <div class="modal-body">
+    <div><strong>Email:</strong> pedrohenrique.oliveira17ph@gmail.com</div>
+    <div><strong>Telefone:</strong> +55 21 988549335</div>
+  </div>
+  <div class="modal-action">
+    <button class="modal-btn" onclick="closeContact()">Fechar</button>
+  </div>
+</div>
+
 <div class="layout">
   <div class="left-panel">
     <div class="pt-label">Clique em qualquer elemento</div>
-    <div class="pt-grid" id="pt-grid"></div>
     <div class="legend-title">
       <span>Filtrar por família</span>
       <button class="legend-clear" onclick="clearFamilies()">✕ Limpar</button>
@@ -275,6 +333,7 @@ header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background
     <div class="fam-count-bar" id="fam-count-bar">
       <span id="fam-count-text" style="color:var(--text-faint)">Nenhuma família selecionada</span>
     </div>
+    <div class="pt-grid" id="pt-grid"></div>
   </div>
 
   <div class="right-panel">
@@ -328,6 +387,31 @@ function toggleTheme(){
   h.setAttribute('data-theme', dark ? 'light' : 'dark');
   document.getElementById('theme-icon').textContent = dark ? '☀️' : '🌙';
   //document.getElementById('theme-label').textContent = dark ? '' : '';
+}
+
+function toggleSideMenu(){
+  const menu = document.getElementById('side-menu');
+  const backdrop = document.getElementById('side-menu-backdrop');
+  const isOpen = menu.classList.toggle('open');
+  backdrop.classList.toggle('visible', isOpen);
+}
+
+function showContact(){
+  closeSideMenu();
+  document.getElementById('contact-backdrop').classList.add('open');
+  document.getElementById('contact-modal').classList.add('open');
+}
+
+function closeContact(){
+  document.getElementById('contact-backdrop').classList.remove('open');
+  document.getElementById('contact-modal').classList.remove('open');
+}
+
+function closeSideMenu(){
+  const menu = document.getElementById('side-menu');
+  const backdrop = document.getElementById('side-menu-backdrop');
+  menu.classList.remove('open');
+  backdrop.classList.remove('visible');
 }
 
 /* ══ LOAD DATA ═══════════════════════════════════════ */
@@ -481,6 +565,10 @@ function showElement(sym){
     estado:  rich?.estado  || '—',
     cor:     rich?.cor     || '—',
     bloco:   rich?.bloco   || derivarBloco(base.cat),
+    metodoBase: rich?.metodoBase || rich?.metodo_base || '-',
+    tamanhoAlvo: rich?.tamanhoAlvo || rich?.tamanho_alvo || '-',
+    agenteRedutor: rich?.agenteRedutor || rich?.agente_redutor || '-',
+    agenteEstabilizante: rich?.agenteEstabilizante || rich?.agente_estabilizante || '-',
     desc:    rich?.desc    || null,
     normas:  rich?.normas  || [],
   };
@@ -524,6 +612,16 @@ function renderElementView(d){
       <div class="prop-card"><div class="prop-label">Nº atômico</div><div class="prop-value">${d.z}</div></div>
     </div>
 
+    <div class="section-header" style="margin-top:1.4rem">
+      <span class="section-title">Parâmetros adicionais</span>
+    </div>
+    <div class="props-grid">
+      <div class="prop-card"><div class="prop-label">Método base</div><div class="prop-value">${d.metodoBase}</div></div>
+      <div class="prop-card"><div class="prop-label">Tamanho-alvo (DLS)</div><div class="prop-value">${d.tamanhoAlvo}</div></div>
+      <div class="prop-card"><div class="prop-label">Agente redutor</div><div class="prop-value">${d.agenteRedutor}</div></div>
+      <div class="prop-card"><div class="prop-label">Agente estabilizante</div><div class="prop-value">${d.agenteEstabilizante}</div></div>
+    </div>
+
     <div class="section-header">
       <span class="section-title">Normas e Métodos</span>
       <span class="norm-count" id="norm-count">${d.normas.length} norma${d.normas.length!==1?'s':''}</span>
@@ -562,7 +660,12 @@ function buildCurrentData(){
     catKey: base.cat || 'transition',
     grupo: rich?.grupo || '—', periodo: rich?.periodo || '—',
     estado: rich?.estado || '—', cor: rich?.cor || '—',
-    bloco: rich?.bloco || derivarBloco(base.cat), desc: rich?.desc || null,
+    bloco: rich?.bloco || derivarBloco(base.cat),
+    metodoBase: rich?.metodoBase || rich?.metodo_base || '-',
+    tamanhoAlvo: rich?.tamanhoAlvo || rich?.tamanho_alvo || '-',
+    agenteRedutor: rich?.agenteRedutor || rich?.agente_redutor || '-',
+    agenteEstabilizante: rich?.agenteEstabilizante || rich?.agente_estabilizante || '-',
+    desc: rich?.desc || null,
   };
 }
 
