@@ -366,7 +366,7 @@
                 <div>
                     <div class="un" id="sb-uname">—</div>
                     <div class="ur" id="sb-urole">—</div>
-                    <div class="ur">1.5.7</div>
+                    <div class="ur">1.6.11</div>
                 </div>
                 <button id="bell-btn" class="bell-btn hidden" onclick="abrirNotificacoes()" title="Notificações">🔔</button>
             </div>
@@ -465,7 +465,7 @@
         <!-- LOGS -->
         <div id="tab-logs" class="tab-c">
             <div class="ph">
-                <div><div class="pt">System Logs</div><div class="ps">Histórico estruturado de atividades</div></div>
+                <div><div class="pt">System Logs</div><div class="ps">Histórico estruturado de atividades(em manutenção)</div></div>
                 <div style="display:flex;gap:8px">
                     <button class="btn btn-s btn-sm" onclick="exportarLogs()">⬇️ Exportar CSV</button>
                     <button class="btn btn-s btn-sm" onclick="carregarLogs()">↺ Atualizar</button>
@@ -967,7 +967,7 @@ async function criarEtapa(pId, sId) {
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
     const { error } = await sb.from('etapas').insert({ sessao_id: sId, nome, descricao: desc, responsavel_id: resp, status, prioridade: prio, prazo });
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog('create','etapa',null,{nome}); fecharModal(); toast(`Etapa "${nome}" criada!`); await renderizarProjetos();
+    await addLog('create','etapa',null,{nome}); fecharModal(); toast(`Atividade "${nome}" criada!`); await renderizarProjetos();
 }
 
 function editarEtapa(eId) {
@@ -990,7 +990,7 @@ async function editarEtapaSave(eId) {
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
     const { error } = await sb.from('etapas').update({ nome, descricao: desc, responsavel_id: resp, status, prioridade: prio, prazo }).eq('id', eId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog('update','etapa',null,{nome}); fecharModal(); toast('Etapa atualizada!'); await renderizarProjetos();
+    await addLog('update','etapa',null,{nome}); fecharModal(); toast('Atividade atualizada!'); await renderizarProjetos();
 }
 
 async function updateEtapaPrio(eId, prio) {
@@ -1005,12 +1005,12 @@ async function updateEtapaStatus(eId, status) {
 
 // ─── DELETAR ETAPA (direto, sem aprovação) ────────────────────────
 async function deletarEtapa(eId) {
-    if (!confirm('Tem certeza que deseja excluir esta etapa? Esta ação não pode ser desfeita.')) return;
+    if (!confirm('Tem certeza que deseja excluir esta Atividade? Esta ação não pode ser desfeita.')) return;
     fecharModal();
     const { error } = await sb.from('etapas').delete().eq('id', eId);
     if (error) { toast('Erro ao excluir etapa: '+error.message, 'error'); return; }
     await addLog('delete','etapa',eId,{});
-    toast('Etapa excluída.');
+    toast('Atividade excluída.');
     await renderizarProjetos();
 }
 
@@ -1148,7 +1148,7 @@ async function carregarHome() {
                 <div class="home-col-title">✅ Minhas etapas (${minhasEtapas.length})</div>
                 ${minhasEtapas.length
                     ? minhasEtapas.map((e,i) => renderMinhaEtapa(e,i)).join('')
-                    : `<div class="note-empty" style="padding:28px 20px"><div class="ei">🎉</div>Nenhuma etapa atribuída a você.</div>`}
+                    : `<div class="note-empty" style="padding:28px 20px"><div class="ei">🎉</div>Nenhuma atividade atribuída a você.</div>`}
             </div>
             <div>
                 <div class="home-col-title">📅 Próximos eventos</div>
@@ -1178,7 +1178,7 @@ async function carregarProgresso() {
 function renderProgresso(etapas) {
     const c = document.getElementById('progresso-container');
     if (!etapas.length) {
-        c.innerHTML = `<div class="empty-state"><div class="ei">📊</div><h3>Nenhuma etapa ainda</h3><p>Crie etapas nos projetos para ver o progresso aqui.</p></div>`;
+        c.innerHTML = `<div class="empty-state"><div class="ei">📊</div><h3>Nenhuma atividade ainda</h3><p>Crie atividades nos projetos para ver o progresso aqui.</p></div>`;
         return;
     }
 
@@ -1264,7 +1264,7 @@ function renderProgresso(etapas) {
                 </thead>
                 <tbody>${filtradas.map((e,i) => renderRow(e,i)).join('')}</tbody>
             </table>
-        </div>` : `<div class="empty-state"><div class="ei">🔍</div><h3>Nenhuma etapa neste filtro</h3></div>`}`;
+        </div>` : `<div class="empty-state"><div class="ei">🔍</div><h3>Nenhuma Atividade neste filtro</h3></div>`}`;
 }
 
 // ─── ARQUIVO MANAGER ──────────────────────────────
