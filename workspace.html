@@ -728,7 +728,7 @@ function renderProj(p) {
             <span class="chev open" id="pc-${p.id}" style="font-size:1.1rem;flex-shrink:0">▶</span>
             <div class="proj-name">${escH(p.nome)}</div>
             <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-                <span class="badge b-acc">${(p.sessoes||[]).length} seções</span>
+                <span class="badge b-acc">${(p.sessoes||[]).length} Atividades</span>
                 <span class="badge b-gray">${total} etapas</span>
                 ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="event.stopPropagation(); editarProjeto(${p.id})">✏️</button>` : ''}
             </div>
@@ -736,7 +736,7 @@ function renderProj(p) {
         <div id="pb-${p.id}" class="proj-body">
             ${p.descricao ? `<p class="proj-desc">${escH(p.descricao)}</p>` : ''}
             ${(p.sessoes||[]).map(s => renderSess(p.id, s)).join('')}
-            ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="abrirModalSessao(${p.id})">+ Seção</button>` : ''}
+            ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="abrirModalSessao(${p.id})">+ Atividade</button>` : ''}
             <button class="btn btn-s btn-sm" style="margin-left:6px" onclick="irParaAnexosProjeto(${p.id})">🔗 Anexos do Projeto</button>
         </div>
     </div>`;
@@ -844,17 +844,17 @@ async function salvarEdicaoProjeto(projId) {
 }
 
 async function deletarProjetoConfirm(projId) {
-    if (!confirm('Tem certeza? Isso também deletará todas as seções, etapas e arquivos.')) return;
+    if (!confirm('Tem certeza? Isso também deletará todas as Atividades, etapas e arquivos.')) return;
     fecharModal();
     const { error } = await sb.from('projetos').delete().eq('id', projId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     await addLog('delete','projeto',null); toast('Projeto deletado.'); await renderizarProjetos(); popularSelectProjetos();
 }
 
-// ─── CRUD SEÇÕES ──────────────────────────────────
+// ─── CRUD Atividade ──────────────────────────────────
 function abrirModalSessao(pId) {
     const opts = wsMembers.map(u => `<option value="${u.id}">${escH(u.nome)} (${u.username})</option>`).join('');
-    abrirModal('🗂 Nova Seção', `
+    abrirModal('🗂 Nova Atividade', `
         <div class="fg"><label class="fl">Nome</label><input id="m-snome" class="fi" placeholder="Ex: Frontend..."/></div>
         <div class="fg"><label class="fl">Descrição</label><input id="m-sdesc" class="fi" placeholder="Breve descrição..."/></div>
         <div class="fg"><label class="fl">Colaboradores</label>
@@ -875,7 +875,7 @@ async function criarSessao(pId) {
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     const users = [...new Set([currentUser.id, ...sel])];
     await sb.from('sessao_usuarios').insert(users.map(uid => ({ sessao_id: data.id, usuario_id: uid })));
-    await addLog('create','sessao',null,{nome}); fecharModal(); toast(`Seção "${nome}" criada!`); await renderizarProjetos();
+    await addLog('create','sessao',null,{nome}); fecharModal(); toast(`Atividade "${nome}" criada!`); await renderizarProjetos();
 }
 
 async function editarSessao(sessId, projId) {
@@ -888,7 +888,7 @@ async function editarSessao(sessId, projId) {
         { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
     ];
     if (currentUserIsWorkspaceAdmin) buttons.push({ label: '🗑 Deletar', cls: 'btn-s', style: 'border-color:var(--danger);color:var(--danger)', action: `deletarSessaoConfirm(${sessId})` });
-    abrirModal('✏️ Editar Seção', `
+    abrirModal('✏️ Editar Atividade', `
         <div class="fg"><label class="fl">Nome</label><input id="m-snome-edit" class="fi" value="${escH(sess.nome)}"/></div>
         <div class="fg"><label class="fl">Descrição</label><input id="m-sdesc-edit" class="fi" value="${escH(sess.descricao||'')}"/></div>
         <div class="fg"><label class="fl">Colaborador</label>
@@ -911,7 +911,7 @@ async function salvarEdicaoSessao(sessId) {
     await sb.from('sessao_usuarios').delete().eq('sessao_id', sessId);
     const users = [...new Set([currentUser.id, ...sel])];
     await sb.from('sessao_usuarios').insert(users.map(uid => ({ sessao_id: sessId, usuario_id: uid })));
-    await addLog('update','sessao',null); fecharModal(); toast('Seção atualizada!'); await renderizarProjetos();
+    await addLog('update','sessao',null); fecharModal(); toast('Atividade atualizada!'); await renderizarProjetos();
 }
 
 async function deletarSessaoConfirm(sessId) {
@@ -919,7 +919,7 @@ async function deletarSessaoConfirm(sessId) {
     fecharModal();
     const { error } = await sb.from('sessoes').delete().eq('id', sessId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog('delete','sessao',null); toast('Seção deletada.'); await renderizarProjetos();
+    await addLog('delete','sessao',null); toast('Atividade deletada.'); await renderizarProjetos();
 }
 
 // ─── CRUD ETAPAS ──────────────────────────────────
@@ -1255,7 +1255,7 @@ function renderProgresso(etapas) {
                 <thead>
                     <tr>
                         <th>Etapa</th>
-                        <th>Seção</th>
+                        <th>Atividade</th>
                         <th>Responsável</th>
                         <th>Prazo</th>
                         <th>Status</th>
@@ -1330,7 +1330,7 @@ function renderArkPastas() {
         <span>🗂</span> <span style="flex:1">Todos os Anexos</span>
     </button>`;
 
-    // ── Seção: Anexos de Projeto ──────────────────
+    // ── Atividade: Anexos de Projeto ──────────────────
     html += `<div style="padding:10px 6px 4px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Anexos de Projeto</div>`;
     if (projsComArquivos.length === 0) {
         html += `<div style="padding:4px 10px 8px;font-size:.77rem;color:var(--muted)">Nenhum projeto com arquivos.</div>`;
@@ -1346,7 +1346,7 @@ function renderArkPastas() {
         });
     }
 
-    // ── Seção: Pastas ─────────────────────────────
+    // ── Atividade: Pastas ─────────────────────────────
     html += `<div style="padding:10px 6px 4px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Pastas</div>`;
     if (!arkPastas.length) {
         html += `<div style="padding:4px 10px 8px;font-size:.77rem;color:var(--muted)">Nenhuma pasta ainda.</div>`;
@@ -1856,7 +1856,7 @@ function renderEventos(eventos, etapasComPrazo) {
     const c = document.getElementById('eventos-container');
     const hoje = new Date(); hoje.setHours(0,0,0,0);
 
-    // ── Seção de Eventos ──────────────────────────
+    // ── Atividade de Eventos ──────────────────────────
     let html = ''
     const futuros = eventos.filter(e => new Date(e.data + 'T00:00:00') >= hoje);
     const passados = eventos.filter(e => new Date(e.data + 'T00:00:00') < hoje);
