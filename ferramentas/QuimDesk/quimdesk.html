@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QuimDesk</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -62,7 +63,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-serif);font-s
 header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;transition:background .3s,border-color .3s}
 .logo{font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--gold-light);white-space:nowrap;letter-spacing:.05em;display:flex;align-items:center;gap:.45rem;flex-shrink:0}
 .logo-dot{width:7px;height:7px;border-radius:50%;background:var(--gold-light)}
-.search-wrap{flex:1;max-width:500px;position:relative}
+.search-wrap{flex:1;max-width:560px;position:relative;border-radius:var(--radius-lg);box-shadow:0 0 0 2px var(--gold-border),0 0 16px var(--gold-bg);transition:box-shadow .2s}
+.search-wrap:focus-within{box-shadow:0 0 0 2.5px var(--gold-light),0 0 22px color-mix(in srgb,var(--gold-light) 45%,transparent)}
 .menu-toggle-btn{display:flex;align-items:center;justify-content:center;padding:.32rem .7rem;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);color:var(--text-muted);font-family:var(--font-mono);font-size:.68rem;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s,color .15s,border-color .15s}
 .menu-toggle-btn:hover{background:var(--border);color:var(--text)}
 .side-menu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.28);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease;z-index:190}
@@ -78,27 +80,27 @@ header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background
 .side-menu-spacer{flex:1}
 .side-menu-contact{margin-top:auto;background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue)}
 .side-menu-contact:hover{background:var(--blue)}
-.search-wrap input{width:100%;padding:.48rem 1rem .48rem 2.4rem;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);font-family:var(--font-serif);font-size:.93rem;outline:none;transition:border-color .2s,background .3s}
-.search-wrap input:focus{border-color:var(--border-light)}
+.search-wrap input{width:100%;padding:.48rem 1rem .48rem 2.4rem;background:var(--card);border:1.5px solid var(--gold-border);color:var(--text);border-radius:var(--radius-lg);font-family:var(--font-serif);font-size:.93rem;outline:none;transition:border-color .2s,background .3s}
+.search-wrap input:focus{border-color:var(--gold-light)}
 .search-wrap input::placeholder{color:var(--text-faint)}
-.search-icon{position:absolute;left:.68rem;top:50%;transform:translateY(-50%);color:var(--text-faint);font-size:.82rem;pointer-events:none}
+.search-icon{position:absolute;left:.68rem;top:50%;transform:translateY(-50%);color:var(--gold-light);font-size:.88rem;pointer-events:none}
 .header-tag{font-family:var(--font-mono);font-size:.68rem;color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:.18rem .5rem;white-space:nowrap;margin-left:auto}
 .theme-btn{display:flex;align-items:center;gap:.38rem;padding:.32rem .7rem;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);color:var(--text-muted);font-family:var(--font-mono);font-size:.68rem;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s,color .15s,border-color .15s}
 .theme-btn:hover{background:var(--border);color:var(--text)}
 
 /* ── LAYOUT ── */
 .layout{display:flex;height:calc(100vh - 48px)}
-.left-panel{width:min(700px,55%);flex-shrink:0;overflow-y:auto;padding:1rem .9rem;border-right:1px solid var(--border);transition:border-color .3s}
+.left-panel{width:min(440px,38%);flex-shrink:0;overflow-y:auto;padding:1rem .9rem;border-right:1px solid var(--border);transition:border-color .3s}
 .right-panel{flex:1;overflow-y:auto;padding:1.4rem 1.5rem}
 
 /* ── PERIODIC TABLE ── */
 .pt-label{font-family:var(--font-mono);font-size:.63rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.7rem}
-.pt-grid{display:grid;grid-template-columns:repeat(18,1fr);grid-template-rows:repeat(11,auto);gap:2px;font-family:var(--font-mono)}
-.pt-gap-row{grid-column:1/-1;height:5px}
-.el{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:3px;cursor:pointer;border:1px solid var(--cat-trans-bd);background:var(--cat-trans-bg);transition:border-color .2s,background .2s,transform .12s,opacity .3s,box-shadow .3s}
+.pt-grid{display:grid;grid-template-columns:repeat(18,1fr);grid-template-rows:repeat(11,auto);gap:1px;font-family:var(--font-mono);max-width:420px}
+.pt-gap-row{grid-column:1/-1;height:4px}
+.el{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:2px;cursor:pointer;border:1px solid var(--cat-trans-bd);background:var(--cat-trans-bg);transition:border-color .2s,background .2s,transform .12s,opacity .3s,box-shadow .3s}
 .el:hover{border-color:var(--border-light);transform:scale(1.08);z-index:2}
-.el-num{font-size:.44rem;color:var(--text-faint);line-height:1;margin-bottom:1px}
-.el-sym{font-size:.74rem;font-weight:500;line-height:1;color:var(--text)}
+.el-num{font-size:.36rem;color:var(--text-faint);line-height:1;margin-bottom:1px}
+.el-sym{font-size:.6rem;font-weight:500;line-height:1;color:var(--text)}
 .cat-alkali{background:var(--cat-alkali-bg);border-color:var(--cat-alkali-bd)}
 .cat-alkaline{background:var(--cat-alkaline-bg);border-color:var(--cat-alkaline-bd)}
 .cat-transition{background:var(--cat-trans-bg);border-color:var(--cat-trans-bd)}
@@ -273,6 +275,221 @@ header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 .hidden{display:none!important}
+
+/* ══ PACS / MATERIAL SYSTEMS / RELATIONS ══════════════ */
+.rel-badges{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.5rem}
+.rel-badge{font-family:var(--font-mono);font-size:.6rem;padding:.16rem .5rem;border-radius:4px;cursor:pointer;border:1px solid;transition:all .15s;display:inline-flex;align-items:center;gap:.25rem}
+.rel-badge:hover{transform:translateY(-1px)}
+.rel-badge.pac{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold-light)}
+.rel-badge.mat{background:var(--silver-bg);border-color:var(--silver-border);color:var(--silver-light)}
+
+.manage-btn{display:flex;align-items:center;gap:.38rem;padding:.32rem .7rem;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);color:var(--text-muted);font-family:var(--font-mono);font-size:.68rem;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s,color .15s,border-color .15s}
+.manage-btn:hover{background:var(--border);color:var(--text)}
+
+.manage-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.96);width:min(94%,640px);max-height:84vh;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.2);opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease,transform .2s ease;z-index:260}
+.manage-modal.open{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+.manage-modal-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.3rem .8rem;border-bottom:1px solid var(--border)}
+.manage-modal-title{font-family:var(--font-display);font-size:1.05rem;color:var(--text)}
+.manage-tabs{display:flex;gap:.4rem;padding:.8rem 1.3rem 0}
+.manage-tab{font-family:var(--font-mono);font-size:.72rem;padding:.45rem .9rem;border-radius:6px 6px 0 0;cursor:pointer;border:1px solid var(--border);border-bottom:none;background:var(--card);color:var(--text-muted)}
+.manage-tab.active{background:var(--surface);color:var(--text);font-weight:600;border-color:var(--border-light)}
+.manage-body{flex:1;overflow-y:auto;padding:1rem 1.3rem 1.3rem}
+.manage-section-label{font-family:var(--font-mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-faint);margin:.9rem 0 .5rem}
+.manage-form{display:grid;gap:.5rem;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:.8rem}
+.manage-form input,.manage-form textarea,.manage-form select{width:100%;padding:.45rem .6rem;background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--font-mono);font-size:.78rem;outline:none}
+.manage-form select[multiple]{height:118px}
+.manage-form select option{padding:.2rem .3rem}
+.manage-form input:focus,.manage-form textarea:focus{border-color:var(--border-light)}
+.manage-form-row{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.manage-form label{font-family:var(--font-mono);font-size:.6rem;color:var(--text-faint);display:block;margin-bottom:.2rem}
+.manage-form-add{justify-self:start;padding:.42rem .9rem;border-radius:5px;border:1px solid var(--blue-border);background:var(--blue-bg);color:var(--blue);font-family:var(--font-mono);font-size:.72rem;cursor:pointer}
+.manage-form-add:hover{background:var(--blue);color:#fff}
+.manage-list{display:flex;flex-direction:column;gap:.55rem;margin-top:.7rem}
+.manage-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.7rem .85rem}
+.manage-item-top{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.manage-item-code{font-family:var(--font-mono);font-size:.76rem;font-weight:600;color:var(--text)}
+.manage-item-name{font-size:.82rem;color:var(--text-muted);margin-top:.1rem}
+.manage-item-desc{font-size:.78rem;color:var(--text-faint);margin-top:.3rem;line-height:1.5}
+.manage-item-del{border:none;background:transparent;color:var(--coral);cursor:pointer;font-family:var(--font-mono);font-size:.7rem;opacity:.7}
+.manage-item-del:hover{opacity:1}
+.manage-empty{font-family:var(--font-mono);font-size:.72rem;color:var(--text-faint);text-align:center;padding:1.2rem 0}
+.rel-detail-back{font-family:var(--font-mono);font-size:.65rem;color:var(--text-muted);cursor:pointer;display:inline-block;margin-bottom:.6rem}
+.rel-detail-back:hover{color:var(--text)}
+.rel-detail-title{font-family:var(--font-display);font-size:1.1rem;color:var(--text);margin-bottom:.2rem}
+.rel-detail-sub{font-size:.8rem;color:var(--text-faint);margin-bottom:.8rem}
+.rel-mini-list{display:flex;flex-direction:column;gap:.4rem}
+.rel-mini-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:.42rem .65rem;font-family:var(--font-mono);font-size:.72rem;cursor:pointer;gap:.5rem}
+.rel-mini-item:hover{border-color:var(--border-light)}
+.mat-card-formula{font-family:var(--font-mono);font-weight:700;font-size:.95rem;color:var(--text)}
+.mat-tag{display:inline-flex;font-family:var(--font-mono);font-size:.6rem;padding:.1rem .4rem;border-radius:3px;background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border);margin-right:.25rem}
+
+/* ══ NORM PICKER MODAL ══════════════════════════════ */
+.norm-picker-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.42);backdrop-filter:blur(2px);opacity:0;visibility:hidden;transition:opacity .22s,visibility .22s;z-index:300}
+.norm-picker-backdrop.open{opacity:1;visibility:visible}
+.norm-picker-modal{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.95);
+  width:min(96%,680px);max-height:86vh;display:flex;flex-direction:column;
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  box-shadow:0 20px 48px rgba(0,0,0,.22);
+  opacity:0;visibility:hidden;transition:opacity .22s,visibility .22s,transform .22s;z-index:310
+}
+.norm-picker-modal.open{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+.norm-picker-head{display:flex;align-items:center;justify-content:space-between;padding:1.05rem 1.3rem .75rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.norm-picker-title{font-family:var(--font-display);font-size:1rem;color:var(--text)}
+.norm-picker-sub{font-family:var(--font-mono);font-size:.68rem;color:var(--text-faint);margin-top:.12rem}
+.norm-picker-search-wrap{padding:.75rem 1.3rem .5rem;flex-shrink:0;border-bottom:1px solid var(--border)}
+.norm-picker-search{position:relative}
+.norm-picker-search input{
+  width:100%;padding:.44rem .9rem .44rem 2.2rem;
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:var(--radius);color:var(--text);
+  font-family:var(--font-mono);font-size:.8rem;outline:none;
+  transition:border-color .18s
+}
+.norm-picker-search input:focus{border-color:var(--gold-light)}
+.norm-picker-search .pi-icon{position:absolute;left:.65rem;top:50%;transform:translateY(-50%);color:var(--text-faint);font-size:.85rem;pointer-events:none}
+.norm-picker-filters{display:flex;gap:.35rem;padding:.55rem 1.3rem .35rem;flex-shrink:0;align-items:center;flex-wrap:wrap}
+.np-filter-btn{font-family:var(--font-mono);font-size:.62rem;padding:.22rem .6rem;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);transition:all .15s}
+.np-filter-btn:hover{border-color:var(--border-light);color:var(--text)}
+.np-filter-btn.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold-light)}
+.norm-picker-count{margin-left:auto;font-family:var(--font-mono);font-size:.62rem;color:var(--text-faint)}
+.norm-picker-list{flex:1;overflow-y:auto;padding:.5rem 1.3rem}
+.np-group-label{font-family:var(--font-mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.09em;color:var(--text-faint);padding:.55rem 0 .3rem;border-top:1px solid var(--border);margin-top:.35rem}
+.np-group-label:first-child{border-top:none;margin-top:0}
+.np-item{
+  display:flex;align-items:flex-start;gap:.75rem;
+  padding:.55rem .6rem;border-radius:var(--radius);
+  cursor:pointer;border:1px solid transparent;
+  transition:background .13s,border-color .13s;
+  margin-bottom:.28rem;
+}
+.np-item:hover{background:var(--card);border-color:var(--border)}
+.np-item.selected{background:var(--gold-bg);border-color:var(--gold-border)}
+.np-item.already-in{opacity:.42;cursor:not-allowed;pointer-events:none}
+.np-item.already-in .np-cb{border-color:var(--teal)!important;background:var(--teal)!important}
+.np-cb{
+  flex-shrink:0;margin-top:.12rem;
+  width:14px;height:14px;border-radius:3px;
+  border:1.5px solid var(--border-light);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .13s,border-color .13s;font-size:.6rem;color:#fff
+}
+.np-item.selected .np-cb{background:var(--gold-light);border-color:var(--gold-light)}
+.np-item-body{flex:1;min-width:0}
+.np-item-top{display:flex;align-items:center;gap:.45rem;margin-bottom:.12rem;flex-wrap:wrap}
+.np-item-code{font-family:var(--font-mono);font-size:.72rem;font-weight:600;color:var(--text)}
+.np-item-element{font-family:var(--font-mono);font-size:.6rem;padding:.08rem .35rem;border-radius:3px;background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.np-item-title{font-size:.8rem;color:var(--text-muted);line-height:1.4}
+.np-item-meta{font-family:var(--font-mono);font-size:.58rem;color:var(--text-faint);margin-top:.15rem}
+.np-already-tag{font-family:var(--font-mono);font-size:.58rem;padding:.08rem .35rem;border-radius:3px;background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-border)}
+.np-empty{padding:2rem 1rem;text-align:center;font-family:var(--font-mono);font-size:.78rem;color:var(--text-faint)}
+.norm-picker-footer{
+  flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:.8rem;
+  padding:.85rem 1.3rem;border-top:1px solid var(--border);flex-wrap:wrap
+}
+.np-selection-info{font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted)}
+.np-selection-info strong{color:var(--text)}
+.np-footer-btns{display:flex;gap:.5rem}
+.np-btn-cancel{
+  font-family:var(--font-mono);font-size:.74rem;padding:.42rem .9rem;
+  border-radius:5px;border:1px solid var(--border);background:var(--card);
+  color:var(--text-muted);cursor:pointer;transition:all .15s
+}
+.np-btn-cancel:hover{background:var(--border);color:var(--text)}
+.np-btn-add{
+  font-family:var(--font-mono);font-size:.74rem;padding:.42rem 1rem;
+  border-radius:5px;border:1px solid var(--gold-border);background:var(--gold-bg);
+  color:var(--gold-light);cursor:pointer;transition:all .15s;font-weight:600
+}
+.np-btn-add:hover{background:var(--gold-light);color:#fff;border-color:var(--gold-light)}
+.np-btn-add:disabled{opacity:.38;cursor:not-allowed;pointer-events:none}
+/* "Adicionar norma/elemento" action buttons */
+.add-norm-to-pac-btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-family:var(--font-mono);font-size:.72rem;padding:.38rem .85rem;
+  border-radius:5px;border:1px solid var(--gold-border);background:var(--gold-bg);
+  color:var(--gold-light);cursor:pointer;transition:all .15s;margin-bottom:.6rem
+}
+.add-norm-to-pac-btn:hover{background:var(--gold-light);color:#fff}
+.add-el-to-mat-btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-family:var(--font-mono);font-size:.72rem;padding:.38rem .85rem;
+  border-radius:5px;border:1px solid var(--blue-border);background:var(--blue-bg);
+  color:var(--blue);cursor:pointer;transition:all .15s;margin-bottom:.35rem
+}
+.add-el-to-mat-btn:hover{background:var(--blue);color:#fff}
+.add-norm-to-mat-btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-family:var(--font-mono);font-size:.72rem;padding:.38rem .85rem;
+  border-radius:5px;border:1px solid var(--teal-border);background:var(--teal-bg);
+  color:var(--teal);cursor:pointer;transition:all .15s;margin-bottom:.6rem
+}
+.add-norm-to-mat-btn:hover{background:var(--teal);color:#fff}
+
+/* ══ FAVOURITES ══════════════════════════════════════ */
+.fav-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:5px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text-faint);font-size:.85rem;cursor:pointer;
+  transition:all .18s;flex-shrink:0;line-height:1;padding:0
+}
+.fav-btn:hover{border-color:var(--gold-border);color:var(--gold-light);background:var(--gold-bg)}
+.fav-btn.active{border-color:var(--gold-border);color:var(--gold-light);background:var(--gold-bg)}
+.fav-btn.active:hover{border-color:var(--coral-border);color:var(--coral);background:var(--coral-bg)}
+
+/* ══ ELEMENT/NORM PICKER FOR MATERIAL (shared with norm-picker styles) ══ */
+.mat-picker-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.42);backdrop-filter:blur(2px);opacity:0;visibility:hidden;transition:opacity .22s,visibility .22s;z-index:320}
+.mat-picker-backdrop.open{opacity:1;visibility:visible}
+.mat-picker-modal{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.95);
+  width:min(96%,680px);max-height:86vh;display:flex;flex-direction:column;
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  box-shadow:0 20px 48px rgba(0,0,0,.22);
+  opacity:0;visibility:hidden;transition:opacity .22s,visibility .22s,transform .22s;z-index:330
+}
+.mat-picker-modal.open{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+
+.mp-el-item{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.5rem .6rem;border-radius:var(--radius);
+  cursor:pointer;border:1px solid transparent;
+  transition:background .13s,border-color .13s;margin-bottom:.22rem
+}
+.mp-el-item:hover{background:var(--card);border-color:var(--border)}
+.mp-el-item.selected{background:var(--blue-bg);border-color:var(--blue-border)}
+.mp-el-item.already-in{opacity:.42;cursor:not-allowed;pointer-events:none}
+.mp-el-item.already-in .np-cb{border-color:var(--teal)!important;background:var(--teal)!important}
+.mp-el-item.selected .np-cb{background:var(--blue);border-color:var(--blue)}
+.mp-el-sym{font-family:var(--font-mono);font-weight:600;font-size:.88rem;width:32px;text-align:center;flex-shrink:0}
+.mp-el-name{font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);flex:1}
+.mp-el-cat{font-family:var(--font-mono);font-size:.58rem;padding:.08rem .35rem;border-radius:3px;background:var(--surface);border:1px solid var(--border);color:var(--text-faint)}
+/* norm item inside mat picker reuse np-item but with teal accent */
+.mp-norm-item{
+  display:flex;align-items:flex-start;gap:.75rem;
+  padding:.55rem .6rem;border-radius:var(--radius);
+  cursor:pointer;border:1px solid transparent;
+  transition:background .13s,border-color .13s;margin-bottom:.28rem
+}
+.mp-norm-item:hover{background:var(--card);border-color:var(--border)}
+.mp-norm-item.selected{background:var(--teal-bg);border-color:var(--teal-border)}
+.mp-norm-item.already-in{opacity:.42;cursor:not-allowed;pointer-events:none}
+.mp-norm-item.already-in .np-cb{border-color:var(--teal)!important;background:var(--teal)!important}
+.mp-norm-item.selected .np-cb{background:var(--teal);border-color:var(--teal)}
+.mp-btn-add-blue{
+  font-family:var(--font-mono);font-size:.74rem;padding:.42rem 1rem;
+  border-radius:5px;border:1px solid var(--blue-border);background:var(--blue-bg);
+  color:var(--blue);cursor:pointer;transition:all .15s;font-weight:600
+}
+.mp-btn-add-blue:hover{background:var(--blue);color:#fff}
+.mp-btn-add-blue:disabled{opacity:.38;cursor:not-allowed;pointer-events:none}
+.mp-btn-add-teal{
+  font-family:var(--font-mono);font-size:.74rem;padding:.42rem 1rem;
+  border-radius:5px;border:1px solid var(--teal-border);background:var(--teal-bg);
+  color:var(--teal);cursor:pointer;transition:all .15s;font-weight:600
+}
+.mp-btn-add-teal:hover{background:var(--teal);color:#fff}
+.mp-btn-add-teal:disabled{opacity:.38;cursor:not-allowed;pointer-events:none}
 </style>
 </head>
 <body>
@@ -288,6 +505,9 @@ header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background
     <div class="search-results hidden" id="search-results"></div>
   </div>
   <div class="header-tag" id="header-tag"></div>
+  <button class="manage-btn" onclick="openManageModal()" title="Gerenciar PACs e Sistemas de Materiais">
+    <span>⛁ PACs/Sistemas</span>
+  </button>
   <button class="theme-btn" onclick="toggleTheme()">
     <span id="theme-icon">☀️</span>
   </button>
@@ -300,6 +520,8 @@ header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background
       <span>Menu</span>
       <button class="side-menu-close" onclick="toggleSideMenu()" aria-label="Fechar menu">✕</button>
     </div>
+    <button class="side-menu-btn" onclick="openManageModal('normas')">📋 Normas catalogadas</button>
+    <button class="side-menu-btn" onclick="openManageModal('pacs')">⛁ PACs catalogados</button>
     <button class="side-menu-btn">Salvos(em manutenção)</button>
     <button class="side-menu-btn">Recentes(em manutenção)'</button>
     <div class="side-menu-spacer"></div>
@@ -319,6 +541,120 @@ header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background
   </div>
   <div class="modal-action">
     <button class="modal-btn" onclick="closeContact()">Fechar</button>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="manage-backdrop" onclick="closeManageModal()"></div>
+<div class="manage-modal" id="manage-modal" role="dialog" aria-modal="true" aria-labelledby="manage-title">
+  <div class="manage-modal-head">
+    <div class="manage-modal-title" id="manage-title">PACs &amp; Sistemas de Materiais</div>
+    <button class="modal-close" onclick="closeManageModal()" aria-label="Fechar modal">✕</button>
+  </div>
+  <div class="manage-tabs">
+    <div class="manage-tab" id="mtab-normas" onclick="switchManageTab('normas')">Normas</div>
+    <div class="manage-tab" id="mtab-pacs" onclick="switchManageTab('pacs')">PACs</div>
+    <div class="manage-tab" id="mtab-mats" onclick="switchManageTab('mats')">Sistemas de Materiais</div>
+  </div>
+  <div class="manage-body" id="manage-body"></div>
+</div>
+
+<!-- ══ NORM PICKER MODAL ══════════════════════════════ -->
+<div class="norm-picker-backdrop" id="np-backdrop" onclick="closeNormPicker()"></div>
+<div class="norm-picker-modal" id="np-modal" role="dialog" aria-modal="true" aria-labelledby="np-title">
+  <div class="norm-picker-head">
+    <div>
+      <div class="norm-picker-title" id="np-title">Adicionar normas ao PAC</div>
+      <div class="norm-picker-sub" id="np-sub"></div>
+    </div>
+    <button class="modal-close" onclick="closeNormPicker()" aria-label="Fechar">✕</button>
+  </div>
+  <div class="norm-picker-search-wrap">
+    <div class="norm-picker-search">
+      <span class="pi-icon">⌕</span>
+      <input type="text" id="np-search" placeholder="Pesquisar por código, título, elemento ou tipo…" oninput="renderNormPickerList()">
+    </div>
+  </div>
+  <div class="norm-picker-filters" id="np-filters">
+    <button class="np-filter-btn active" data-npf="ALL" onclick="setNpFilter('ALL')">Todas</button>
+    <button class="np-filter-btn" data-npf="ABNT" onclick="setNpFilter('ABNT')">ABNT</button>
+    <button class="np-filter-btn" data-npf="ISO" onclick="setNpFilter('ISO')">ISO</button>
+    <button class="np-filter-btn" data-npf="ASTM" onclick="setNpFilter('ASTM')">ASTM</button>
+    <span class="norm-picker-count" id="np-count"></span>
+  </div>
+  <div class="norm-picker-list" id="np-list"></div>
+  <div class="norm-picker-footer">
+    <div class="np-selection-info" id="np-sel-info">Nenhuma norma selecionada</div>
+    <div class="np-footer-btns">
+      <button class="np-btn-cancel" onclick="closeNormPicker()">Cancelar</button>
+      <button class="np-btn-add" id="np-btn-add" onclick="confirmAddNormsToPac()" disabled>Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MATERIAL ELEMENT PICKER MODAL ══════════════════ -->
+<div class="mat-picker-backdrop" id="mp-el-backdrop" onclick="closeMpEl()"></div>
+<div class="mat-picker-modal" id="mp-el-modal" role="dialog" aria-modal="true">
+  <div class="norm-picker-head">
+    <div>
+      <div class="norm-picker-title" id="mp-el-title">Adicionar elementos ao sistema</div>
+      <div class="norm-picker-sub" id="mp-el-sub"></div>
+    </div>
+    <button class="modal-close" onclick="closeMpEl()" aria-label="Fechar">✕</button>
+  </div>
+  <div class="norm-picker-search-wrap">
+    <div class="norm-picker-search">
+      <span class="pi-icon">⌕</span>
+      <input type="text" id="mp-el-search" placeholder="Pesquisar por símbolo, nome ou categoria…" oninput="renderMpElList()">
+    </div>
+  </div>
+  <div class="norm-picker-filters">
+    <button class="np-filter-btn active" data-mpelf="ALL" onclick="setMpElFilter('ALL')">Todos</button>
+    <button class="np-filter-btn" data-mpelf="alkali" onclick="setMpElFilter('alkali')">Alcalino</button>
+    <button class="np-filter-btn" data-mpelf="transition" onclick="setMpElFilter('transition')">Transição</button>
+    <button class="np-filter-btn" data-mpelf="nonmetal" onclick="setMpElFilter('nonmetal')">Não-metal</button>
+    <button class="np-filter-btn" data-mpelf="halogen" onclick="setMpElFilter('halogen')">Halogênio</button>
+    <span class="norm-picker-count" id="mp-el-count"></span>
+  </div>
+  <div class="norm-picker-list" id="mp-el-list"></div>
+  <div class="norm-picker-footer">
+    <div class="np-selection-info" id="mp-el-sel-info">Nenhum elemento selecionado</div>
+    <div class="np-footer-btns">
+      <button class="np-btn-cancel" onclick="closeMpEl()">Cancelar</button>
+      <button class="mp-btn-add-blue" id="mp-el-btn-add" onclick="confirmAddElToMat()" disabled>Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MATERIAL NORM PICKER MODAL ═════════════════════ -->
+<div class="mat-picker-backdrop" id="mp-norm-backdrop" onclick="closeMpNorm()"></div>
+<div class="mat-picker-modal" id="mp-norm-modal" role="dialog" aria-modal="true">
+  <div class="norm-picker-head">
+    <div>
+      <div class="norm-picker-title" id="mp-norm-title">Adicionar normas ao sistema</div>
+      <div class="norm-picker-sub" id="mp-norm-sub"></div>
+    </div>
+    <button class="modal-close" onclick="closeMpNorm()" aria-label="Fechar">✕</button>
+  </div>
+  <div class="norm-picker-search-wrap">
+    <div class="norm-picker-search">
+      <span class="pi-icon">⌕</span>
+      <input type="text" id="mp-norm-search" placeholder="Pesquisar por código, título, elemento ou tipo…" oninput="renderMpNormList()">
+    </div>
+  </div>
+  <div class="norm-picker-filters">
+    <button class="np-filter-btn active" data-mpnf="ALL" onclick="setMpNormFilter('ALL')">Todas</button>
+    <button class="np-filter-btn" data-mpnf="ABNT" onclick="setMpNormFilter('ABNT')">ABNT</button>
+    <button class="np-filter-btn" data-mpnf="ISO" onclick="setMpNormFilter('ISO')">ISO</button>
+    <button class="np-filter-btn" data-mpnf="ASTM" onclick="setMpNormFilter('ASTM')">ASTM</button>
+    <span class="norm-picker-count" id="mp-norm-count"></span>
+  </div>
+  <div class="norm-picker-list" id="mp-norm-list"></div>
+  <div class="norm-picker-footer">
+    <div class="np-selection-info" id="mp-norm-sel-info">Nenhuma norma selecionada</div>
+    <div class="np-footer-btns">
+      <button class="np-btn-cancel" onclick="closeMpNorm()">Cancelar</button>
+      <button class="mp-btn-add-teal" id="mp-norm-btn-add" onclick="confirmAddNormToMat()" disabled>Adicionar</button>
+    </div>
   </div>
 </div>
 
@@ -380,6 +716,156 @@ let activeNormFilters = new Set();
 let currentSym = null;
 let searchIndex = [];
 
+/* ══ PACS, SISTEMAS DE MATERIAIS E NORMAS — BANCO SQL (sql.js) ═
+══════════════════════════════════════════════════════ */
+let db = null;
+let dbReady = false;
+let manageActiveTab = 'normas';
+let manageDetail = null; // {type:'pac'|'mat', id}
+
+const SQL_SCHEMA = `
+  CREATE TABLE IF NOT EXISTS normas (
+    codigo   TEXT PRIMARY KEY,
+    sym      TEXT,
+    elemento TEXT,
+    titulo   TEXT,
+    tipo     TEXT,
+    ano      INTEGER,
+    escopo   TEXT,
+    link     TEXT
+  );
+  CREATE TABLE IF NOT EXISTS pacs (
+    id        TEXT PRIMARY KEY,
+    codigo    TEXT,
+    nome      TEXT,
+    descricao TEXT
+  );
+  CREATE TABLE IF NOT EXISTS pac_normas (
+    pac_id       TEXT,
+    norma_codigo TEXT
+  );
+  CREATE TABLE IF NOT EXISTS materiais (
+    id      TEXT PRIMARY KEY,
+    formula TEXT,
+    nome    TEXT,
+    pac_id  TEXT REFERENCES pacs(id)
+  );
+  CREATE TABLE IF NOT EXISTS material_elementos (
+    material_id TEXT,
+    sym         TEXT
+  );
+  CREATE TABLE IF NOT EXISTS material_normas (
+    material_id  TEXT,
+    norma_codigo TEXT
+  );
+`;
+
+async function initDB(){
+  const SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${f}` });
+  const saved = localStorage.getItem('quimdesk_sqlite_b64');
+  if(saved){
+    try{
+      const bin = atob(saved);
+      const bytes = new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+      db = new SQL.Database(bytes);
+    }catch(e){ db = new SQL.Database(); }
+  } else {
+    db = new SQL.Database();
+  }
+  db.run(SQL_SCHEMA);
+  // migração: bancos salvos antes da FK pac_id não têm a coluna — adiciona se faltar
+  try{
+    const cols = db.exec("PRAGMA table_info(materiais)");
+    const hasPacId = cols.length && cols[0].values.some(r => r[1] === 'pac_id');
+    if(!hasPacId) db.run('ALTER TABLE materiais ADD COLUMN pac_id TEXT REFERENCES pacs(id)');
+  }catch(e){ /* coluna já existe ou tabela nova */ }
+  dbReady = true;
+}
+
+function persistDB(){
+  if(!db) return;
+  const data = db.export();
+  let bin = '';
+  for(let i=0;i<data.length;i++) bin += String.fromCharCode(data[i]);
+  localStorage.setItem('quimdesk_sqlite_b64', btoa(bin));
+}
+
+/* helper: SELECT -> array of plain objects */
+function q(sql, params = []){
+  if(!dbReady) return [];
+  const stmt = db.prepare(sql);
+  if(params.length) stmt.bind(params);
+  const rows = [];
+  while(stmt.step()) rows.push(stmt.getAsObject());
+  stmt.free();
+  return rows;
+}
+/* helper: INSERT/UPDATE/DELETE */
+function run(sql, params = []){ if(dbReady) db.run(sql, params); }
+
+function uid(){ return 'id' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function splitList(str){ return (str||'').split(',').map(s=>s.trim()).filter(Boolean); }
+
+/* repopula a tabela "normas" a partir do JSON de elementos (fonte de verdade) */
+function refreshNormasTable(){
+  run('DELETE FROM normas');
+  Object.keys(NORMAS).forEach(sym => {
+    const el = NORMAS[sym];
+    (el.normas || []).forEach(n => {
+      run(`INSERT OR REPLACE INTO normas (codigo,sym,elemento,titulo,tipo,ano,escopo,link) VALUES (?,?,?,?,?,?,?,?)`,
+        [n.codigo, sym, el.nome || sym, n.titulo, n.tipo, n.ano, n.escopo, n.link]);
+    });
+  });
+}
+
+/* ── lookups  ── */
+function findNormaByCodigo(codigo){
+  const rows = q('SELECT * FROM normas WHERE codigo = ?', [codigo]);
+  if(!rows.length) return null;
+  const r = rows[0];
+  return { sym:r.sym, norma:{codigo:r.codigo, titulo:r.titulo, tipo:r.tipo, ano:r.ano, escopo:r.escopo, link:r.link} };
+}
+// Norma -> PACs 
+function getPacsForNorma(codigo){
+  return q(`SELECT p.* FROM pacs p JOIN pac_normas pn ON pn.pac_id = p.id WHERE pn.norma_codigo = ?`, [codigo]);
+}
+// Norma -> Sistemas de materiais 
+function getMaterialsForNorma(codigo){
+  return q(`SELECT m.* FROM materiais m JOIN material_normas mn ON mn.material_id = m.id WHERE mn.norma_codigo = ?`, [codigo]);
+}
+// PAC -> Normas (forward)
+function getNormasForPac(pac){
+  return q(`SELECT n.* FROM normas n JOIN pac_normas pn ON pn.norma_codigo = n.codigo WHERE pn.pac_id = ? ORDER BY n.codigo`, [pac.id])
+    .map(r => ({sym:r.sym, norma:r}));
+}
+// PAC -> Elementos presentes nas normas do PAC (reverse search via norma)
+function getElementsForPac(pac){
+  return q(`SELECT DISTINCT n.sym AS sym, n.elemento AS nome FROM normas n JOIN pac_normas pn ON pn.norma_codigo = n.codigo WHERE pn.pac_id = ? ORDER BY n.sym`, [pac.id]);
+}
+// Sistema -> Normas (forward)
+function getNormasForMaterial(mat){
+  return q(`SELECT n.* FROM normas n JOIN material_normas mn ON mn.norma_codigo = n.codigo WHERE mn.material_id = ? ORDER BY n.codigo`, [mat.id])
+    .map(r => ({sym:r.sym, norma:r}));
+}
+// Sistema -> Elementos vinculados diretamente
+function getElementsForMaterial(mat){
+  return q(`SELECT sym FROM material_elementos WHERE material_id = ?`, [mat.id]).map(r => r.sym);
+}
+// Elemento -> Sistemas de materiais (reverse)
+function getMaterialsForElement(sym){
+  return q(`SELECT m.* FROM materiais m JOIN material_elementos me ON me.material_id = m.id WHERE me.sym = ?`, [sym]);
+}
+// PAC -> Sistemas (FK direta: materiais.pac_id)
+function getMaterialsForPac(pac){
+  return q(`SELECT * FROM materiais WHERE pac_id = ? ORDER BY formula`, [pac.id]);
+}
+// Sistema -> PAC (FK direta, pode haver 0 ou 1)
+function getPacsForMaterial(mat){
+  if(!mat.pac_id) return [];
+  return q(`SELECT * FROM pacs WHERE id = ?`, [mat.pac_id]);
+}
+
 /* ══ THEME ═══════════════════════════════════════════ */
 function toggleTheme(){
   const h = document.documentElement;
@@ -414,6 +900,227 @@ function closeSideMenu(){
   backdrop.classList.remove('visible');
 }
 
+/* ══ MANAGE MODAL (Normas, PACs & Sistemas de Materiais) ═════ */
+function openManageModal(tab){
+  closeSideMenu();
+  manageDetail = null;
+  document.getElementById('manage-backdrop').classList.add('open');
+  document.getElementById('manage-modal').classList.add('open');
+  switchManageTab(tab || manageActiveTab);
+}
+function closeManageModal(){
+  document.getElementById('manage-backdrop').classList.remove('open');
+  document.getElementById('manage-modal').classList.remove('open');
+}
+function switchManageTab(tab){
+  manageActiveTab = tab;
+  manageDetail = null;
+  document.getElementById('mtab-normas').classList.toggle('active', tab==='normas');
+  document.getElementById('mtab-pacs').classList.toggle('active', tab==='pacs');
+  document.getElementById('mtab-mats').classList.toggle('active', tab==='mats');
+  renderManageBody();
+}
+
+function renderManageBody(){
+  const body = document.getElementById('manage-body');
+  if(!dbReady){ body.innerHTML = `<div class="manage-empty">Carregando banco de dados…</div>`; return; }
+  if(manageDetail){ renderRelationDetail(body); return; }
+  if(manageActiveTab === 'normas') body.innerHTML = normasTabHTML();
+  else if(manageActiveTab === 'pacs') body.innerHTML = pacsTabHTML();
+  else body.innerHTML = materialsTabHTML();
+}
+
+/* ── ── */
+function normasTabHTML(){
+  const rows = q('SELECT * FROM normas ORDER BY sym, codigo');
+  return `
+    <div class="manage-section-label">Normas catalogadas no site (${rows.length})</div>
+    <div class="rel-mini-list">
+      ${rows.length ? rows.map(n => `
+        <div class="rel-mini-item" onclick="closeManageModal();pick('${n.sym}','norm','${n.codigo}')">
+          <span>${n.elemento} (${n.sym}) — ${n.codigo}</span>
+          <span class="norm-type-badge type-${(n.tipo||'').toLowerCase()}">${n.tipo}</span>
+        </div>`).join('') : '<div class="manage-empty">Nenhuma norma catalogada ainda.</div>'}
+    </div>`;
+}
+
+/* ── PACS TAB ── */
+function pacsTabHTML(){
+  const pacs = q('SELECT * FROM pacs ORDER BY codigo');
+  return `
+    <div class="manage-section-label">Novo PAC</div>
+    <div class="manage-form">
+      <div class="manage-form-row">
+        <div><label>Código do PAC</label><input id="pac-codigo" placeholder="ex: PAC-001"></div>
+        <div><label>Nome</label><input id="pac-nome"></div>
+      </div>
+      <div><label>Descrição</label><textarea id="pac-desc" rows="2" placeholder="Para que serve este conjunto de normas"></textarea></div>
+      <button class="manage-form-add" onclick="addPac()">+ Criar PAC</button>
+    </div>
+    <div class="manage-section-label">PACs cadastrados (${pacs.length})</div>
+    <div class="manage-list">
+      ${pacs.length ? pacs.map(p => {
+        const codes = q('SELECT norma_codigo FROM pac_normas WHERE pac_id=?', [p.id]).map(r=>r.norma_codigo);
+        return `
+        <div class="manage-item">
+          <div class="manage-item-top">
+            <div>
+              <div class="manage-item-code" style="cursor:pointer" onclick="showRelationDetail('pac','${p.id}')">${p.codigo}</div>
+              <div class="manage-item-name">${p.nome}</div>
+            </div>
+            <button class="manage-item-del" onclick="deletePac('${p.id}')">remover</button>
+          </div>
+          ${p.descricao ? `<div class="manage-item-desc">${p.descricao}</div>` : ''}
+          <div class="rel-badges">${codes.slice(0,4).map(c=>`<span class="rel-badge mat">${c}</span>`).join('')}${codes.length>4?`<span class="rel-badge mat">+${codes.length-4}</span>`:''}</div>
+          <div style="margin-top:.45rem"><button class="add-norm-to-pac-btn" style="margin-bottom:0;font-size:.65rem;padding:.28rem .65rem" onclick="openNormPicker('${p.id}')">＋ Adicionar norma</button></div>
+        </div>`;
+      }).join('') : `<div class="manage-empty">Nenhum PAC cadastrado ainda.</div>`}
+    </div>`;
+}
+
+function addPac(){
+  const codigo = document.getElementById('pac-codigo').value.trim();
+  const nome = document.getElementById('pac-nome').value.trim();
+  const descricao = document.getElementById('pac-desc').value.trim();
+  if(!codigo || !nome){ alert('Informe ao menos o código e o nome do PAC.'); return; }
+  const id = uid();
+  run('INSERT INTO pacs (id,codigo,nome,descricao) VALUES (?,?,?,?)', [id, codigo, nome, descricao]);
+  persistDB(); buildSearchIndex(); renderManageBody();
+}
+function deletePac(id){
+  run('DELETE FROM pacs WHERE id=?', [id]);
+  run('DELETE FROM pac_normas WHERE pac_id=?', [id]);
+  run('UPDATE materiais SET pac_id=NULL WHERE pac_id=?', [id]);
+  persistDB(); buildSearchIndex(); renderManageBody();
+}
+
+/* ── SISTEMAS DE MATERIAIS TAB ── */
+function materialsTabHTML(){
+  const mats = q('SELECT * FROM materiais ORDER BY formula');
+  const pacOpts = q('SELECT id, codigo, nome FROM pacs ORDER BY codigo');
+  return `
+    <div class="manage-section-label">Novo Sistema de Materiais</div>
+    ${!pacOpts.length ? `<div class="manage-empty" style="margin-bottom:.6rem">Crie um PAC primeiro — um sistema de materiais precisa estar atribuído a um PAC.</div>` : ''}
+    <div class="manage-form">
+      <div class="manage-form-row">
+        <div><label>Fórmula</label><input id="mat-formula" placeholder="ex: TiO2"></div>
+        <div><label>Nome</label><input id="mat-nome" placeholder="ex: Dióxido de Titânio"></div>
+      </div>
+      <div>
+        <label>PAC ao qual este sistema pertence</label>
+        <select id="mat-pac-select" ${!pacOpts.length ? 'disabled' : ''}>
+          <option value="">— selecione um PAC —</option>
+          ${pacOpts.map(p => `<option value="${p.id}">${p.codigo} — ${p.nome}</option>`).join('')}
+        </select>
+      </div>
+      <button class="manage-form-add" onclick="addMaterial()">+ Criar Sistema</button>
+      <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text-faint);margin-top:.2rem">Após criar, adicione elementos e normas pelo botão no card do sistema.</div>
+    </div>
+    <div class="manage-section-label">Sistemas cadastrados (${mats.length})</div>
+    <div class="manage-list">
+      ${mats.length ? mats.map(m => {
+        const elementos = q('SELECT sym FROM material_elementos WHERE material_id=?', [m.id]).map(r=>r.sym);
+        const codes = q('SELECT norma_codigo FROM material_normas WHERE material_id=?', [m.id]).map(r=>r.norma_codigo);
+        const pacRow = m.pac_id ? q('SELECT codigo FROM pacs WHERE id=?', [m.pac_id])[0] : null;
+        return `
+        <div class="manage-item">
+          <div class="manage-item-top">
+            <div>
+              <div class="manage-item-code mat-card-formula" style="cursor:pointer" onclick="showRelationDetail('mat','${m.id}')">${m.formula}</div>
+              <div class="manage-item-name">${m.nome}</div>
+            </div>
+            <button class="manage-item-del" onclick="deleteMaterial('${m.id}')">remover</button>
+          </div>
+          <div class="rel-badges" style="margin-top:.3rem">${pacRow ? `<span class="rel-badge pac">⛁ ${pacRow.codigo}</span>` : `<span class="rel-badge mat" style="opacity:.6">sem PAC</span>`}</div>
+          <div style="margin-top:.4rem">${elementos.map(s=>`<span class="mat-tag">${s}</span>`).join('')}</div>
+          <div class="rel-badges">${codes.slice(0,4).map(c=>`<span class="rel-badge mat">${c}</span>`).join('')}${codes.length>4?`<span class="rel-badge mat">+${codes.length-4}</span>`:''}</div>
+          <div style="display:flex;gap:.4rem;margin-top:.45rem;flex-wrap:wrap">
+            <button class="add-el-to-mat-btn" style="margin-bottom:0;font-size:.65rem;padding:.28rem .65rem" onclick="openMpEl('${m.id}')">＋ Elementos</button>
+            <button class="add-norm-to-mat-btn" style="margin-bottom:0;font-size:.65rem;padding:.28rem .65rem" onclick="openMpNorm('${m.id}')">＋ Normas</button>
+          </div>
+        </div>`;
+      }).join('') : `<div class="manage-empty">Nenhum sistema de materiais cadastrado ainda.</div>`}
+    </div>`;
+}
+
+function addMaterial(){
+  const formula = document.getElementById('mat-formula').value.trim();
+  const nome = document.getElementById('mat-nome').value.trim();
+  const pacId = document.getElementById('mat-pac-select').value;
+  if(!formula || !nome){ alert('Informe ao menos a fórmula e o nome do sistema.'); return; }
+  if(!pacId){ alert('Selecione o PAC ao qual este sistema pertence. Crie um PAC antes, se ainda não tiver nenhum.'); return; }
+  const id = uid();
+  run('INSERT INTO materiais (id,formula,nome,pac_id) VALUES (?,?,?,?)', [id, formula, nome, pacId]);
+  persistDB(); buildSearchIndex(); renderManageBody();
+}
+function deleteMaterial(id){
+  run('DELETE FROM materiais WHERE id=?', [id]);
+  run('DELETE FROM material_elementos WHERE material_id=?', [id]);
+  run('DELETE FROM material_normas WHERE material_id=?', [id]);
+  persistDB(); buildSearchIndex(); renderManageBody();
+}
+
+/* ── DETAIL / REVERSE SEARCH VIEW (PAC <-> Norma <-> Sistema <-> Elemento) ── */
+function showRelationDetail(type, id){
+  manageDetail = {type, id};
+  document.getElementById('manage-backdrop').classList.add('open');
+  document.getElementById('manage-modal').classList.add('open');
+  renderManageBody();
+}
+
+function renderRelationDetail(body){
+  if(manageDetail.type === 'pac'){
+    const rows = q('SELECT * FROM pacs WHERE id=?', [manageDetail.id]);
+    if(!rows.length){ manageDetail = null; renderManageBody(); return; }
+    const pac = rows[0];
+    const normas = getNormasForPac(pac);
+    const elementos = getElementsForPac(pac);
+    const mats = getMaterialsForPac(pac);
+    body.innerHTML = `
+      <span class="rel-detail-back" onclick="manageDetail=null;renderManageBody()">‹ voltar para PACs</span>
+      <div class="rel-detail-title">${pac.codigo}</div>
+      <div class="rel-detail-sub">${pac.nome}${pac.descricao ? ' — '+pac.descricao : ''}</div>
+      <div class="manage-section-label">Normas neste PAC (${normas.length})</div>
+      <button class="add-norm-to-pac-btn" onclick="openNormPicker('${pac.id}')">＋ Adicionar norma</button>
+      <div class="rel-mini-list">${normas.length ? normas.map(({sym,norma}) => `
+        <div class="rel-mini-item" onclick="closeManageModal();pick('${sym}','norm','${norma.codigo}')">
+          <span>${norma.codigo}</span><span class="norm-type-badge type-${(norma.tipo||'').toLowerCase()}">${norma.tipo}</span>
+        </div>`).join('') : '<div class="manage-empty">Nenhuma norma vinculada.</div>'}</div>
+      <div class="manage-section-label">Elementos presentes nessas normas (${elementos.length})</div>
+      <div>${elementos.length ? elementos.map(e=>`<span class="mat-tag" style="cursor:pointer" onclick="closeManageModal();showElement('${e.sym}')">${e.sym} — ${e.nome}</span>`).join('') : '<span class="manage-empty">Nenhum elemento identificado nas normas deste PAC.</span>'}</div>
+      <div class="manage-section-label">Sistemas de materiais ligados a este PAC (${mats.length})</div>
+      <div class="rel-mini-list">${mats.length ? mats.map(m => `
+        <div class="rel-mini-item" onclick="showRelationDetail('mat','${m.id}')">
+          <span>${m.formula} — ${m.nome}</span><span>›</span>
+        </div>`).join('') : '<div class="manage-empty">Nenhum sistema ligado via normas em comum.</div>'}</div>`;
+  } else {
+    const rows = q('SELECT * FROM materiais WHERE id=?', [manageDetail.id]);
+    if(!rows.length){ manageDetail = null; renderManageBody(); return; }
+    const mat = rows[0];
+    const elementos = getElementsForMaterial(mat);
+    const normas = getNormasForMaterial(mat);
+    const pacs = getPacsForMaterial(mat);
+    body.innerHTML = `
+      <span class="rel-detail-back" onclick="manageDetail=null;renderManageBody()">‹ voltar para Sistemas</span>
+      <div class="rel-detail-title">${mat.formula}</div>
+      <div class="rel-detail-sub">${mat.nome}</div>
+      <div class="manage-section-label">Elementos (${elementos.length})</div>
+      <button class="add-el-to-mat-btn" onclick="openMpEl('${mat.id}')">＋ Adicionar elemento</button>
+      <div>${elementos.length ? elementos.map(s=>`<span class="mat-tag" style="cursor:pointer" onclick="closeManageModal();showElement('${s}')">${s}</span>`).join('') : '<span class="manage-empty">Nenhum elemento vinculado.</span>'}</div>
+      <div class="manage-section-label">Normas deste sistema (${normas.length})</div>
+      <button class="add-norm-to-mat-btn" onclick="openMpNorm('${mat.id}')">＋ Adicionar norma</button>
+      <div class="rel-mini-list">${normas.length ? normas.map(({sym,norma}) => `
+        <div class="rel-mini-item" onclick="closeManageModal();pick('${sym}','norm','${norma.codigo}')">
+          <span>${norma.codigo}</span><span class="norm-type-badge type-${(norma.tipo||'').toLowerCase()}">${norma.tipo}</span>
+        </div>`).join('') : '<div class="manage-empty">Nenhuma norma vinculada.</div>'}</div>
+      <div class="manage-section-label">PAC ao qual este sistema pertence</div>
+      <div class="rel-mini-list">${pacs.length ? pacs.map(p => `
+        <div class="rel-mini-item" onclick="showRelationDetail('pac','${p.id}')">
+          <span>${p.codigo} — ${p.nome}</span><span>›</span>
+        </div>`).join('') : '<div class="manage-empty">Nenhum PAC atribuído a este sistema.</div>'}</div>`;
+  }
+}
+
 /* ══ LOAD DATA ═══════════════════════════════════════ */
 async function loadData(){
   try {
@@ -424,7 +1131,9 @@ async function loadData(){
     ELEMENTS = FALLBACK_ELEMENTS;
     NORMAS   = FALLBACK_NORMAS;
   }
-  const normaSyms = Object.keys(NORMAS);
+  await initDB();
+  refreshNormasTable();
+  persistDB();
   buildSearchIndex();
   renderTable();
   renderLegendCheckboxes();
@@ -437,6 +1146,10 @@ function buildSearchIndex(){
   Object.values(NORMAS).forEach(el => {
     el.normas.forEach(n => searchIndex.push({type:'norm', sym:el.sym, code:n.codigo, title:n.titulo, tipo:n.tipo, link:n.link}));
   });
+  if(dbReady){
+    q('SELECT * FROM pacs').forEach(p => searchIndex.push({type:'pac', id:p.id, codigo:p.codigo, nome:p.nome}));
+    q('SELECT * FROM materiais').forEach(m => searchIndex.push({type:'material', id:m.id, formula:m.formula, nome:m.nome}));
+  }
 }
 
 /* ══ PERIODIC TABLE ══════════════════════════════════ */
@@ -587,6 +1300,7 @@ function derivarBloco(cat){
 function renderElementView(d){
   const symCls = 'sym-' + d.catKey;
   const hasNorms = d.normas.length > 0;
+  const elMats = getMaterialsForElement(d.sym);
 
   document.getElementById('element-view').innerHTML = `
     <div class="el-header">
@@ -600,6 +1314,7 @@ function renderElementView(d){
           ${hasNorms ? `<span class="badge" style="background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-border)">● ${d.normas.length} norma${d.normas.length!==1?'s':''}</span>` : ''}
         </div>
         ${d.desc ? `<p class="el-desc">${d.desc}</p>` : ''}
+        ${elMats.length ? `<div class="rel-badges">${elMats.map(m=>`<span class="rel-badge mat" onclick="openManageModal();showRelationDetail('mat','${m.id}')" title="Sistema de materiais">◆ ${m.formula} — ${m.nome}</span>`).join('')}</div>` : ''}
       </div>
     </div>
 
@@ -706,11 +1421,17 @@ function renderNorms(d){
     return;
   }
 
-  list.innerHTML = norms.map(n => `
+  list.innerHTML = norms.map(n => {
+    const favKey = 'fav_' + n.codigo.replace(/\s/g,'_');
+    const isFav = localStorage.getItem(favKey) === '1';
+    return `
     <div class="norm-card">
       <div class="norm-card-top">
         <span class="norm-code">${n.codigo} (${n.ano})</span>
-        <span class="norm-type-badge type-${n.tipo.toLowerCase()}">${n.tipo}</span>
+        <div style="display:flex;align-items:center;gap:.45rem;flex-shrink:0">
+          <span class="norm-type-badge type-${n.tipo.toLowerCase()}">${n.tipo}</span>
+          <button class="fav-btn${isFav?' active':''}" title="${isFav?'Remover dos favoritos':'Adicionar aos favoritos'}" onclick="toggleFav(this,'${n.codigo.replace(/'/g,"\\'")}')">★</button>
+        </div>
       </div>
       <div class="norm-title">${n.titulo}</div>
       <div class="norm-footer">
@@ -720,7 +1441,19 @@ function renderNorms(d){
           Link para a Norma
         </a>
       </div>
-    </div>`).join('');
+      ${renderNormRelBadges(n.codigo)}
+    </div>`}).join('');
+}
+
+/* Norma -> PAC / Norma -> Sistema de materiais (reverse search inline) */
+function renderNormRelBadges(codigo){
+  const pacs = getPacsForNorma(codigo);
+  const mats = getMaterialsForNorma(codigo);
+  if(!pacs.length && !mats.length) return '';
+  return `<div class="rel-badges">
+    ${pacs.map(p => `<span class="rel-badge pac" onclick="openManageModal();showRelationDetail('pac','${p.id}')" title="PAC vinculado">⛁ ${p.codigo}</span>`).join('')}
+    ${mats.map(m => `<span class="rel-badge mat" onclick="openManageModal();showRelationDetail('mat','${m.id}')" title="Sistema de materiais vinculado">◆ ${m.formula}</span>`).join('')}
+  </div>`;
 }
 
 /* ══ SEARCH ══════════════════════════════════════════ */
@@ -730,11 +1463,13 @@ const searchResults = document.getElementById('search-results');
 searchInput.addEventListener('input', () => {
   const q = searchInput.value.trim().toLowerCase();
   if(!q){ searchResults.classList.add('hidden'); return; }
-  const m = searchIndex.filter(i =>
-    i.type === 'element'
-      ? i.name.toLowerCase().includes(q) || i.sym.toLowerCase() === q
-      : i.code.toLowerCase().includes(q) || i.title.toLowerCase().includes(q) || i.tipo.toLowerCase().includes(q)
-  ).slice(0, 8);
+  const m = searchIndex.filter(i => {
+    if(i.type === 'element') return i.name.toLowerCase().includes(q) || i.sym.toLowerCase() === q;
+    if(i.type === 'norm')    return i.code.toLowerCase().includes(q) || i.title.toLowerCase().includes(q) || i.tipo.toLowerCase().includes(q);
+    if(i.type === 'pac')     return i.codigo.toLowerCase().includes(q) || i.nome.toLowerCase().includes(q);
+    if(i.type === 'material')return i.formula.toLowerCase().includes(q) || i.nome.toLowerCase().includes(q);
+    return false;
+  }).slice(0, 8);
   if(!m.length){ searchResults.classList.add('hidden'); return; }
   searchResults.innerHTML = m.map(i => {
     if(i.type === 'element'){
@@ -747,6 +1482,22 @@ searchInput.addEventListener('input', () => {
           <span style="font-size:.84rem">${i.name}</span>
           ${NORMAS[i.sym]?`<span style="font-family:var(--font-mono);font-size:.56rem;color:var(--teal)">● normas</span>`:''}
         </div></div>`;
+    }
+    if(i.type === 'pac'){
+      return `<div class="sr-item" onclick="openManageModal();showRelationDetail('pac','${i.id}')">
+        <div class="sr-item-top">
+          <span class="sr-item-code">⛁ ${i.codigo}</span>
+          <span class="rel-badge pac">PAC</span>
+        </div>
+        <div class="sr-item-text">${i.nome}</div></div>`;
+    }
+    if(i.type === 'material'){
+      return `<div class="sr-item" onclick="openManageModal();showRelationDetail('mat','${i.id}')">
+        <div class="sr-item-top">
+          <span class="sr-item-code">◆ ${i.formula}</span>
+          <span class="rel-badge mat">Sistema</span>
+        </div>
+        <div class="sr-item-text">${i.nome}</div></div>`;
     }
     return `<div class="sr-item" onclick="pick('${i.sym}','norm','${i.code}')">
       <div class="sr-item-top">
@@ -780,6 +1531,361 @@ document.addEventListener('keydown', e => {
   if(e.key === '/' && document.activeElement !== searchInput){ e.preventDefault(); searchInput.focus(); }
   if(e.key === 'Escape') searchResults.classList.add('hidden');
 });
+
+/* ══ NORM PICKER ════════════════════════════════════
+══════════════════════════════════════════════════ */
+let npPacId = null;          // PAC alvo
+let npSelected = new Set();  // codigos selecionados na sessão
+let npTypeFilter = 'ALL';    // filtro de tipo ativo
+
+function openNormPicker(pacId){
+  npPacId = pacId;
+  npSelected.clear();
+  npTypeFilter = 'ALL';
+  // reset UI
+  document.getElementById('np-search').value = '';
+  document.querySelectorAll('[data-npf]').forEach(b => b.classList.toggle('active', b.dataset.npf === 'ALL'));
+  // PAC info no subtítulo
+  const pac = q('SELECT * FROM pacs WHERE id=?', [pacId])[0];
+  document.getElementById('np-sub').textContent = pac ? `${pac.codigo} — ${pac.nome}` : '';
+  // show modal
+  document.getElementById('np-backdrop').classList.add('open');
+  document.getElementById('np-modal').classList.add('open');
+  document.getElementById('np-search').focus();
+  renderNormPickerList();
+}
+
+function closeNormPicker(){
+  document.getElementById('np-backdrop').classList.remove('open');
+  document.getElementById('np-modal').classList.remove('open');
+}
+
+function setNpFilter(tipo){
+  npTypeFilter = tipo;
+  document.querySelectorAll('[data-npf]').forEach(b => b.classList.toggle('active', b.dataset.npf === tipo));
+  renderNormPickerList();
+}
+
+function renderNormPickerList(){
+  const searchVal = (document.getElementById('np-search').value || '').trim().toLowerCase();
+  // normas já no PAC
+  const alreadyIn = new Set(q('SELECT norma_codigo FROM pac_normas WHERE pac_id=?', [npPacId]).map(r=>r.norma_codigo));
+  // todas as normas catalogadas
+  let all = q('SELECT * FROM normas ORDER BY sym, codigo');
+  // filtro tipo
+  if(npTypeFilter !== 'ALL') all = all.filter(n => n.tipo === npTypeFilter);
+  // filtro texto
+  if(searchVal){
+    all = all.filter(n =>
+      n.codigo.toLowerCase().includes(searchVal) ||
+      (n.titulo||'').toLowerCase().includes(searchVal) ||
+      (n.elemento||'').toLowerCase().includes(searchVal) ||
+      (n.sym||'').toLowerCase().includes(searchVal) ||
+      (n.tipo||'').toLowerCase().includes(searchVal) ||
+      (n.escopo||'').toLowerCase().includes(searchVal)
+    );
+  }
+  // contar total visível
+  document.getElementById('np-count').textContent = all.length + ' norma' + (all.length !== 1 ? 's' : '');
+  // agrupar por elemento
+  const byEl = {};
+  all.forEach(n => {
+    const key = n.sym || '?';
+    if(!byEl[key]) byEl[key] = {sym:key, nome:n.elemento||key, items:[]};
+    byEl[key].items.push(n);
+  });
+  const groups = Object.values(byEl).sort((a,b) => a.sym.localeCompare(b.sym));
+  const list = document.getElementById('np-list');
+  if(!groups.length){
+    list.innerHTML = `<div class="np-empty">Nenhuma norma encontrada com esses filtros.</div>`;
+  } else {
+    list.innerHTML = groups.map(g => `
+      <div class="np-group-label">${g.sym} — ${g.nome}</div>
+      ${g.items.map(n => {
+        const inPac = alreadyIn.has(n.codigo);
+        const sel   = npSelected.has(n.codigo);
+        const cls   = inPac ? 'np-item already-in' : sel ? 'np-item selected' : 'np-item';
+        const cb    = inPac ? '✓' : sel ? '✓' : '';
+        const already = inPac ? `<span class="np-already-tag">já no PAC</span>` : '';
+        return `<div class="${cls}" onclick="toggleNpItem('${n.codigo.replace(/'/g,"\\'")}','${inPac}')">
+          <div class="np-cb">${cb}</div>
+          <div class="np-item-body">
+            <div class="np-item-top">
+              <span class="np-item-code">${n.codigo}</span>
+              <span class="norm-type-badge type-${(n.tipo||'').toLowerCase()}">${n.tipo||''}</span>
+              <span class="np-item-element">${n.sym}</span>
+              ${already}
+            </div>
+            <div class="np-item-title">${n.titulo||''}</div>
+            <div class="np-item-meta">${n.escopo||''} ${n.ano ? '· ' + n.ano : ''}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    `).join('');
+  }
+  updateNpFooter();
+}
+
+function toggleNpItem(codigo, inPac){
+  if(inPac === 'true') return; // já está no PAC — não faz nada
+  if(npSelected.has(codigo)) npSelected.delete(codigo);
+  else npSelected.add(codigo);
+  renderNormPickerList();
+}
+
+function updateNpFooter(){
+  const n = npSelected.size;
+  const info = document.getElementById('np-sel-info');
+  const btn  = document.getElementById('np-btn-add');
+  if(n === 0){
+    info.innerHTML = `Nenhuma norma selecionada`;
+    btn.disabled = true;
+  } else {
+    info.innerHTML = `<strong>${n}</strong> norma${n!==1?'s':''} selecionada${n!==1?'s':''}`;
+    btn.disabled = false;
+  }
+}
+
+function confirmAddNormsToPac(){
+  if(!npPacId || !npSelected.size) return;
+  // normas já no PAC (garantia extra contra duplicatas)
+  const alreadyIn = new Set(q('SELECT norma_codigo FROM pac_normas WHERE pac_id=?', [npPacId]).map(r=>r.norma_codigo));
+  let added = 0;
+  npSelected.forEach(codigo => {
+    if(alreadyIn.has(codigo)) return; // dupla proteção
+    run('INSERT INTO pac_normas (pac_id, norma_codigo) VALUES (?,?)', [npPacId, codigo]);
+    added++;
+    // ── auto-vincular elementos relacionados ────────────────────
+    // A norma tem campo sym (elemento). Se esse sym já aparece em
+    // algum sistema de materiais deste PAC, vincula via
+    // material_elementos (sem duplicata). Mesmo que não haja sistema,
+    // o elemento fica rastreável via norma.sym nas consultas.
+    const normRow = q('SELECT sym FROM normas WHERE codigo=?', [codigo])[0];
+    if(normRow && normRow.sym){
+      // sistemas do PAC
+      const mats = q('SELECT id FROM materiais WHERE pac_id=?', [npPacId]);
+      mats.forEach(m => {
+        const exists = q('SELECT 1 FROM material_elementos WHERE material_id=? AND sym=?', [m.id, normRow.sym]);
+        if(!exists.length){
+          run('INSERT INTO material_elementos (material_id, sym) VALUES (?,?)', [m.id, normRow.sym]);
+        }
+      });
+    }
+  });
+  persistDB();
+  buildSearchIndex();
+  closeNormPicker();
+  // recarregar detail do PAC
+  manageDetail = {type:'pac', id:npPacId};
+  document.getElementById('manage-backdrop').classList.add('open');
+  document.getElementById('manage-modal').classList.add('open');
+  renderManageBody();
+}
+
+/* ══ FAVOURITES ══════════════════════════════════════ */
+function toggleFav(btn, codigo){
+  const key = 'fav_' + codigo.replace(/\s/g,'_');
+  const isFav = localStorage.getItem(key) === '1';
+  if(isFav){
+    localStorage.removeItem(key);
+    btn.classList.remove('active');
+    btn.title = 'Adicionar aos favoritos';
+  } else {
+    localStorage.setItem(key, '1');
+    btn.classList.add('active');
+    btn.title = 'Remover dos favoritos';
+  }
+}
+
+/* ══ MATERIAL ELEMENT PICKER ════════════════════════
+══════════════════════════════════════════════════ */
+let mpElMatId    = null;
+let mpElSelected = new Set();
+let mpElFilter   = 'ALL';
+
+function openMpEl(matId){
+  mpElMatId = matId;
+  mpElSelected.clear();
+  mpElFilter = 'ALL';
+  document.getElementById('mp-el-search').value = '';
+  document.querySelectorAll('[data-mpelf]').forEach(b => b.classList.toggle('active', b.dataset.mpelf === 'ALL'));
+  const mat = q('SELECT * FROM materiais WHERE id=?', [matId])[0];
+  document.getElementById('mp-el-sub').textContent = mat ? `${mat.formula} — ${mat.nome}` : '';
+  document.getElementById('mp-el-backdrop').classList.add('open');
+  document.getElementById('mp-el-modal').classList.add('open');
+  document.getElementById('mp-el-search').focus();
+  renderMpElList();
+}
+function closeMpEl(){
+  document.getElementById('mp-el-backdrop').classList.remove('open');
+  document.getElementById('mp-el-modal').classList.remove('open');
+}
+function setMpElFilter(cat){
+  mpElFilter = cat;
+  document.querySelectorAll('[data-mpelf]').forEach(b => b.classList.toggle('active', b.dataset.mpelf === cat));
+  renderMpElList();
+}
+function renderMpElList(){
+  const sv = (document.getElementById('mp-el-search').value || '').trim().toLowerCase();
+  const alreadyIn = new Set(q('SELECT sym FROM material_elementos WHERE material_id=?', [mpElMatId]).map(r=>r.sym));
+  let all = ELEMENTS.filter(e => e.z > 0 && e.cat !== 'placeholder');
+  if(mpElFilter !== 'ALL') all = all.filter(e => e.cat === mpElFilter);
+  if(sv) all = all.filter(e => e.s.toLowerCase().includes(sv) || e.n.toLowerCase().includes(sv) || (e.cat||'').includes(sv));
+  all = all.sort((a,b) => a.n.localeCompare(b.n));
+  document.getElementById('mp-el-count').textContent = all.length + ' elemento' + (all.length !== 1 ? 's' : '');
+  const list = document.getElementById('mp-el-list');
+  if(!all.length){
+    list.innerHTML = `<div class="np-empty">Nenhum elemento encontrado.</div>`; return;
+  }
+  list.innerHTML = all.map(e => {
+    const inMat = alreadyIn.has(e.s);
+    const sel   = mpElSelected.has(e.s);
+    const cls   = inMat ? 'mp-el-item already-in' : sel ? 'mp-el-item selected' : 'mp-el-item';
+    const cb    = (inMat || sel) ? '✓' : '';
+    const catLabel = CAT_LABEL[e.cat] || e.cat;
+    const already = inMat ? `<span class="np-already-tag">já no sistema</span>` : '';
+    return `<div class="${cls}" onclick="toggleMpEl('${e.s}','${inMat}')">
+      <div class="np-cb">${cb}</div>
+      <span class="mp-el-sym" style="color:var(--cat-${e.cat==='transition'?'trans':e.cat==='nonmetal'?'non':e.cat==='halogen'?'hal':e.cat==='noble'?'noble':e.cat==='alkaline'?'alkaline':e.cat==='alkali'?'alkali':e.cat==='lanthanide'?'lan':e.cat==='actinide'?'act':e.cat==='post'?'post':'metal'}-glow)">${e.s}</span>
+      <span class="mp-el-name">${e.n} (Z=${e.z})</span>
+      <span class="mp-el-cat">${catLabel}</span>
+      ${already}
+    </div>`;
+  }).join('');
+  updateMpElFooter();
+}
+function toggleMpEl(sym, inMat){
+  if(inMat === 'true') return;
+  mpElSelected.has(sym) ? mpElSelected.delete(sym) : mpElSelected.add(sym);
+  renderMpElList();
+}
+function updateMpElFooter(){
+  const n = mpElSelected.size;
+  const info = document.getElementById('mp-el-sel-info');
+  const btn  = document.getElementById('mp-el-btn-add');
+  if(n === 0){ info.innerHTML = 'Nenhum elemento selecionado'; btn.disabled = true; }
+  else { info.innerHTML = `<strong>${n}</strong> elemento${n!==1?'s':''} selecionado${n!==1?'s':''}`; btn.disabled = false; }
+}
+function confirmAddElToMat(){
+  if(!mpElMatId || !mpElSelected.size) return;
+  const alreadyIn = new Set(q('SELECT sym FROM material_elementos WHERE material_id=?', [mpElMatId]).map(r=>r.sym));
+  mpElSelected.forEach(sym => {
+    if(alreadyIn.has(sym)) return;
+    run('INSERT INTO material_elementos (material_id, sym) VALUES (?,?)', [mpElMatId, sym]);
+  });
+  persistDB(); buildSearchIndex(); closeMpEl();
+  manageDetail = {type:'mat', id:mpElMatId};
+  document.getElementById('manage-backdrop').classList.add('open');
+  document.getElementById('manage-modal').classList.add('open');
+  renderManageBody();
+}
+
+/* ══ MATERIAL NORM PICKER ═════════════════════════ */
+let mpNormMatId    = null;
+let mpNormSelected = new Set();
+let mpNormFilter   = 'ALL';
+
+function openMpNorm(matId){
+  mpNormMatId = matId;
+  mpNormSelected.clear();
+  mpNormFilter = 'ALL';
+  document.getElementById('mp-norm-search').value = '';
+  document.querySelectorAll('[data-mpnf]').forEach(b => b.classList.toggle('active', b.dataset.mpnf === 'ALL'));
+  const mat = q('SELECT * FROM materiais WHERE id=?', [matId])[0];
+  document.getElementById('mp-norm-sub').textContent = mat ? `${mat.formula} — ${mat.nome}` : '';
+  document.getElementById('mp-norm-backdrop').classList.add('open');
+  document.getElementById('mp-norm-modal').classList.add('open');
+  document.getElementById('mp-norm-search').focus();
+  renderMpNormList();
+}
+function closeMpNorm(){
+  document.getElementById('mp-norm-backdrop').classList.remove('open');
+  document.getElementById('mp-norm-modal').classList.remove('open');
+}
+function setMpNormFilter(tipo){
+  mpNormFilter = tipo;
+  document.querySelectorAll('[data-mpnf]').forEach(b => b.classList.toggle('active', b.dataset.mpnf === tipo));
+  renderMpNormList();
+}
+function renderMpNormList(){
+  const sv = (document.getElementById('mp-norm-search').value || '').trim().toLowerCase();
+  const alreadyIn = new Set(q('SELECT norma_codigo FROM material_normas WHERE material_id=?', [mpNormMatId]).map(r=>r.norma_codigo));
+  let all = q('SELECT * FROM normas ORDER BY sym, codigo');
+  if(mpNormFilter !== 'ALL') all = all.filter(n => n.tipo === mpNormFilter);
+  if(sv) all = all.filter(n =>
+    n.codigo.toLowerCase().includes(sv) ||
+    (n.titulo||'').toLowerCase().includes(sv) ||
+    (n.elemento||'').toLowerCase().includes(sv) ||
+    (n.sym||'').toLowerCase().includes(sv) ||
+    (n.tipo||'').toLowerCase().includes(sv)
+  );
+  document.getElementById('mp-norm-count').textContent = all.length + ' norma' + (all.length !== 1 ? 's' : '');
+  const list = document.getElementById('mp-norm-list');
+  if(!all.length){ list.innerHTML = `<div class="np-empty">Nenhuma norma encontrada.</div>`; return; }
+  // agrupar por elemento
+  const byEl = {};
+  all.forEach(n => {
+    const key = n.sym || '?';
+    if(!byEl[key]) byEl[key] = {sym:key, nome:n.elemento||key, items:[]};
+    byEl[key].items.push(n);
+  });
+  const groups = Object.values(byEl).sort((a,b) => a.sym.localeCompare(b.sym));
+  list.innerHTML = groups.map(g => `
+    <div class="np-group-label">${g.sym} — ${g.nome}</div>
+    ${g.items.map(n => {
+      const inMat = alreadyIn.has(n.codigo);
+      const sel   = mpNormSelected.has(n.codigo);
+      const cls   = inMat ? 'mp-norm-item already-in' : sel ? 'mp-norm-item selected' : 'mp-norm-item';
+      const cb    = (inMat || sel) ? '✓' : '';
+      const already = inMat ? `<span class="np-already-tag">já no sistema</span>` : '';
+      return `<div class="${cls}" onclick="toggleMpNorm('${n.codigo.replace(/'/g,"\\'")}','${inMat}')">
+        <div class="np-cb">${cb}</div>
+        <div class="np-item-body">
+          <div class="np-item-top">
+            <span class="np-item-code">${n.codigo}</span>
+            <span class="norm-type-badge type-${(n.tipo||'').toLowerCase()}">${n.tipo||''}</span>
+            <span class="np-item-element">${n.sym}</span>
+            ${already}
+          </div>
+          <div class="np-item-title">${n.titulo||''}</div>
+          <div class="np-item-meta">${n.escopo||''} ${n.ano ? '· '+n.ano : ''}</div>
+        </div>
+      </div>`;
+    }).join('')}
+  `).join('');
+  updateMpNormFooter();
+}
+function toggleMpNorm(codigo, inMat){
+  if(inMat === 'true') return;
+  mpNormSelected.has(codigo) ? mpNormSelected.delete(codigo) : mpNormSelected.add(codigo);
+  renderMpNormList();
+}
+function updateMpNormFooter(){
+  const n = mpNormSelected.size;
+  const info = document.getElementById('mp-norm-sel-info');
+  const btn  = document.getElementById('mp-norm-btn-add');
+  if(n === 0){ info.innerHTML = 'Nenhuma norma selecionada'; btn.disabled = true; }
+  else { info.innerHTML = `<strong>${n}</strong> norma${n!==1?'s':''} selecionada${n!==1?'s':''}`; btn.disabled = false; }
+}
+function confirmAddNormToMat(){
+  if(!mpNormMatId || !mpNormSelected.size) return;
+  const alreadyIn = new Set(q('SELECT norma_codigo FROM material_normas WHERE material_id=?', [mpNormMatId]).map(r=>r.norma_codigo));
+  mpNormSelected.forEach(codigo => {
+    if(alreadyIn.has(codigo)) return;
+    run('INSERT INTO material_normas (material_id, norma_codigo) VALUES (?,?)', [mpNormMatId, codigo]);
+    // auto-add elemento from norma.sym
+    const normRow = q('SELECT sym FROM normas WHERE codigo=?', [codigo])[0];
+    if(normRow && normRow.sym){
+      const exists = q('SELECT 1 FROM material_elementos WHERE material_id=? AND sym=?', [mpNormMatId, normRow.sym]);
+      if(!exists.length) run('INSERT INTO material_elementos (material_id, sym) VALUES (?,?)', [mpNormMatId, normRow.sym]);
+    }
+  });
+  persistDB(); buildSearchIndex(); closeMpNorm();
+  manageDetail = {type:'mat', id:mpNormMatId};
+  document.getElementById('manage-backdrop').classList.add('open');
+  document.getElementById('manage-modal').classList.add('open');
+  renderManageBody();
+}
 
 /* ══ FALLBACK ═══════════════════════════════ */
 //const FALLBACK_ELEMENTS=[{"z":1,"s":"H","n":"Hidrogênio","r":1,"c":1,"cat":"nonmetal"},{"z":2,"s":"He","n":"Hélio","r":1,"c":18,"cat":"noble"},{"z":3,"s":"Li","n":"Lítio","r":2,"c":1,"cat":"alkali"},{"z":4,"s":"Be","n":"Berílio","r":2,"c":2,"cat":"alkaline"},{"z":5,"s":"B","n":"Boro","r":2,"c":13,"cat":"metalloid"},{"z":6,"s":"C","n":"Carbono","r":2,"c":14,"cat":"nonmetal"},{"z":7,"s":"N","n":"Nitrogênio","r":2,"c":15,"cat":"nonmetal"},{"z":8,"s":"O","n":"Oxigênio","r":2,"c":16,"cat":"nonmetal"},{"z":9,"s":"F","n":"Flúor","r":2,"c":17,"cat":"halogen"},{"z":10,"s":"Ne","n":"Neônio","r":2,"c":18,"cat":"noble"},{"z":11,"s":"Na","n":"Sódio","r":3,"c":1,"cat":"alkali"},{"z":12,"s":"Mg","n":"Magnésio","r":3,"c":2,"cat":"alkaline"},{"z":13,"s":"Al","n":"Alumínio","r":3,"c":13,"cat":"post"},{"z":14,"s":"Si","n":"Silício","r":3,"c":14,"cat":"metalloid"},{"z":15,"s":"P","n":"Fósforo","r":3,"c":15,"cat":"nonmetal"},{"z":16,"s":"S","n":"Enxofre","r":3,"c":16,"cat":"nonmetal"},{"z":17,"s":"Cl","n":"Cloro","r":3,"c":17,"cat":"halogen"},{"z":18,"s":"Ar","n":"Argônio","r":3,"c":18,"cat":"noble"},{"z":19,"s":"K","n":"Potássio","r":4,"c":1,"cat":"alkali"},{"z":20,"s":"Ca","n":"Cálcio","r":4,"c":2,"cat":"alkaline"},{"z":21,"s":"Sc","n":"Escândio","r":4,"c":3,"cat":"transition"},{"z":22,"s":"Ti","n":"Titânio","r":4,"c":4,"cat":"transition"},{"z":23,"s":"V","n":"Vanádio","r":4,"c":5,"cat":"transition"},{"z":24,"s":"Cr","n":"Cromo","r":4,"c":6,"cat":"transition"},{"z":25,"s":"Mn","n":"Manganês","r":4,"c":7,"cat":"transition"},{"z":26,"s":"Fe","n":"Ferro","r":4,"c":8,"cat":"transition"},{"z":27,"s":"Co","n":"Cobalto","r":4,"c":9,"cat":"transition"},{"z":28,"s":"Ni","n":"Níquel","r":4,"c":10,"cat":"transition"},{"z":29,"s":"Cu","n":"Cobre","r":4,"c":11,"cat":"transition"},{"z":30,"s":"Zn","n":"Zinco","r":4,"c":12,"cat":"transition"},{"z":31,"s":"Ga","n":"Gálio","r":4,"c":13,"cat":"post"},{"z":32,"s":"Ge","n":"Germânio","r":4,"c":14,"cat":"metalloid"},{"z":33,"s":"As","n":"Arsênio","r":4,"c":15,"cat":"metalloid"},{"z":34,"s":"Se","n":"Selênio","r":4,"c":16,"cat":"nonmetal"},{"z":35,"s":"Br","n":"Bromo","r":4,"c":17,"cat":"halogen"},{"z":36,"s":"Kr","n":"Criptônio","r":4,"c":18,"cat":"noble"},{"z":37,"s":"Rb","n":"Rubídio","r":5,"c":1,"cat":"alkali"},{"z":38,"s":"Sr","n":"Estrôncio","r":5,"c":2,"cat":"alkaline"},{"z":39,"s":"Y","n":"Ítrio","r":5,"c":3,"cat":"transition"},{"z":40,"s":"Zr","n":"Zircônio","r":5,"c":4,"cat":"transition"},{"z":41,"s":"Nb","n":"Nióbio","r":5,"c":5,"cat":"transition"},{"z":42,"s":"Mo","n":"Molibdênio","r":5,"c":6,"cat":"transition"},{"z":43,"s":"Tc","n":"Tecnécio","r":5,"c":7,"cat":"transition"},{"z":44,"s":"Ru","n":"Rutênio","r":5,"c":8,"cat":"transition"},{"z":45,"s":"Rh","n":"Ródio","r":5,"c":9,"cat":"transition"},{"z":46,"s":"Pd","n":"Paládio","r":5,"c":10,"cat":"transition"},{"z":47,"s":"Ag","n":"Prata","r":5,"c":11,"cat":"transition"},{"z":48,"s":"Cd","n":"Cádmio","r":5,"c":12,"cat":"transition"},{"z":49,"s":"In","n":"Índio","r":5,"c":13,"cat":"post"},{"z":50,"s":"Sn","n":"Estanho","r":5,"c":14,"cat":"post"},{"z":51,"s":"Sb","n":"Antimônio","r":5,"c":15,"cat":"metalloid"},{"z":52,"s":"Te","n":"Telúrio","r":5,"c":16,"cat":"metalloid"},{"z":53,"s":"I","n":"Iodo","r":5,"c":17,"cat":"halogen"},{"z":54,"s":"Xe","n":"Xenônio","r":5,"c":18,"cat":"noble"},{"z":55,"s":"Cs","n":"Césio","r":6,"c":1,"cat":"alkali"},{"z":56,"s":"Ba","n":"Bário","r":6,"c":2,"cat":"alkaline"},{"z":0,"s":"57-71","n":"Lantanídeos","r":6,"c":3,"cat":"placeholder"},{"z":72,"s":"Hf","n":"Háfnio","r":6,"c":4,"cat":"transition"},{"z":73,"s":"Ta","n":"Tântalo","r":6,"c":5,"cat":"transition"},{"z":74,"s":"W","n":"Tungstênio","r":6,"c":6,"cat":"transition"},{"z":75,"s":"Re","n":"Rênio","r":6,"c":7,"cat":"transition"},{"z":76,"s":"Os","n":"Ósmio","r":6,"c":8,"cat":"transition"},{"z":77,"s":"Ir","n":"Irídio","r":6,"c":9,"cat":"transition"},{"z":78,"s":"Pt","n":"Platina","r":6,"c":10,"cat":"transition"},{"z":79,"s":"Au","n":"Ouro","r":6,"c":11,"cat":"transition"},{"z":80,"s":"Hg","n":"Mercúrio","r":6,"c":12,"cat":"transition"},{"z":81,"s":"Tl","n":"Tálio","r":6,"c":13,"cat":"post"},{"z":82,"s":"Pb","n":"Chumbo","r":6,"c":14,"cat":"post"},{"z":83,"s":"Bi","n":"Bismuto","r":6,"c":15,"cat":"post"},{"z":84,"s":"Po","n":"Polônio","r":6,"c":16,"cat":"metalloid"},{"z":85,"s":"At","n":"Astato","r":6,"c":17,"cat":"halogen"},{"z":86,"s":"Rn","n":"Radônio","r":6,"c":18,"cat":"noble"},{"z":87,"s":"Fr","n":"Frâncio","r":7,"c":1,"cat":"alkali"},{"z":88,"s":"Ra","n":"Rádio","r":7,"c":2,"cat":"alkaline"},{"z":0,"s":"89-103","n":"Actinídeos","r":7,"c":3,"cat":"placeholder"},{"z":104,"s":"Rf","n":"Rutherfórdio","r":7,"c":4,"cat":"transition"},{"z":105,"s":"Db","n":"Dúbnio","r":7,"c":5,"cat":"transition"},{"z":106,"s":"Sg","n":"Seabórgio","r":7,"c":6,"cat":"transition"},{"z":107,"s":"Bh","n":"Bóhrio","r":7,"c":7,"cat":"transition"},{"z":108,"s":"Hs","n":"Hássio","r":7,"c":8,"cat":"transition"},{"z":109,"s":"Mt","n":"Meitnério","r":7,"c":9,"cat":"transition"},{"z":110,"s":"Ds","n":"Darmstádtio","r":7,"c":10,"cat":"transition"},{"z":111,"s":"Rg","n":"Roentgênio","r":7,"c":11,"cat":"transition"},{"z":112,"s":"Cn","n":"Copernício","r":7,"c":12,"cat":"transition"},{"z":113,"s":"Nh","n":"Nihônio","r":7,"c":13,"cat":"post"},{"z":114,"s":"Fl","n":"Fleróvio","r":7,"c":14,"cat":"post"},{"z":115,"s":"Mc","n":"Moscóvio","r":7,"c":15,"cat":"post"},{"z":116,"s":"Lv","n":"Livermório","r":7,"c":16,"cat":"post"},{"z":117,"s":"Ts","n":"Tennessino","r":7,"c":17,"cat":"halogen"},{"z":118,"s":"Og","n":"Oganessônio","r":7,"c":18,"cat":"noble"},{"z":57,"s":"La","n":"Lantânio","r":9,"c":3,"cat":"lanthanide"},{"z":58,"s":"Ce","n":"Cério","r":9,"c":4,"cat":"lanthanide"},{"z":59,"s":"Pr","n":"Praseodímio","r":9,"c":5,"cat":"lanthanide"},{"z":60,"s":"Nd","n":"Neodímio","r":9,"c":6,"cat":"lanthanide"},{"z":61,"s":"Pm","n":"Promécio","r":9,"c":7,"cat":"lanthanide"},{"z":62,"s":"Sm","n":"Samário","r":9,"c":8,"cat":"lanthanide"},{"z":63,"s":"Eu","n":"Európio","r":9,"c":9,"cat":"lanthanide"},{"z":64,"s":"Gd","n":"Gadolínio","r":9,"c":10,"cat":"lanthanide"},{"z":65,"s":"Tb","n":"Térbio","r":9,"c":11,"cat":"lanthanide"},{"z":66,"s":"Dy","n":"Disprósio","r":9,"c":12,"cat":"lanthanide"},{"z":67,"s":"Ho","n":"Hólmio","r":9,"c":13,"cat":"lanthanide"},{"z":68,"s":"Er","n":"Érbio","r":9,"c":14,"cat":"lanthanide"},{"z":69,"s":"Tm","n":"Túlio","r":9,"c":15,"cat":"lanthanide"},{"z":70,"s":"Yb","n":"Itérbio","r":9,"c":16,"cat":"lanthanide"},{"z":71,"s":"Lu","n":"Lutécio","r":9,"c":17,"cat":"lanthanide"},{"z":89,"s":"Ac","n":"Actínio","r":10,"c":3,"cat":"actinide"},{"z":90,"s":"Th","n":"Tório","r":10,"c":4,"cat":"actinide"},{"z":91,"s":"Pa","n":"Protactínio","r":10,"c":5,"cat":"actinide"},{"z":92,"s":"U","n":"Urânio","r":10,"c":6,"cat":"actinide"},{"z":93,"s":"Np","n":"Neptúnio","r":10,"c":7,"cat":"actinide"},{"z":94,"s":"Pu","n":"Plutônio","r":10,"c":8,"cat":"actinide"},{"z":95,"s":"Am","n":"Amerício","r":10,"c":9,"cat":"actinide"},{"z":96,"s":"Cm","n":"Cúrio","r":10,"c":10,"cat":"actinide"},{"z":97,"s":"Bk","n":"Berquélio","r":10,"c":11,"cat":"actinide"},{"z":98,"s":"Cf","n":"Califórnio","r":10,"c":12,"cat":"actinide"},{"z":99,"s":"Es","n":"Einsteínio","r":10,"c":13,"cat":"actinide"},{"z":100,"s":"Fm","n":"Férmio","r":10,"c":14,"cat":"actinide"},{"z":101,"s":"Md","n":"Mendelévio","r":10,"c":15,"cat":"actinide"},{"z":102,"s":"No","n":"Nobélio","r":10,"c":16,"cat":"actinide"},{"z":103,"s":"Lr","n":"Laurêncio","r":10,"c":17,"cat":"actinide"}];
