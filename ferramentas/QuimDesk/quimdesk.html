@@ -301,6 +301,9 @@ header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background
 .manage-form select option{padding:.2rem .3rem}
 .manage-form input:focus,.manage-form textarea:focus{border-color:var(--border-light)}
 .manage-form-row{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.mp-checkbox-list{display:flex;flex-direction:column;gap:.3rem;max-height:160px;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:.5rem .6rem}
+.mp-checkbox-item{display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--text);cursor:pointer}
+.mp-checkbox-item input{width:auto;accent-color:var(--blue)}
 .manage-form label{font-family:var(--font-mono);font-size:.6rem;color:var(--text-faint);display:block;margin-bottom:.2rem}
 .manage-form-add{justify-self:start;padding:.42rem .9rem;border-radius:5px;border:1px solid var(--blue-border);background:var(--blue-bg);color:var(--blue);font-family:var(--font-mono);font-size:.72rem;cursor:pointer}
 .manage-form-add:hover{background:var(--blue);color:#fff}
@@ -732,7 +735,8 @@ const SQL_SCHEMA = `
     tipo     TEXT,
     ano      INTEGER,
     escopo   TEXT,
-    link     TEXT
+    link     TEXT,
+    custom   INTEGER DEFAULT 0
   );
   CREATE TABLE IF NOT EXISTS pacs (
     id        TEXT PRIMARY KEY,
@@ -749,6 +753,10 @@ const SQL_SCHEMA = `
     formula TEXT,
     nome    TEXT,
     pac_id  TEXT REFERENCES pacs(id)
+  );
+  CREATE TABLE IF NOT EXISTS material_pacs (
+    material_id TEXT,
+    pac_id      TEXT
   );
   CREATE TABLE IF NOT EXISTS material_elementos (
     material_id TEXT,
@@ -780,7 +788,21 @@ async function initDB(){
     const hasPacId = cols.length && cols[0].values.some(r => r[1] === 'pac_id');
     if(!hasPacId) db.run('ALTER TABLE materiais ADD COLUMN pac_id TEXT REFERENCES pacs(id)');
   }catch(e){ /* coluna já existe ou tabela nova */ }
+  // migração: bancos salvos antes da coluna "custom" em normas
+  try{
+    const colsN = db.exec("PRAGMA table_info(normas)");
+    const hasCustom = colsN.length && colsN[0].values.some(r => r[1] === 'custom');
+    if(!hasCustom) db.run('ALTER TABLE normas ADD COLUMN custom INTEGER DEFAULT 0');
+  }catch(e){ /* coluna já existe ou tabela nova */ }
   dbReady = true;
+  // migração: leva o vínculo legado materiais.pac_id (1:1) para material_pacs (N:N)
+  try{
+    const legacy = q("SELECT id, pac_id FROM materiais WHERE pac_id IS NOT NULL AND pac_id != ''");
+    legacy.forEach(m => {
+      const exists = q('SELECT 1 FROM material_pacs WHERE material_id=? AND pac_id=?', [m.id, m.pac_id]);
+      if(!exists.length) run('INSERT INTO material_pacs (material_id, pac_id) VALUES (?,?)', [m.id, m.pac_id]);
+    });
+  }catch(e){ /* nada a migrar */ }
 }
 
 function persistDB(){
@@ -807,16 +829,24 @@ function run(sql, params = []){ if(dbReady) db.run(sql, params); }
 function uid(){ return 'id' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 function splitList(str){ return (str||'').split(',').map(s=>s.trim()).filter(Boolean); }
 
-/* repopula a tabela "normas" a partir do JSON de elementos (fonte de verdade) */
+/* repopula a tabela "normas" a partir do JSON de elementos (fonte de verdade) — preserva normas customizadas (custom=1) */
 function refreshNormasTable(){
-  run('DELETE FROM normas');
+  run('DELETE FROM normas WHERE custom IS NULL OR custom = 0');
   Object.keys(NORMAS).forEach(sym => {
     const el = NORMAS[sym];
     (el.normas || []).forEach(n => {
-      run(`INSERT OR REPLACE INTO normas (codigo,sym,elemento,titulo,tipo,ano,escopo,link) VALUES (?,?,?,?,?,?,?,?)`,
+      run(`INSERT OR REPLACE INTO normas (codigo,sym,elemento,titulo,tipo,ano,escopo,link,custom) VALUES (?,?,?,?,?,?,?,?,0)`,
         [n.codigo, sym, el.nome || sym, n.titulo, n.tipo, n.ano, n.escopo, n.link]);
     });
   });
+}
+/* cria uma norma personalizada (não vinculada a um elemento específico) */
+function addCustomNorma(nome, codigo, descricao){
+  const existing = q('SELECT codigo FROM normas WHERE codigo=?', [codigo]);
+  if(existing.length){ alert('Já existe uma norma cadastrada com este código.'); return false; }
+  run(`INSERT INTO normas (codigo,sym,elemento,titulo,tipo,ano,escopo,link,custom) VALUES (?,?,?,?,?,?,?,?,1)`,
+    [codigo, '', '', nome, 'Geral', null, descricao || '', null]);
+  return true;
 }
 
 /* ── lookups  ── */
@@ -856,14 +886,13 @@ function getElementsForMaterial(mat){
 function getMaterialsForElement(sym){
   return q(`SELECT m.* FROM materiais m JOIN material_elementos me ON me.material_id = m.id WHERE me.sym = ?`, [sym]);
 }
-// PAC -> Sistemas (FK direta: materiais.pac_id)
+// PAC -> Sistemas (N:N via material_pacs)
 function getMaterialsForPac(pac){
-  return q(`SELECT * FROM materiais WHERE pac_id = ? ORDER BY formula`, [pac.id]);
+  return q(`SELECT m.* FROM materiais m JOIN material_pacs mp ON mp.material_id = m.id WHERE mp.pac_id = ? ORDER BY m.formula`, [pac.id]);
 }
-// Sistema -> PAC (FK direta, pode haver 0 ou 1)
+// Sistema -> PACs (N:N via material_pacs)
 function getPacsForMaterial(mat){
-  if(!mat.pac_id) return [];
-  return q(`SELECT * FROM pacs WHERE id = ?`, [mat.pac_id]);
+  return q(`SELECT p.* FROM pacs p JOIN material_pacs mp ON mp.pac_id = p.id WHERE mp.material_id = ? ORDER BY p.codigo`, [mat.id]);
 }
 
 /* ══ THEME ═══════════════════════════════════════════ */
@@ -915,6 +944,7 @@ function closeManageModal(){
 function switchManageTab(tab){
   manageActiveTab = tab;
   manageDetail = null;
+  normasFilterText = '';
   document.getElementById('mtab-normas').classList.toggle('active', tab==='normas');
   document.getElementById('mtab-pacs').classList.toggle('active', tab==='pacs');
   document.getElementById('mtab-mats').classList.toggle('active', tab==='mats');
@@ -931,17 +961,61 @@ function renderManageBody(){
 }
 
 /* ── ── */
+let normasFilterText = '';
+let showNewNormaForm = false;
 function normasTabHTML(){
-  const rows = q('SELECT * FROM normas ORDER BY sym, codigo');
   return `
-    <div class="manage-section-label">Normas catalogadas no site (${rows.length})</div>
+    <div class="manage-section-label">Normas catalogadas no site</div>
+    <div class="manage-form" style="margin-bottom:.7rem">
+      <div style="display:flex;gap:.5rem;align-items:center">
+        <input id="normas-filter" type="text" style="flex:1" placeholder="Filtrar por código, título, elemento (ex: Carbono, CO, ISO)…"
+          value="${normasFilterText.replace(/"/g,'&quot;')}"
+          oninput="normasFilterText=this.value;renderNormasList();">
+        <button class="manage-form-add" style="white-space:nowrap" onclick="showNewNormaForm=!showNewNormaForm;renderManageBody();">${showNewNormaForm ? '✕ Cancelar' : '+ Adicionar norma'}</button>
+      </div>
+    </div>
+    ${showNewNormaForm ? `
+    <div class="manage-form" style="margin-bottom:.9rem">
+      <div><label>Nome</label><input id="norma-nome" placeholder="ex: Boas práticas de armazenamento de solventes"></div>
+      <div><label>Código</label><input id="norma-codigo" placeholder="ex: QD-INT-014"></div>
+      <div><label>Descrição</label><textarea id="norma-descricao" rows="2" placeholder="Para que serve / o que esta norma cobre"></textarea></div>
+      <button class="manage-form-add" onclick="submitCustomNorma()">+ Criar norma</button>
+    </div>` : ''}
+    <div id="normas-list">${renderNormasListHTML()}</div>`;
+}
+function submitCustomNorma(){
+  const nome = document.getElementById('norma-nome').value.trim();
+  const codigo = document.getElementById('norma-codigo').value.trim();
+  const descricao = document.getElementById('norma-descricao').value.trim();
+  if(!nome || !codigo){ alert('Informe ao menos o nome e o código da norma.'); return; }
+  const ok = addCustomNorma(nome, codigo, descricao);
+  if(!ok) return;
+  showNewNormaForm = false;
+  persistDB(); buildSearchIndex(); renderManageBody();
+}
+function renderNormasListHTML(){
+  const all = q('SELECT * FROM normas ORDER BY sym, codigo');
+  const term = normasFilterText.trim().toLowerCase();
+  const rows = !term ? all : all.filter(n => {
+    if(n.elemento.toLowerCase().includes(term) || n.sym.toLowerCase() === term) return true;
+    if(n.codigo.toLowerCase().includes(term) || n.titulo.toLowerCase().includes(term)) return true;
+    if((n.tipo||'').toLowerCase().includes(term) || (n.escopo||'').toLowerCase().includes(term)) return true;
+    if(String(n.ano||'').includes(term)) return true;
+    return false;
+  });
+  return `
+    <div class="manage-section-label" style="margin-top:0">${rows.length} resultado${rows.length===1?'':'s'}${term?` para "${normasFilterText}"`:''}</div>
     <div class="rel-mini-list">
       ${rows.length ? rows.map(n => `
         <div class="rel-mini-item" onclick="closeManageModal();pick('${n.sym}','norm','${n.codigo}')">
           <span>${n.elemento} (${n.sym}) — ${n.codigo}</span>
           <span class="norm-type-badge type-${(n.tipo||'').toLowerCase()}">${n.tipo}</span>
-        </div>`).join('') : '<div class="manage-empty">Nenhuma norma catalogada ainda.</div>'}
+        </div>`).join('') : '<div class="manage-empty">Nenhuma norma encontrada.</div>'}
     </div>`;
+}
+function renderNormasList(){
+  const list = document.getElementById('normas-list');
+  if(list) list.innerHTML = renderNormasListHTML();
 }
 
 /* ── PACS TAB ── */
@@ -990,6 +1064,7 @@ function addPac(){
 function deletePac(id){
   run('DELETE FROM pacs WHERE id=?', [id]);
   run('DELETE FROM pac_normas WHERE pac_id=?', [id]);
+  run('DELETE FROM material_pacs WHERE pac_id=?', [id]);
   run('UPDATE materiais SET pac_id=NULL WHERE pac_id=?', [id]);
   persistDB(); buildSearchIndex(); renderManageBody();
 }
@@ -1000,18 +1075,21 @@ function materialsTabHTML(){
   const pacOpts = q('SELECT id, codigo, nome FROM pacs ORDER BY codigo');
   return `
     <div class="manage-section-label">Novo Sistema de Materiais</div>
-    ${!pacOpts.length ? `<div class="manage-empty" style="margin-bottom:.6rem">Crie um PAC primeiro — um sistema de materiais precisa estar atribuído a um PAC.</div>` : ''}
     <div class="manage-form">
       <div class="manage-form-row">
         <div><label>Fórmula</label><input id="mat-formula" placeholder="ex: TiO2"></div>
         <div><label>Nome</label><input id="mat-nome" placeholder="ex: Dióxido de Titânio"></div>
       </div>
       <div>
-        <label>PAC ao qual este sistema pertence</label>
-        <select id="mat-pac-select" ${!pacOpts.length ? 'disabled' : ''}>
-          <option value="">— selecione um PAC —</option>
-          ${pacOpts.map(p => `<option value="${p.id}">${p.codigo} — ${p.nome}</option>`).join('')}
-        </select>
+        <label>PAC(s) ao(s) qual(is) este sistema pertence <span style="color:var(--text-faint);font-weight:400">(opcional)</span></label>
+        ${pacOpts.length ? `
+        <div class="mp-checkbox-list">
+          ${pacOpts.map(p => `
+            <label class="mp-checkbox-item">
+              <input type="checkbox" class="mat-pac-check" value="${p.id}">
+              <span>${p.codigo} — ${p.nome}</span>
+            </label>`).join('')}
+        </div>` : `<div class="manage-empty">Nenhum PAC cadastrado ainda — você pode criar o sistema sem PAC e vincular depois.</div>`}
       </div>
       <button class="manage-form-add" onclick="addMaterial()">+ Criar Sistema</button>
       <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text-faint);margin-top:.2rem">Após criar, adicione elementos e normas pelo botão no card do sistema.</div>
@@ -1021,7 +1099,7 @@ function materialsTabHTML(){
       ${mats.length ? mats.map(m => {
         const elementos = q('SELECT sym FROM material_elementos WHERE material_id=?', [m.id]).map(r=>r.sym);
         const codes = q('SELECT norma_codigo FROM material_normas WHERE material_id=?', [m.id]).map(r=>r.norma_codigo);
-        const pacRow = m.pac_id ? q('SELECT codigo FROM pacs WHERE id=?', [m.pac_id])[0] : null;
+        const pacRows = getPacsForMaterial(m);
         return `
         <div class="manage-item">
           <div class="manage-item-top">
@@ -1031,7 +1109,7 @@ function materialsTabHTML(){
             </div>
             <button class="manage-item-del" onclick="deleteMaterial('${m.id}')">remover</button>
           </div>
-          <div class="rel-badges" style="margin-top:.3rem">${pacRow ? `<span class="rel-badge pac">⛁ ${pacRow.codigo}</span>` : `<span class="rel-badge mat" style="opacity:.6">sem PAC</span>`}</div>
+          <div class="rel-badges" style="margin-top:.3rem">${pacRows.length ? pacRows.map(p=>`<span class="rel-badge pac">⛁ ${p.codigo}</span>`).join('') : `<span class="rel-badge mat" style="opacity:.6">sem PAC</span>`}</div>
           <div style="margin-top:.4rem">${elementos.map(s=>`<span class="mat-tag">${s}</span>`).join('')}</div>
           <div class="rel-badges">${codes.slice(0,4).map(c=>`<span class="rel-badge mat">${c}</span>`).join('')}${codes.length>4?`<span class="rel-badge mat">+${codes.length-4}</span>`:''}</div>
           <div style="display:flex;gap:.4rem;margin-top:.45rem;flex-wrap:wrap">
@@ -1046,17 +1124,18 @@ function materialsTabHTML(){
 function addMaterial(){
   const formula = document.getElementById('mat-formula').value.trim();
   const nome = document.getElementById('mat-nome').value.trim();
-  const pacId = document.getElementById('mat-pac-select').value;
+  const pacIds = Array.from(document.querySelectorAll('.mat-pac-check:checked')).map(c => c.value);
   if(!formula || !nome){ alert('Informe ao menos a fórmula e o nome do sistema.'); return; }
-  if(!pacId){ alert('Selecione o PAC ao qual este sistema pertence. Crie um PAC antes, se ainda não tiver nenhum.'); return; }
   const id = uid();
-  run('INSERT INTO materiais (id,formula,nome,pac_id) VALUES (?,?,?,?)', [id, formula, nome, pacId]);
+  run('INSERT INTO materiais (id,formula,nome,pac_id) VALUES (?,?,?,?)', [id, formula, nome, pacIds[0] || null]);
+  pacIds.forEach(pid => run('INSERT INTO material_pacs (material_id, pac_id) VALUES (?,?)', [id, pid]));
   persistDB(); buildSearchIndex(); renderManageBody();
 }
 function deleteMaterial(id){
   run('DELETE FROM materiais WHERE id=?', [id]);
   run('DELETE FROM material_elementos WHERE material_id=?', [id]);
   run('DELETE FROM material_normas WHERE material_id=?', [id]);
+  run('DELETE FROM material_pacs WHERE material_id=?', [id]);
   persistDB(); buildSearchIndex(); renderManageBody();
 }
 
@@ -1100,6 +1179,7 @@ function renderRelationDetail(body){
     const elementos = getElementsForMaterial(mat);
     const normas = getNormasForMaterial(mat);
     const pacs = getPacsForMaterial(mat);
+    const allPacs = q('SELECT * FROM pacs ORDER BY codigo');
     body.innerHTML = `
       <span class="rel-detail-back" onclick="manageDetail=null;renderManageBody()">‹ voltar para Sistemas</span>
       <div class="rel-detail-title">${mat.formula}</div>
@@ -1113,12 +1193,20 @@ function renderRelationDetail(body){
         <div class="rel-mini-item" onclick="closeManageModal();pick('${sym}','norm','${norma.codigo}')">
           <span>${norma.codigo}</span><span class="norm-type-badge type-${(norma.tipo||'').toLowerCase()}">${norma.tipo}</span>
         </div>`).join('') : '<div class="manage-empty">Nenhuma norma vinculada.</div>'}</div>
-      <div class="manage-section-label">PAC ao qual este sistema pertence</div>
-      <div class="rel-mini-list">${pacs.length ? pacs.map(p => `
-        <div class="rel-mini-item" onclick="showRelationDetail('pac','${p.id}')">
-          <span>${p.codigo} — ${p.nome}</span><span>›</span>
-        </div>`).join('') : '<div class="manage-empty">Nenhum PAC atribuído a este sistema.</div>'}</div>`;
+      <div class="manage-section-label">PACs aos quais este sistema pertence (${pacs.length})</div>
+      <div class="mp-checkbox-list">
+        ${allPacs.length ? allPacs.map(p => `
+          <label class="mp-checkbox-item">
+            <input type="checkbox" ${pacs.some(x=>x.id===p.id)?'checked':''} onchange="toggleMatPac('${mat.id}','${p.id}',this.checked)">
+            <span>${p.codigo} — ${p.nome}</span>
+          </label>`).join('') : '<div class="manage-empty">Nenhum PAC cadastrado ainda.</div>'}
+      </div>`;
   }
+}
+function toggleMatPac(matId, pacId, checked){
+  if(checked) run('INSERT INTO material_pacs (material_id, pac_id) VALUES (?,?)', [matId, pacId]);
+  else run('DELETE FROM material_pacs WHERE material_id=? AND pac_id=?', [matId, pacId]);
+  persistDB(); buildSearchIndex(); renderManageBody();
 }
 
 /* ══ LOAD DATA ═══════════════════════════════════════ */
@@ -1148,7 +1236,13 @@ function buildSearchIndex(){
   });
   if(dbReady){
     q('SELECT * FROM pacs').forEach(p => searchIndex.push({type:'pac', id:p.id, codigo:p.codigo, nome:p.nome}));
-    q('SELECT * FROM materiais').forEach(m => searchIndex.push({type:'material', id:m.id, formula:m.formula, nome:m.nome}));
+    q('SELECT * FROM materiais').forEach(m => {
+      const elementos = q('SELECT sym FROM material_elementos WHERE material_id=?', [m.id]).map(r => {
+        const base = ELEMENTS.find(e => e.s === r.sym);
+        return {sym:r.sym, nome: base ? base.n : r.sym};
+      });
+      searchIndex.push({type:'material', id:m.id, formula:m.formula, nome:m.nome, elementos});
+    });
   }
 }
 
@@ -1467,7 +1561,10 @@ searchInput.addEventListener('input', () => {
     if(i.type === 'element') return i.name.toLowerCase().includes(q) || i.sym.toLowerCase() === q;
     if(i.type === 'norm')    return i.code.toLowerCase().includes(q) || i.title.toLowerCase().includes(q) || i.tipo.toLowerCase().includes(q);
     if(i.type === 'pac')     return i.codigo.toLowerCase().includes(q) || i.nome.toLowerCase().includes(q);
-    if(i.type === 'material')return i.formula.toLowerCase().includes(q) || i.nome.toLowerCase().includes(q);
+    if(i.type === 'material'){
+      i._matchedEl = (i.elementos || []).find(el => el.sym.toLowerCase() === q || el.nome.toLowerCase().includes(q));
+      return i.formula.toLowerCase().includes(q) || i.nome.toLowerCase().includes(q) || !!i._matchedEl;
+    }
     return false;
   }).slice(0, 8);
   if(!m.length){ searchResults.classList.add('hidden'); return; }
@@ -1497,7 +1594,7 @@ searchInput.addEventListener('input', () => {
           <span class="sr-item-code">◆ ${i.formula}</span>
           <span class="rel-badge mat">Sistema</span>
         </div>
-        <div class="sr-item-text">${i.nome}</div></div>`;
+        <div class="sr-item-text">${i.nome}${i._matchedEl ? ` <span style="color:var(--teal);font-family:var(--font-mono);font-size:.6rem">— contém ${i._matchedEl.sym} (${i._matchedEl.nome})</span>` : ''}</div></div>`;
     }
     return `<div class="sr-item" onclick="pick('${i.sym}','norm','${i.code}')">
       <div class="sr-item-top">
@@ -1888,8 +1985,8 @@ function confirmAddNormToMat(){
 }
 
 /* ══ FALLBACK ═══════════════════════════════ */
-//const FALLBACK_ELEMENTS=[{"z":1,"s":"H","n":"Hidrogênio","r":1,"c":1,"cat":"nonmetal"},{"z":2,"s":"He","n":"Hélio","r":1,"c":18,"cat":"noble"},{"z":3,"s":"Li","n":"Lítio","r":2,"c":1,"cat":"alkali"},{"z":4,"s":"Be","n":"Berílio","r":2,"c":2,"cat":"alkaline"},{"z":5,"s":"B","n":"Boro","r":2,"c":13,"cat":"metalloid"},{"z":6,"s":"C","n":"Carbono","r":2,"c":14,"cat":"nonmetal"},{"z":7,"s":"N","n":"Nitrogênio","r":2,"c":15,"cat":"nonmetal"},{"z":8,"s":"O","n":"Oxigênio","r":2,"c":16,"cat":"nonmetal"},{"z":9,"s":"F","n":"Flúor","r":2,"c":17,"cat":"halogen"},{"z":10,"s":"Ne","n":"Neônio","r":2,"c":18,"cat":"noble"},{"z":11,"s":"Na","n":"Sódio","r":3,"c":1,"cat":"alkali"},{"z":12,"s":"Mg","n":"Magnésio","r":3,"c":2,"cat":"alkaline"},{"z":13,"s":"Al","n":"Alumínio","r":3,"c":13,"cat":"post"},{"z":14,"s":"Si","n":"Silício","r":3,"c":14,"cat":"metalloid"},{"z":15,"s":"P","n":"Fósforo","r":3,"c":15,"cat":"nonmetal"},{"z":16,"s":"S","n":"Enxofre","r":3,"c":16,"cat":"nonmetal"},{"z":17,"s":"Cl","n":"Cloro","r":3,"c":17,"cat":"halogen"},{"z":18,"s":"Ar","n":"Argônio","r":3,"c":18,"cat":"noble"},{"z":19,"s":"K","n":"Potássio","r":4,"c":1,"cat":"alkali"},{"z":20,"s":"Ca","n":"Cálcio","r":4,"c":2,"cat":"alkaline"},{"z":21,"s":"Sc","n":"Escândio","r":4,"c":3,"cat":"transition"},{"z":22,"s":"Ti","n":"Titânio","r":4,"c":4,"cat":"transition"},{"z":23,"s":"V","n":"Vanádio","r":4,"c":5,"cat":"transition"},{"z":24,"s":"Cr","n":"Cromo","r":4,"c":6,"cat":"transition"},{"z":25,"s":"Mn","n":"Manganês","r":4,"c":7,"cat":"transition"},{"z":26,"s":"Fe","n":"Ferro","r":4,"c":8,"cat":"transition"},{"z":27,"s":"Co","n":"Cobalto","r":4,"c":9,"cat":"transition"},{"z":28,"s":"Ni","n":"Níquel","r":4,"c":10,"cat":"transition"},{"z":29,"s":"Cu","n":"Cobre","r":4,"c":11,"cat":"transition"},{"z":30,"s":"Zn","n":"Zinco","r":4,"c":12,"cat":"transition"},{"z":31,"s":"Ga","n":"Gálio","r":4,"c":13,"cat":"post"},{"z":32,"s":"Ge","n":"Germânio","r":4,"c":14,"cat":"metalloid"},{"z":33,"s":"As","n":"Arsênio","r":4,"c":15,"cat":"metalloid"},{"z":34,"s":"Se","n":"Selênio","r":4,"c":16,"cat":"nonmetal"},{"z":35,"s":"Br","n":"Bromo","r":4,"c":17,"cat":"halogen"},{"z":36,"s":"Kr","n":"Criptônio","r":4,"c":18,"cat":"noble"},{"z":37,"s":"Rb","n":"Rubídio","r":5,"c":1,"cat":"alkali"},{"z":38,"s":"Sr","n":"Estrôncio","r":5,"c":2,"cat":"alkaline"},{"z":39,"s":"Y","n":"Ítrio","r":5,"c":3,"cat":"transition"},{"z":40,"s":"Zr","n":"Zircônio","r":5,"c":4,"cat":"transition"},{"z":41,"s":"Nb","n":"Nióbio","r":5,"c":5,"cat":"transition"},{"z":42,"s":"Mo","n":"Molibdênio","r":5,"c":6,"cat":"transition"},{"z":43,"s":"Tc","n":"Tecnécio","r":5,"c":7,"cat":"transition"},{"z":44,"s":"Ru","n":"Rutênio","r":5,"c":8,"cat":"transition"},{"z":45,"s":"Rh","n":"Ródio","r":5,"c":9,"cat":"transition"},{"z":46,"s":"Pd","n":"Paládio","r":5,"c":10,"cat":"transition"},{"z":47,"s":"Ag","n":"Prata","r":5,"c":11,"cat":"transition"},{"z":48,"s":"Cd","n":"Cádmio","r":5,"c":12,"cat":"transition"},{"z":49,"s":"In","n":"Índio","r":5,"c":13,"cat":"post"},{"z":50,"s":"Sn","n":"Estanho","r":5,"c":14,"cat":"post"},{"z":51,"s":"Sb","n":"Antimônio","r":5,"c":15,"cat":"metalloid"},{"z":52,"s":"Te","n":"Telúrio","r":5,"c":16,"cat":"metalloid"},{"z":53,"s":"I","n":"Iodo","r":5,"c":17,"cat":"halogen"},{"z":54,"s":"Xe","n":"Xenônio","r":5,"c":18,"cat":"noble"},{"z":55,"s":"Cs","n":"Césio","r":6,"c":1,"cat":"alkali"},{"z":56,"s":"Ba","n":"Bário","r":6,"c":2,"cat":"alkaline"},{"z":0,"s":"57-71","n":"Lantanídeos","r":6,"c":3,"cat":"placeholder"},{"z":72,"s":"Hf","n":"Háfnio","r":6,"c":4,"cat":"transition"},{"z":73,"s":"Ta","n":"Tântalo","r":6,"c":5,"cat":"transition"},{"z":74,"s":"W","n":"Tungstênio","r":6,"c":6,"cat":"transition"},{"z":75,"s":"Re","n":"Rênio","r":6,"c":7,"cat":"transition"},{"z":76,"s":"Os","n":"Ósmio","r":6,"c":8,"cat":"transition"},{"z":77,"s":"Ir","n":"Irídio","r":6,"c":9,"cat":"transition"},{"z":78,"s":"Pt","n":"Platina","r":6,"c":10,"cat":"transition"},{"z":79,"s":"Au","n":"Ouro","r":6,"c":11,"cat":"transition"},{"z":80,"s":"Hg","n":"Mercúrio","r":6,"c":12,"cat":"transition"},{"z":81,"s":"Tl","n":"Tálio","r":6,"c":13,"cat":"post"},{"z":82,"s":"Pb","n":"Chumbo","r":6,"c":14,"cat":"post"},{"z":83,"s":"Bi","n":"Bismuto","r":6,"c":15,"cat":"post"},{"z":84,"s":"Po","n":"Polônio","r":6,"c":16,"cat":"metalloid"},{"z":85,"s":"At","n":"Astato","r":6,"c":17,"cat":"halogen"},{"z":86,"s":"Rn","n":"Radônio","r":6,"c":18,"cat":"noble"},{"z":87,"s":"Fr","n":"Frâncio","r":7,"c":1,"cat":"alkali"},{"z":88,"s":"Ra","n":"Rádio","r":7,"c":2,"cat":"alkaline"},{"z":0,"s":"89-103","n":"Actinídeos","r":7,"c":3,"cat":"placeholder"},{"z":104,"s":"Rf","n":"Rutherfórdio","r":7,"c":4,"cat":"transition"},{"z":105,"s":"Db","n":"Dúbnio","r":7,"c":5,"cat":"transition"},{"z":106,"s":"Sg","n":"Seabórgio","r":7,"c":6,"cat":"transition"},{"z":107,"s":"Bh","n":"Bóhrio","r":7,"c":7,"cat":"transition"},{"z":108,"s":"Hs","n":"Hássio","r":7,"c":8,"cat":"transition"},{"z":109,"s":"Mt","n":"Meitnério","r":7,"c":9,"cat":"transition"},{"z":110,"s":"Ds","n":"Darmstádtio","r":7,"c":10,"cat":"transition"},{"z":111,"s":"Rg","n":"Roentgênio","r":7,"c":11,"cat":"transition"},{"z":112,"s":"Cn","n":"Copernício","r":7,"c":12,"cat":"transition"},{"z":113,"s":"Nh","n":"Nihônio","r":7,"c":13,"cat":"post"},{"z":114,"s":"Fl","n":"Fleróvio","r":7,"c":14,"cat":"post"},{"z":115,"s":"Mc","n":"Moscóvio","r":7,"c":15,"cat":"post"},{"z":116,"s":"Lv","n":"Livermório","r":7,"c":16,"cat":"post"},{"z":117,"s":"Ts","n":"Tennessino","r":7,"c":17,"cat":"halogen"},{"z":118,"s":"Og","n":"Oganessônio","r":7,"c":18,"cat":"noble"},{"z":57,"s":"La","n":"Lantânio","r":9,"c":3,"cat":"lanthanide"},{"z":58,"s":"Ce","n":"Cério","r":9,"c":4,"cat":"lanthanide"},{"z":59,"s":"Pr","n":"Praseodímio","r":9,"c":5,"cat":"lanthanide"},{"z":60,"s":"Nd","n":"Neodímio","r":9,"c":6,"cat":"lanthanide"},{"z":61,"s":"Pm","n":"Promécio","r":9,"c":7,"cat":"lanthanide"},{"z":62,"s":"Sm","n":"Samário","r":9,"c":8,"cat":"lanthanide"},{"z":63,"s":"Eu","n":"Európio","r":9,"c":9,"cat":"lanthanide"},{"z":64,"s":"Gd","n":"Gadolínio","r":9,"c":10,"cat":"lanthanide"},{"z":65,"s":"Tb","n":"Térbio","r":9,"c":11,"cat":"lanthanide"},{"z":66,"s":"Dy","n":"Disprósio","r":9,"c":12,"cat":"lanthanide"},{"z":67,"s":"Ho","n":"Hólmio","r":9,"c":13,"cat":"lanthanide"},{"z":68,"s":"Er","n":"Érbio","r":9,"c":14,"cat":"lanthanide"},{"z":69,"s":"Tm","n":"Túlio","r":9,"c":15,"cat":"lanthanide"},{"z":70,"s":"Yb","n":"Itérbio","r":9,"c":16,"cat":"lanthanide"},{"z":71,"s":"Lu","n":"Lutécio","r":9,"c":17,"cat":"lanthanide"},{"z":89,"s":"Ac","n":"Actínio","r":10,"c":3,"cat":"actinide"},{"z":90,"s":"Th","n":"Tório","r":10,"c":4,"cat":"actinide"},{"z":91,"s":"Pa","n":"Protactínio","r":10,"c":5,"cat":"actinide"},{"z":92,"s":"U","n":"Urânio","r":10,"c":6,"cat":"actinide"},{"z":93,"s":"Np","n":"Neptúnio","r":10,"c":7,"cat":"actinide"},{"z":94,"s":"Pu","n":"Plutônio","r":10,"c":8,"cat":"actinide"},{"z":95,"s":"Am","n":"Amerício","r":10,"c":9,"cat":"actinide"},{"z":96,"s":"Cm","n":"Cúrio","r":10,"c":10,"cat":"actinide"},{"z":97,"s":"Bk","n":"Berquélio","r":10,"c":11,"cat":"actinide"},{"z":98,"s":"Cf","n":"Califórnio","r":10,"c":12,"cat":"actinide"},{"z":99,"s":"Es","n":"Einsteínio","r":10,"c":13,"cat":"actinide"},{"z":100,"s":"Fm","n":"Férmio","r":10,"c":14,"cat":"actinide"},{"z":101,"s":"Md","n":"Mendelévio","r":10,"c":15,"cat":"actinide"},{"z":102,"s":"No","n":"Nobélio","r":10,"c":16,"cat":"actinide"},{"z":103,"s":"Lr","n":"Laurêncio","r":10,"c":17,"cat":"actinide"}];
-//const FALLBACK_NORMAS={"Au":{"nome":"Ouro","sym":"Au","z":79,"peso":"196,967","cat":"Metal de Transição","grupo":"11","periodo":"6","estado":"Sólido","cor":"Amarelo metálico","desc":"Metal precioso nobre, altamente maleável e dúctil, de cor amarela característica. Não oxida ao ar e é resistente à maioria dos ácidos. Amplamente usado em joalheria, eletrônica e como reserva de valor.","normas":[{"id":1,"codigo":"ABNT NBR ISO 11426","ano":2012,"titulo":"Joalheria — Determinação do teor de ouro em ligas de joias de ouro — Método por copelação (ensaio de toque)","tipo":"ABNT","escopo":"Joalheria e metais preciosos","link":"https://www.abntcatalogo.com.br/norma.aspx?ID=ABNT+NBR+ISO+11426"},{"id":2,"codigo":"ISO 11426","ano":2021,"titulo":"Jewellery and precious metals — Determination of gold in gold jewellery alloys — Cupellation method (fire assay)","tipo":"ISO","escopo":"Joalheria e metais preciosos","link":"https://www.iso.org/standard/79827.html"},{"id":3,"codigo":"ASTM E1335","ano":2020,"titulo":"Standard Test Method for Determination of Gold, Silver, and Palladium in Jewelry Alloys by ICP-OES","tipo":"ASTM","escopo":"Joalheria e espectrometria","link":"https://www.astm.org/e1335-20.html"},{"id":4,"codigo":"ISO 9202","ano":2014,"titulo":"Jewellery — Fineness of precious metal alloys","tipo":"ISO","escopo":"Ligas de metais preciosos","link":"https://www.iso.org/standard/62448.html"},{"id":5,"codigo":"ABNT NBR 16064","ano":2012,"titulo":"Joias, bijuterias e acessórios — Contaminantes inorgânicos — Determinação de metais pesados por AAS","tipo":"ABNT","escopo":"Joalheria e segurança química","link":"https://www.abntcatalogo.com.br/norma.aspx?ID=ABNT+NBR+16064"},{"id":6,"codigo":"ASTM B562","ano":2019,"titulo":"Standard Specification for Refined Gold","tipo":"ASTM","escopo":"Ouro refinado e pureza","link":"https://www.astm.org/b0562-19.html"},{"id":7,"codigo":"ISO 15093","ano":2020,"titulo":"Jewellery — Determination of high purity gold — Difference method using ICP-OES","tipo":"ISO","escopo":"Alta pureza — ICP-OES","link":"https://www.iso.org/standard/74587.html"}]},"Ag":{"nome":"Prata","sym":"Ag","z":47,"peso":"107,868","cat":"Metal de Transição","grupo":"11","periodo":"5","estado":"Sólido","cor":"Branco prateado","desc":"Metal precioso de cor branco brilhante, com a maior condutividade elétrica e térmica entre todos os metais. Amplamente usado em joalheria, eletrônica, fotografia e aplicações antimicrobianas.","normas":[{"id":1,"codigo":"ABNT NBR ISO 11427","ano":2012,"titulo":"Joalheria — Determinação do teor de prata em ligas de joias de prata — Método gravimétrico (Volhard)","tipo":"ABNT","escopo":"Joalheria e metais preciosos","link":"https://www.abntcatalogo.com.br/norma.aspx?ID=ABNT+NBR+ISO+11427"},{"id":2,"codigo":"ISO 11427","ano":2021,"titulo":"Jewellery and precious metals — Determination of silver in silver jewellery alloys — Volumetric (potentiometric) method","tipo":"ISO","escopo":"Joalheria e metais preciosos","link":"https://www.iso.org/standard/79828.html"},{"id":3,"codigo":"ABNT NBR 14942","ano":2003,"titulo":"Joias — Títulos de ligas de prata — Definição, requisitos e métodos de ensaio","tipo":"ABNT","escopo":"Ligas de prata para joalheria","link":"https://www.abntcatalogo.com.br/norma.aspx?ID=ABNT+NBR+14942"},{"id":4,"codigo":"ASTM E1336","ano":2019,"titulo":"Standard Test Method for Determination of Silver in Precious Metal Alloys by Flame Atomic Absorption Spectrometry","tipo":"ASTM","escopo":"Espectrometria de absorção atômica","link":"https://www.astm.org/e1336-19.html"},{"id":5,"codigo":"ASTM B413","ano":2014,"titulo":"Standard Specification for Refined Silver","tipo":"ASTM","escopo":"Prata refinada — especificação","link":"https://www.astm.org/b0413-14.html"},{"id":6,"codigo":"ISO 15093","ano":2020,"titulo":"Jewellery — Determination of high purity silver — Difference method using ICP-OES","tipo":"ISO","escopo":"Alta pureza — ICP-OES","link":"https://www.iso.org/standard/74587.html"},{"id":7,"codigo":"ASTM B452","ano":2022,"titulo":"Standard Specification for Silver-Copper and Silver-Copper-Zinc Brazing Filler Metals","tipo":"ASTM","escopo":"Ligas para brasagem","link":"https://www.astm.org/b0452-22.html"}]}};
+const FALLBACK_ELEMENTS=[{"z":1,"s":"H","n":"Hidrogênio","r":1,"c":1,"cat":"nonmetal"},{"z":2,"s":"He","n":"Hélio","r":1,"c":18,"cat":"noble"},{"z":3,"s":"Li","n":"Lítio","r":2,"c":1,"cat":"alkali"},{"z":4,"s":"Be","n":"Berílio","r":2,"c":2,"cat":"alkaline"},{"z":5,"s":"B","n":"Boro","r":2,"c":13,"cat":"metalloid"},{"z":6,"s":"C","n":"Carbono","r":2,"c":14,"cat":"nonmetal"},{"z":7,"s":"N","n":"Nitrogênio","r":2,"c":15,"cat":"nonmetal"},{"z":8,"s":"O","n":"Oxigênio","r":2,"c":16,"cat":"nonmetal"},{"z":9,"s":"F","n":"Flúor","r":2,"c":17,"cat":"halogen"},{"z":10,"s":"Ne","n":"Neônio","r":2,"c":18,"cat":"noble"},{"z":11,"s":"Na","n":"Sódio","r":3,"c":1,"cat":"alkali"},{"z":12,"s":"Mg","n":"Magnésio","r":3,"c":2,"cat":"alkaline"},{"z":13,"s":"Al","n":"Alumínio","r":3,"c":13,"cat":"post"},{"z":14,"s":"Si","n":"Silício","r":3,"c":14,"cat":"metalloid"},{"z":15,"s":"P","n":"Fósforo","r":3,"c":15,"cat":"nonmetal"},{"z":16,"s":"S","n":"Enxofre","r":3,"c":16,"cat":"nonmetal"},{"z":17,"s":"Cl","n":"Cloro","r":3,"c":17,"cat":"halogen"},{"z":18,"s":"Ar","n":"Argônio","r":3,"c":18,"cat":"noble"},{"z":19,"s":"K","n":"Potássio","r":4,"c":1,"cat":"alkali"},{"z":20,"s":"Ca","n":"Cálcio","r":4,"c":2,"cat":"alkaline"},{"z":21,"s":"Sc","n":"Escândio","r":4,"c":3,"cat":"transition"},{"z":22,"s":"Ti","n":"Titânio","r":4,"c":4,"cat":"transition"},{"z":23,"s":"V","n":"Vanádio","r":4,"c":5,"cat":"transition"},{"z":24,"s":"Cr","n":"Cromo","r":4,"c":6,"cat":"transition"},{"z":25,"s":"Mn","n":"Manganês","r":4,"c":7,"cat":"transition"},{"z":26,"s":"Fe","n":"Ferro","r":4,"c":8,"cat":"transition"},{"z":27,"s":"Co","n":"Cobalto","r":4,"c":9,"cat":"transition"},{"z":28,"s":"Ni","n":"Níquel","r":4,"c":10,"cat":"transition"},{"z":29,"s":"Cu","n":"Cobre","r":4,"c":11,"cat":"transition"},{"z":30,"s":"Zn","n":"Zinco","r":4,"c":12,"cat":"transition"},{"z":31,"s":"Ga","n":"Gálio","r":4,"c":13,"cat":"post"},{"z":32,"s":"Ge","n":"Germânio","r":4,"c":14,"cat":"metalloid"},{"z":33,"s":"As","n":"Arsênio","r":4,"c":15,"cat":"metalloid"},{"z":34,"s":"Se","n":"Selênio","r":4,"c":16,"cat":"nonmetal"},{"z":35,"s":"Br","n":"Bromo","r":4,"c":17,"cat":"halogen"},{"z":36,"s":"Kr","n":"Criptônio","r":4,"c":18,"cat":"noble"},{"z":37,"s":"Rb","n":"Rubídio","r":5,"c":1,"cat":"alkali"},{"z":38,"s":"Sr","n":"Estrôncio","r":5,"c":2,"cat":"alkaline"},{"z":39,"s":"Y","n":"Ítrio","r":5,"c":3,"cat":"transition"},{"z":40,"s":"Zr","n":"Zircônio","r":5,"c":4,"cat":"transition"},{"z":41,"s":"Nb","n":"Nióbio","r":5,"c":5,"cat":"transition"},{"z":42,"s":"Mo","n":"Molibdênio","r":5,"c":6,"cat":"transition"},{"z":43,"s":"Tc","n":"Tecnécio","r":5,"c":7,"cat":"transition"},{"z":44,"s":"Ru","n":"Rutênio","r":5,"c":8,"cat":"transition"},{"z":45,"s":"Rh","n":"Ródio","r":5,"c":9,"cat":"transition"},{"z":46,"s":"Pd","n":"Paládio","r":5,"c":10,"cat":"transition"},{"z":47,"s":"Ag","n":"Prata","r":5,"c":11,"cat":"transition"},{"z":48,"s":"Cd","n":"Cádmio","r":5,"c":12,"cat":"transition"},{"z":49,"s":"In","n":"Índio","r":5,"c":13,"cat":"post"},{"z":50,"s":"Sn","n":"Estanho","r":5,"c":14,"cat":"post"},{"z":51,"s":"Sb","n":"Antimônio","r":5,"c":15,"cat":"metalloid"},{"z":52,"s":"Te","n":"Telúrio","r":5,"c":16,"cat":"metalloid"},{"z":53,"s":"I","n":"Iodo","r":5,"c":17,"cat":"halogen"},{"z":54,"s":"Xe","n":"Xenônio","r":5,"c":18,"cat":"noble"},{"z":55,"s":"Cs","n":"Césio","r":6,"c":1,"cat":"alkali"},{"z":56,"s":"Ba","n":"Bário","r":6,"c":2,"cat":"alkaline"},{"z":0,"s":"57-71","n":"Lantanídeos","r":6,"c":3,"cat":"placeholder"},{"z":72,"s":"Hf","n":"Háfnio","r":6,"c":4,"cat":"transition"},{"z":73,"s":"Ta","n":"Tântalo","r":6,"c":5,"cat":"transition"},{"z":74,"s":"W","n":"Tungstênio","r":6,"c":6,"cat":"transition"},{"z":75,"s":"Re","n":"Rênio","r":6,"c":7,"cat":"transition"},{"z":76,"s":"Os","n":"Ósmio","r":6,"c":8,"cat":"transition"},{"z":77,"s":"Ir","n":"Irídio","r":6,"c":9,"cat":"transition"},{"z":78,"s":"Pt","n":"Platina","r":6,"c":10,"cat":"transition"},{"z":79,"s":"Au","n":"Ouro","r":6,"c":11,"cat":"transition"},{"z":80,"s":"Hg","n":"Mercúrio","r":6,"c":12,"cat":"transition"},{"z":81,"s":"Tl","n":"Tálio","r":6,"c":13,"cat":"post"},{"z":82,"s":"Pb","n":"Chumbo","r":6,"c":14,"cat":"post"},{"z":83,"s":"Bi","n":"Bismuto","r":6,"c":15,"cat":"post"},{"z":84,"s":"Po","n":"Polônio","r":6,"c":16,"cat":"metalloid"},{"z":85,"s":"At","n":"Astato","r":6,"c":17,"cat":"halogen"},{"z":86,"s":"Rn","n":"Radônio","r":6,"c":18,"cat":"noble"},{"z":87,"s":"Fr","n":"Frâncio","r":7,"c":1,"cat":"alkali"},{"z":88,"s":"Ra","n":"Rádio","r":7,"c":2,"cat":"alkaline"},{"z":0,"s":"89-103","n":"Actinídeos","r":7,"c":3,"cat":"placeholder"},{"z":104,"s":"Rf","n":"Rutherfórdio","r":7,"c":4,"cat":"transition"},{"z":105,"s":"Db","n":"Dúbnio","r":7,"c":5,"cat":"transition"},{"z":106,"s":"Sg","n":"Seabórgio","r":7,"c":6,"cat":"transition"},{"z":107,"s":"Bh","n":"Bóhrio","r":7,"c":7,"cat":"transition"},{"z":108,"s":"Hs","n":"Hássio","r":7,"c":8,"cat":"transition"},{"z":109,"s":"Mt","n":"Meitnério","r":7,"c":9,"cat":"transition"},{"z":110,"s":"Ds","n":"Darmstádtio","r":7,"c":10,"cat":"transition"},{"z":111,"s":"Rg","n":"Roentgênio","r":7,"c":11,"cat":"transition"},{"z":112,"s":"Cn","n":"Copernício","r":7,"c":12,"cat":"transition"},{"z":113,"s":"Nh","n":"Nihônio","r":7,"c":13,"cat":"post"},{"z":114,"s":"Fl","n":"Fleróvio","r":7,"c":14,"cat":"post"},{"z":115,"s":"Mc","n":"Moscóvio","r":7,"c":15,"cat":"post"},{"z":116,"s":"Lv","n":"Livermório","r":7,"c":16,"cat":"post"},{"z":117,"s":"Ts","n":"Tennessino","r":7,"c":17,"cat":"halogen"},{"z":118,"s":"Og","n":"Oganessônio","r":7,"c":18,"cat":"noble"},{"z":57,"s":"La","n":"Lantânio","r":9,"c":3,"cat":"lanthanide"},{"z":58,"s":"Ce","n":"Cério","r":9,"c":4,"cat":"lanthanide"},{"z":59,"s":"Pr","n":"Praseodímio","r":9,"c":5,"cat":"lanthanide"},{"z":60,"s":"Nd","n":"Neodímio","r":9,"c":6,"cat":"lanthanide"},{"z":61,"s":"Pm","n":"Promécio","r":9,"c":7,"cat":"lanthanide"},{"z":62,"s":"Sm","n":"Samário","r":9,"c":8,"cat":"lanthanide"},{"z":63,"s":"Eu","n":"Európio","r":9,"c":9,"cat":"lanthanide"},{"z":64,"s":"Gd","n":"Gadolínio","r":9,"c":10,"cat":"lanthanide"},{"z":65,"s":"Tb","n":"Térbio","r":9,"c":11,"cat":"lanthanide"},{"z":66,"s":"Dy","n":"Disprósio","r":9,"c":12,"cat":"lanthanide"},{"z":67,"s":"Ho","n":"Hólmio","r":9,"c":13,"cat":"lanthanide"},{"z":68,"s":"Er","n":"Érbio","r":9,"c":14,"cat":"lanthanide"},{"z":69,"s":"Tm","n":"Túlio","r":9,"c":15,"cat":"lanthanide"},{"z":70,"s":"Yb","n":"Itérbio","r":9,"c":16,"cat":"lanthanide"},{"z":71,"s":"Lu","n":"Lutécio","r":9,"c":17,"cat":"lanthanide"},{"z":89,"s":"Ac","n":"Actínio","r":10,"c":3,"cat":"actinide"},{"z":90,"s":"Th","n":"Tório","r":10,"c":4,"cat":"actinide"},{"z":91,"s":"Pa","n":"Protactínio","r":10,"c":5,"cat":"actinide"},{"z":92,"s":"U","n":"Urânio","r":10,"c":6,"cat":"actinide"},{"z":93,"s":"Np","n":"Neptúnio","r":10,"c":7,"cat":"actinide"},{"z":94,"s":"Pu","n":"Plutônio","r":10,"c":8,"cat":"actinide"},{"z":95,"s":"Am","n":"Amerício","r":10,"c":9,"cat":"actinide"},{"z":96,"s":"Cm","n":"Cúrio","r":10,"c":10,"cat":"actinide"},{"z":97,"s":"Bk","n":"Berquélio","r":10,"c":11,"cat":"actinide"},{"z":98,"s":"Cf","n":"Califórnio","r":10,"c":12,"cat":"actinide"},{"z":99,"s":"Es","n":"Einsteínio","r":10,"c":13,"cat":"actinide"},{"z":100,"s":"Fm","n":"Férmio","r":10,"c":14,"cat":"actinide"},{"z":101,"s":"Md","n":"Mendelévio","r":10,"c":15,"cat":"actinide"},{"z":102,"s":"No","n":"Nobélio","r":10,"c":16,"cat":"actinide"},{"z":103,"s":"Lr","n":"Laurêncio","r":10,"c":17,"cat":"actinide"}];
+const FALLBACK_NORMAS={"Au":{"nome":"Ouro","sym":"Au","z":79,"peso":"196,967","cat":"Metal de Transição","grupo":"11","periodo":"6","estado":"Sólido","cor":"Amarelo metálico","desc":"Metal precioso nobre, altamente maleável e dúctil, de cor amarela característica. Não oxida ao ar e é resistente à maioria dos ácidos. Amplamente usado em joalheria, eletrônica e como reserva de valor.","normas":[{"id":1,"codigo":"ABNT NBR ISO 11426","ano":2012,"titulo":"Joalheria — Determinação do teor de ouro em ligas de joias de ouro — Método por copelação (ensaio de toque)","tipo":"ABNT","escopo":"Joalheria e metais preciosos","link":"https://www.abntcatalogo.com.br/norma.aspx?ID=ABNT+NBR+ISO+11426"},{"id":2,"codigo":"ISO 11426","ano":2021,"titulo":"Jewellery and precious metals — Determination of gold in gold jewellery alloys — Cupellation method (fire assay)","tipo":"ISO","escopo":"Joalheria e metais preciosos","link":"https://www.iso.org/standard/79827.html"},{"id":3,"codigo":"ASTM E1335","ano":2020,"titulo":"Standard Test Method for Determination of Gold, Silver, and Palladium in Jewelry Alloys by ICP-OES","tipo":"ASTM","escopo":"Joalheria e espectrometria","link":"https://www.astm.org/e1335-20.html"},{"id":4,"codigo":"ISO 9202","ano":2014,"titulo":"Jewellery — Fineness of precious metal alloys","tipo":"ISO","escopo":"Ligas de metais preciosos","link":"https://www.iso.org/standard/62448.html"},{"id":5,"codigo":"ABNT NBR 16064","ano":2012,"titulo":"Joias, bijuterias e acessórios — Contaminantes inorgânicos — Determinação de metais pesados por AAS","tipo":"ABNT","escopo":"Joalheria e segurança química","link":"https://www.abntcatalogo.com.br/norma.aspx?ID=ABNT+NBR+16064"},{"id":6,"codigo":"ASTM B562","ano":2019,"titulo":"Standard Specification for Refined Gold","tipo":"ASTM","escopo":"Ouro refinado e pureza","link":"https://www.astm.org/b0562-19.html"},{"id":7,"codigo":"ISO 15093","ano":2020,"titulo":"Jewellery — Determination of high purity gold — Difference method using ICP-OES","tipo":"ISO","escopo":"Alta pureza — ICP-OES","link":"https://www.iso.org/standard/74587.html"}]},"Ag":{"nome":"Prata","sym":"Ag","z":47,"peso":"107,868","cat":"Metal de Transição","grupo":"11","periodo":"5","estado":"Sólido","cor":"Branco prateado","desc":"Metal precioso de cor branco brilhante, com a maior condutividade elétrica e térmica entre todos os metais. Amplamente usado em joalheria, eletrônica, fotografia e aplicações antimicrobianas.","normas":[{"id":1,"codigo":"ABNT NBR ISO 11427","ano":2012,"titulo":"Joalheria — Determinação do teor de prata em ligas de joias de prata — Método gravimétrico (Volhard)","tipo":"ABNT","escopo":"Joalheria e metais preciosos","link":"https://www.abntcatalogo.com.br/norma.aspx?ID=ABNT+NBR+ISO+11427"},{"id":2,"codigo":"ISO 11427","ano":2021,"titulo":"Jewellery and precious metals — Determination of silver in silver jewellery alloys — Volumetric (potentiometric) method","tipo":"ISO","escopo":"Joalheria e metais preciosos","link":"https://www.iso.org/standard/79828.html"},{"id":3,"codigo":"ABNT NBR 14942","ano":2003,"titulo":"Joias — Títulos de ligas de prata — Definição, requisitos e métodos de ensaio","tipo":"ABNT","escopo":"Ligas de prata para joalheria","link":"https://www.abntcatalogo.com.br/norma.aspx?ID=ABNT+NBR+14942"},{"id":4,"codigo":"ASTM E1336","ano":2019,"titulo":"Standard Test Method for Determination of Silver in Precious Metal Alloys by Flame Atomic Absorption Spectrometry","tipo":"ASTM","escopo":"Espectrometria de absorção atômica","link":"https://www.astm.org/e1336-19.html"},{"id":5,"codigo":"ASTM B413","ano":2014,"titulo":"Standard Specification for Refined Silver","tipo":"ASTM","escopo":"Prata refinada — especificação","link":"https://www.astm.org/b0413-14.html"},{"id":6,"codigo":"ISO 15093","ano":2020,"titulo":"Jewellery — Determination of high purity silver — Difference method using ICP-OES","tipo":"ISO","escopo":"Alta pureza — ICP-OES","link":"https://www.iso.org/standard/74587.html"},{"id":7,"codigo":"ASTM B452","ano":2022,"titulo":"Standard Specification for Silver-Copper and Silver-Copper-Zinc Brazing Filler Metals","tipo":"ASTM","escopo":"Ligas para brasagem","link":"https://www.astm.org/b0452-22.html"}]}};
 
 /* ══ BOOT ════════════════════════════════════════════ */
 loadData();
