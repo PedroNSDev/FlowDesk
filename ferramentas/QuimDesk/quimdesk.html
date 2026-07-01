@@ -315,6 +315,15 @@ header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background
 .manage-item-desc{font-size:.78rem;color:var(--text-faint);margin-top:.3rem;line-height:1.5}
 .manage-item-del{border:none;background:transparent;color:var(--coral);cursor:pointer;font-family:var(--font-mono);font-size:.7rem;opacity:.7}
 .manage-item-del:hover{opacity:1}
+.manage-item-edit{border:none;background:transparent;color:var(--text-muted);cursor:pointer;font-size:.85rem;padding:.15rem .45rem;border-radius:4px;line-height:1;transition:background .15s ease,color .15s ease;flex-shrink:0}
+.manage-item-edit:hover{background:var(--border);color:var(--text)}
+.rel-mini-edit-btn{border:none;background:transparent;color:var(--text-faint);cursor:pointer;font-size:.78rem;padding:.1rem .35rem;border-radius:4px;flex-shrink:0}
+.rel-mini-edit-btn:hover{background:var(--border);color:var(--text)}
+.edit-modal-actions{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-top:1.1rem}
+.edit-del-btn{border:1px solid var(--coral-border);background:var(--coral-bg);color:var(--coral);font-family:var(--font-mono);font-size:.7rem;padding:.5rem .8rem;border-radius:7px;cursor:pointer;transition:background .15s,color .15s}
+.edit-del-btn:hover{background:var(--coral);color:#fff}
+.edit-save-btn{border:1px solid var(--blue-border);background:var(--blue);color:#fff;font-family:var(--font-mono);font-size:.75rem;padding:.55rem 1.1rem;border-radius:7px;cursor:pointer}
+.edit-save-btn:hover{opacity:.9}
 .manage-empty{font-family:var(--font-mono);font-size:.72rem;color:var(--text-faint);text-align:center;padding:1.2rem 0}
 .rel-detail-back{font-family:var(--font-mono);font-size:.65rem;color:var(--text-muted);cursor:pointer;display:inline-block;margin-bottom:.6rem}
 .rel-detail-back:hover{color:var(--text)}
@@ -559,6 +568,17 @@ header{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;background
     <div class="manage-tab" id="mtab-mats" onclick="switchManageTab('mats')">Sistemas de Materiais</div>
   </div>
   <div class="manage-body" id="manage-body"></div>
+</div>
+
+<!-- ══ EDIT MODAL (Normas, PACs & Sistemas de Materiais) ══════ -->
+<div class="modal-backdrop" id="edit-backdrop" onclick="closeEditModal()"></div>
+<div class="modal" id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-title" style="width:min(92%,460px);max-width:460px">
+  <div class="modal-header">
+    <div class="modal-title" id="edit-title">Editar</div>
+    <button class="modal-close" onclick="closeEditModal()" aria-label="Fechar modal">✕</button>
+  </div>
+  <div class="modal-body" id="edit-body" style="display:block"></div>
+  <div class="edit-modal-actions" id="edit-actions"></div>
 </div>
 
 <!-- ══ NORM PICKER MODAL ══════════════════════════════ -->
@@ -1007,9 +1027,12 @@ function renderNormasListHTML(){
     <div class="manage-section-label" style="margin-top:0">${rows.length} resultado${rows.length===1?'':'s'}${term?` para "${normasFilterText}"`:''}</div>
     <div class="rel-mini-list">
       ${rows.length ? rows.map(n => `
-        <div class="rel-mini-item" onclick="closeManageModal();pick('${n.sym}','norm','${n.codigo}')">
-          <span>${n.elemento} (${n.sym}) — ${n.codigo}</span>
-          <span class="norm-type-badge type-${(n.tipo||'').toLowerCase()}">${n.tipo}</span>
+        <div class="rel-mini-item">
+          <span style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex:1;min-width:0;cursor:pointer" onclick="closeManageModal();pick('${n.sym}','norm','${n.codigo}')">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.elemento} (${n.sym}) — ${n.codigo}</span>
+            <span class="norm-type-badge type-${(n.tipo||'').toLowerCase()}">${n.tipo}</span>
+          </span>
+          <button class="rel-mini-edit-btn" title="Editar norma" onclick="event.stopPropagation();openEditModal('norma','${n.codigo.replace(/'/g,"\\'")}')">✎</button>
         </div>`).join('') : '<div class="manage-empty">Nenhuma norma encontrada.</div>'}
     </div>`;
 }
@@ -1042,7 +1065,7 @@ function pacsTabHTML(){
               <div class="manage-item-code" style="cursor:pointer" onclick="showRelationDetail('pac','${p.id}')">${p.codigo}</div>
               <div class="manage-item-name">${p.nome}</div>
             </div>
-            <button class="manage-item-del" onclick="deletePac('${p.id}')">remover</button>
+            <button class="manage-item-edit" title="Editar PAC" onclick="openEditModal('pac','${p.id}')">✎</button>
           </div>
           ${p.descricao ? `<div class="manage-item-desc">${p.descricao}</div>` : ''}
           <div class="rel-badges">${codes.slice(0,4).map(c=>`<span class="rel-badge mat">${c}</span>`).join('')}${codes.length>4?`<span class="rel-badge mat">+${codes.length-4}</span>`:''}</div>
@@ -1107,7 +1130,7 @@ function materialsTabHTML(){
               <div class="manage-item-code mat-card-formula" style="cursor:pointer" onclick="showRelationDetail('mat','${m.id}')">${m.formula}</div>
               <div class="manage-item-name">${m.nome}</div>
             </div>
-            <button class="manage-item-del" onclick="deleteMaterial('${m.id}')">remover</button>
+            <button class="manage-item-edit" title="Editar sistema" onclick="openEditModal('mat','${m.id}')">✎</button>
           </div>
           <div class="rel-badges" style="margin-top:.3rem">${pacRows.length ? pacRows.map(p=>`<span class="rel-badge pac">⛁ ${p.codigo}</span>`).join('') : `<span class="rel-badge mat" style="opacity:.6">sem PAC</span>`}</div>
           <div style="margin-top:.4rem">${elementos.map(s=>`<span class="mat-tag">${s}</span>`).join('')}</div>
@@ -1139,6 +1162,140 @@ function deleteMaterial(id){
   persistDB(); buildSearchIndex(); renderManageBody();
 }
 
+/* ══ EDIT MODAL (Normas, PACs & Sistemas de Materiais) ═══════ */
+let editState = null; // {type:'norma'|'pac'|'mat', id}
+
+function openEditModal(type, id){
+  editState = {type, id};
+  renderEditModal();
+  document.getElementById('edit-backdrop').classList.add('open');
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeEditModal(){
+  document.getElementById('edit-backdrop').classList.remove('open');
+  document.getElementById('edit-modal').classList.remove('open');
+  editState = null;
+}
+function escAttr(v){ return (v==null?'':String(v)).replace(/"/g,'&quot;'); }
+
+function renderEditModal(){
+  if(!editState) return;
+  const title   = document.getElementById('edit-title');
+  const body    = document.getElementById('edit-body');
+  const actions = document.getElementById('edit-actions');
+
+  if(editState.type === 'norma'){
+    const n = q('SELECT * FROM normas WHERE codigo=?', [editState.id])[0];
+    if(!n){ closeEditModal(); return; }
+    title.textContent = 'Editar norma';
+    body.innerHTML = `
+      <div class="manage-form" style="background:transparent;border:none;padding:0">
+        <div><label>Código</label><input id="edit-norma-codigo" value="${escAttr(n.codigo)}"></div>
+        <div><label>Título</label><input id="edit-norma-titulo" value="${escAttr(n.titulo)}"></div>
+        <div class="manage-form-row">
+          <div><label>Tipo</label><input id="edit-norma-tipo" value="${escAttr(n.tipo)}"></div>
+          <div><label>Ano</label><input id="edit-norma-ano" type="number" value="${escAttr(n.ano)}"></div>
+        </div>
+        <div><label>Escopo</label><input id="edit-norma-escopo" value="${escAttr(n.escopo)}"></div>
+        <div><label>Link</label><input id="edit-norma-link" value="${escAttr(n.link)}"></div>
+        <div><label>Símbolo do elemento associado <span style="color:var(--text-faint);font-weight:400">(opcional)</span></label><input id="edit-norma-sym" value="${escAttr(n.sym)}"></div>
+      </div>`;
+    actions.innerHTML = `
+      <button class="edit-del-btn" onclick="deleteNormaFromEdit('${n.codigo.replace(/'/g,"\\'")}')">Remover norma</button>
+      <button class="edit-save-btn" onclick="saveEditNorma('${n.codigo.replace(/'/g,"\\'")}')">Salvar</button>`;
+  }
+
+  else if(editState.type === 'pac'){
+    const p = q('SELECT * FROM pacs WHERE id=?', [editState.id])[0];
+    if(!p){ closeEditModal(); return; }
+    title.textContent = 'Editar PAC';
+    body.innerHTML = `
+      <div class="manage-form" style="background:transparent;border:none;padding:0">
+        <div><label>Código</label><input id="edit-pac-codigo" value="${escAttr(p.codigo)}"></div>
+        <div><label>Nome</label><input id="edit-pac-nome" value="${escAttr(p.nome)}"></div>
+        <div><label>Descrição</label><textarea id="edit-pac-desc" rows="3">${escAttr(p.descricao)}</textarea></div>
+      </div>`;
+    actions.innerHTML = `
+      <button class="edit-del-btn" onclick="deletePacFromEdit('${p.id}')">Remover PAC</button>
+      <button class="edit-save-btn" onclick="saveEditPac('${p.id}')">Salvar</button>`;
+  }
+
+  else { // mat
+    const m = q('SELECT * FROM materiais WHERE id=?', [editState.id])[0];
+    if(!m){ closeEditModal(); return; }
+    title.textContent = 'Editar sistema de materiais';
+    body.innerHTML = `
+      <div class="manage-form" style="background:transparent;border:none;padding:0">
+        <div><label>Fórmula</label><input id="edit-mat-formula" value="${escAttr(m.formula)}"></div>
+        <div><label>Nome</label><input id="edit-mat-nome" value="${escAttr(m.nome)}"></div>
+      </div>`;
+    actions.innerHTML = `
+      <button class="edit-del-btn" onclick="deleteMaterialFromEdit('${m.id}')">Remover sistema</button>
+      <button class="edit-save-btn" onclick="saveEditMaterial('${m.id}')">Salvar</button>`;
+  }
+}
+
+function saveEditNorma(oldCodigo){
+  const novoCodigo = document.getElementById('edit-norma-codigo').value.trim();
+  const titulo  = document.getElementById('edit-norma-titulo').value.trim();
+  const tipo    = document.getElementById('edit-norma-tipo').value.trim();
+  const anoVal  = document.getElementById('edit-norma-ano').value.trim();
+  const ano     = anoVal ? parseInt(anoVal, 10) : null;
+  const escopo  = document.getElementById('edit-norma-escopo').value.trim();
+  const link    = document.getElementById('edit-norma-link').value.trim();
+  const sym     = document.getElementById('edit-norma-sym').value.trim();
+  if(!novoCodigo || !titulo){ alert('Informe ao menos o código e o título da norma.'); return; }
+  if(novoCodigo !== oldCodigo && q('SELECT 1 FROM normas WHERE codigo=?', [novoCodigo]).length){
+    alert('Já existe uma norma cadastrada com este código.'); return;
+  }
+  const elementoNome = (sym && NORMAS && NORMAS[sym] && NORMAS[sym].nome) ? NORMAS[sym].nome : sym;
+  run('UPDATE normas SET codigo=?, sym=?, elemento=?, titulo=?, tipo=?, ano=?, escopo=?, link=?, custom=1 WHERE codigo=?',
+    [novoCodigo, sym, elementoNome, titulo, tipo, ano, escopo, link, oldCodigo]);
+  if(novoCodigo !== oldCodigo){
+    run('UPDATE pac_normas SET norma_codigo=? WHERE norma_codigo=?', [novoCodigo, oldCodigo]);
+    run('UPDATE material_normas SET norma_codigo=? WHERE norma_codigo=?', [novoCodigo, oldCodigo]);
+  }
+  persistDB(); buildSearchIndex(); closeEditModal(); renderManageBody();
+}
+function deleteNorma(codigo){
+  run('DELETE FROM normas WHERE codigo=?', [codigo]);
+  run('DELETE FROM pac_normas WHERE norma_codigo=?', [codigo]);
+  run('DELETE FROM material_normas WHERE norma_codigo=?', [codigo]);
+  persistDB(); buildSearchIndex(); renderManageBody();
+}
+function deleteNormaFromEdit(codigo){
+  if(!confirm('Remover esta norma? Isso também remove os vínculos dela com PACs e sistemas de materiais.')) return;
+  deleteNorma(codigo);
+  closeEditModal();
+}
+
+function saveEditPac(id){
+  const codigo = document.getElementById('edit-pac-codigo').value.trim();
+  const nome = document.getElementById('edit-pac-nome').value.trim();
+  const descricao = document.getElementById('edit-pac-desc').value.trim();
+  if(!codigo || !nome){ alert('Informe ao menos o código e o nome do PAC.'); return; }
+  run('UPDATE pacs SET codigo=?, nome=?, descricao=? WHERE id=?', [codigo, nome, descricao, id]);
+  persistDB(); buildSearchIndex(); closeEditModal(); renderManageBody();
+}
+function deletePacFromEdit(id){
+  if(!confirm('Remover este PAC? Isso também remove os vínculos dele com normas e sistemas de materiais.')) return;
+  deletePac(id);
+  closeEditModal();
+}
+
+function saveEditMaterial(id){
+  const formula = document.getElementById('edit-mat-formula').value.trim();
+  const nome = document.getElementById('edit-mat-nome').value.trim();
+  if(!formula || !nome){ alert('Informe ao menos a fórmula e o nome do sistema.'); return; }
+  run('UPDATE materiais SET formula=?, nome=? WHERE id=?', [formula, nome, id]);
+  persistDB(); buildSearchIndex(); closeEditModal(); renderManageBody();
+}
+function deleteMaterialFromEdit(id){
+  if(!confirm('Remover este sistema de materiais? Isso também remove os vínculos dele com elementos, normas e PACs.')) return;
+  deleteMaterial(id);
+  closeEditModal();
+}
+
 /* ── DETAIL / REVERSE SEARCH VIEW (PAC <-> Norma <-> Sistema <-> Elemento) ── */
 function showRelationDetail(type, id){
   manageDetail = {type, id};
@@ -1157,13 +1314,16 @@ function renderRelationDetail(body){
     const mats = getMaterialsForPac(pac);
     body.innerHTML = `
       <span class="rel-detail-back" onclick="manageDetail=null;renderManageBody()">‹ voltar para PACs</span>
-      <div class="rel-detail-title">${pac.codigo}</div>
+      <div class="rel-detail-title" style="display:flex;align-items:center;gap:.5rem">${pac.codigo}<button class="manage-item-edit" title="Editar PAC" onclick="openEditModal('pac','${pac.id}')">✎</button></div>
       <div class="rel-detail-sub">${pac.nome}${pac.descricao ? ' — '+pac.descricao : ''}</div>
       <div class="manage-section-label">Normas neste PAC (${normas.length})</div>
       <button class="add-norm-to-pac-btn" onclick="openNormPicker('${pac.id}')">＋ Adicionar norma</button>
       <div class="rel-mini-list">${normas.length ? normas.map(({sym,norma}) => `
-        <div class="rel-mini-item" onclick="closeManageModal();pick('${sym}','norm','${norma.codigo}')">
-          <span>${norma.codigo}</span><span class="norm-type-badge type-${(norma.tipo||'').toLowerCase()}">${norma.tipo}</span>
+        <div class="rel-mini-item">
+          <span style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex:1;min-width:0;cursor:pointer" onclick="closeManageModal();pick('${sym}','norm','${norma.codigo}')">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${norma.codigo}</span><span class="norm-type-badge type-${(norma.tipo||'').toLowerCase()}">${norma.tipo}</span>
+          </span>
+          <button class="rel-mini-edit-btn" title="Editar norma" onclick="event.stopPropagation();openEditModal('norma','${norma.codigo.replace(/'/g,"\\'")}')">✎</button>
         </div>`).join('') : '<div class="manage-empty">Nenhuma norma vinculada.</div>'}</div>
       <div class="manage-section-label">Elementos presentes nessas normas (${elementos.length})</div>
       <div>${elementos.length ? elementos.map(e=>`<span class="mat-tag" style="cursor:pointer" onclick="closeManageModal();showElement('${e.sym}')">${e.sym} — ${e.nome}</span>`).join('') : '<span class="manage-empty">Nenhum elemento identificado nas normas deste PAC.</span>'}</div>
@@ -1182,7 +1342,7 @@ function renderRelationDetail(body){
     const allPacs = q('SELECT * FROM pacs ORDER BY codigo');
     body.innerHTML = `
       <span class="rel-detail-back" onclick="manageDetail=null;renderManageBody()">‹ voltar para Sistemas</span>
-      <div class="rel-detail-title">${mat.formula}</div>
+      <div class="rel-detail-title" style="display:flex;align-items:center;gap:.5rem">${mat.formula}<button class="manage-item-edit" title="Editar sistema" onclick="openEditModal('mat','${mat.id}')">✎</button></div>
       <div class="rel-detail-sub">${mat.nome}</div>
       <div class="manage-section-label">Elementos (${elementos.length})</div>
       <button class="add-el-to-mat-btn" onclick="openMpEl('${mat.id}')">＋ Adicionar elemento</button>
@@ -1190,8 +1350,11 @@ function renderRelationDetail(body){
       <div class="manage-section-label">Normas deste sistema (${normas.length})</div>
       <button class="add-norm-to-mat-btn" onclick="openMpNorm('${mat.id}')">＋ Adicionar norma</button>
       <div class="rel-mini-list">${normas.length ? normas.map(({sym,norma}) => `
-        <div class="rel-mini-item" onclick="closeManageModal();pick('${sym}','norm','${norma.codigo}')">
-          <span>${norma.codigo}</span><span class="norm-type-badge type-${(norma.tipo||'').toLowerCase()}">${norma.tipo}</span>
+        <div class="rel-mini-item">
+          <span style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex:1;min-width:0;cursor:pointer" onclick="closeManageModal();pick('${sym}','norm','${norma.codigo}')">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${norma.codigo}</span><span class="norm-type-badge type-${(norma.tipo||'').toLowerCase()}">${norma.tipo}</span>
+          </span>
+          <button class="rel-mini-edit-btn" title="Editar norma" onclick="event.stopPropagation();openEditModal('norma','${norma.codigo.replace(/'/g,"\\'")}')">✎</button>
         </div>`).join('') : '<div class="manage-empty">Nenhuma norma vinculada.</div>'}</div>
       <div class="manage-section-label">PACs aos quais este sistema pertence (${pacs.length})</div>
       <div class="mp-checkbox-list">
