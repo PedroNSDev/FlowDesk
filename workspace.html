@@ -45,7 +45,7 @@
         .err{font-size:.8rem;color:var(--danger);margin-top:4px;display:none}
 
         /* ── APP SHELL ── */
-        #app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
+        #app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
 
         /* ── SIDEBAR ── */
         .sidebar{background:var(--sidebar);padding:20px 13px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
@@ -67,7 +67,7 @@
         .sb-user .lb:hover{color:var(--danger)}
 
         /* ── MAIN ── */
-        .main{padding:26px 30px;overflow-y:auto}
+        .main{padding:26px 30px;overflow-y:auto;min-width:0}
         .ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
         .pt{font-size:1.4rem;font-weight:700} .ps{color:var(--muted);font-size:.82rem;margin-top:2px}
         .tab-c{display:none} .tab-c.active{display:block}
@@ -80,51 +80,59 @@
         .n-msg{font-size:.87rem;line-height:1.5}
         .n-acts{display:flex;gap:5px;flex-shrink:0;align-self:center}
 
-        /* ── PROJECT CARD ── */
-        .proj-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);margin-bottom:13px;overflow:hidden}
-        .proj-card.done{background:var(--session-done);border-color:var(--session-done-header)}
-        .proj-hdr{display:flex;justify-content:space-between;align-items:center;padding:20px 22px;cursor:pointer;transition:background .1s}
-        .proj-hdr:hover{background:#f8fafc}
-        .proj-hdr.done{background:var(--session-done-header);color:#fff}
-        .proj-hdr.done:hover{background:var(--session-done-header)}
-        .proj-name{font-weight:700;font-size:1.05rem;display:flex;align-items:center;gap:10px;flex:1;padding:10px 0}
-        .proj-card .btn{min-height:42px;padding:10px 14px}
-        .proj-hdr .btn{min-height:42px;padding:10px 14px}
-        .proj-body{padding:0 19px 17px;border-top:1px solid var(--border);  background:linear-gradient(
-    to bottom,
-    rgba(71,85,105,.08),
-    rgba(71,85,105,.11)
-  );;margin-top:15px}
-        .proj-desc{font-size:.8rem;color:var(--muted);padding:10px 0 7px}
-        .proj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
-        .proj-grid .proj-card{width:100%}
-        .proj-grid .proj-card.selected{border-color:var(--acc);box-shadow:0 10px 24px rgba(79,70,229,.14)}
-        .proj-grid .proj-card.selected .proj-body{display:block}
-        .proj-grid .proj-body{display:none}
-        .proj-grid .proj-hdr{cursor:pointer}
-        .proj-grid .chev.open{transform:rotate(90deg)}
-        .proj-view-switch{display:flex;border:1px solid var(--border);border-radius:999px;overflow:hidden;background:#fff}
-        .proj-view-switch .btn{border-radius:0;margin:0;min-width:92px}
-        .proj-view-switch .btn:first-child{border-radius:999px 0 0 999px}
-        .proj-view-switch .btn:last-child{border-radius:0 999px 999px 0}
-        .proj-view-switch .btn.active{background:var(--acc);color:#fff;border-color:var(--acc)}
-        .proj-view-switch .btn:not(.active){background:transparent;color:var(--text);border:none}
-        .proj-desc{font-size:.8rem;color:var(--muted);padding:10px 0 7px}
-        .sess-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:0 -9px 0 -9px}
-        .sess-box{background:#f8fafc;border:1px solid var(--border);border-radius:var(--rsm);overflow:hidden}
-        .sess-box.done{background:var(--session-done);border-color:var(--session-done-header)}
-        .sess-hdr.done{background:var(--session-done-header);color:#fff}
-        .sess-hdr{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;cursor:pointer;transition:background .1s}
-        .sess-hdr:hover{background:#f1f5f9}
-        .sess-name{font-weight:600;font-size:.87rem;display:flex;align-items:center;gap:6px}
-        .sess-body{padding:9px 13px 13px;display:none}
-        .step-item{background:#fff;border:1px solid var(--border);border-radius:var(--rsm);padding:10px 12px;margin-bottom:6px;display:flex;align-items:flex-start;gap:10px;transition:box-shadow .15s}
-        .step-item:hover{box-shadow:var(--sh)}
-        .step-item.done{background:var(--session-done);border-color:var(--session-done-header)}
-        .step-item.done .step-bar{background:var(--session-done-header)!important}
-        .step-acts{display:flex;gap:6px;align-items:center;margin-left:auto}
-        .step-sel{font-size:.75rem;padding:4px 6px;border:1px solid var(--border);border-radius:4px;background:#fff}
-
+        /* ── PROJETOS ── */
+        .proj-view-switch{display:flex;background:#e2e8f5;border-radius:10px;padding:3px;gap:2px}
+        .proj-view-switch .btn{min-width:84px;border-radius:8px;border:none;background:transparent;color:var(--muted);box-shadow:none;padding:7px 14px}
+        .proj-view-switch .btn:hover{transform:none;box-shadow:none;color:var(--text)}
+        .proj-view-switch .btn.active{background:#fff;color:var(--acc);box-shadow:var(--sh)}
+        .pv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+        .pv-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;display:flex;flex-direction:column;gap:10px;transition:.15s;box-shadow:var(--sh)}
+        .pv-card:hover{border-color:#c7d2fe;box-shadow:var(--sh-md);transform:translateY(-2px)}
+        .pv-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+        .pv-name{font-weight:700;font-size:1.02rem;line-height:1.3;overflow-wrap:anywhere}
+        .pv-desc{color:var(--muted);font-size:.82rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em}
+        .pv-bar{height:6px;background:var(--border);border-radius:6px;overflow:hidden;flex:1}
+        .pv-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--ok));border-radius:6px;transition:width .4s}
+        .pv-meta{display:flex;justify-content:space-between;font-size:.76rem;color:var(--muted)}
+        .avs{display:flex;align-items:center}.avs .av{margin-left:-6px}.avs .av:first-child{margin-left:0}
+        .av{width:24px;height:24px;border-radius:50%;color:#fff;font-size:.62rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;border:2px solid #fff;flex-shrink:0}
+        .av-more{background:#94a3b8}
+        .pd-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px}
+        .pd-prog{display:flex;align-items:center;gap:12px;flex:1;min-width:220px;font-size:.8rem;color:var(--muted);font-weight:600;white-space:nowrap}
+        .pd-acts{display:flex;gap:8px;flex-wrap:wrap}
+        .grp{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;box-shadow:var(--sh)}
+        .grp-h{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none}
+        .grp-h:hover{background:#f8fafc}.grp-sp{flex:1}
+        .ib{background:none;border:none;cursor:pointer;width:30px;height:30px;border-radius:8px;font-size:.9rem;color:var(--muted);flex-shrink:0}
+        .ib:hover{background:var(--acc-lt);color:var(--acc)}
+        .row{display:grid;grid-template-columns:minmax(0,1fr) 140px 130px 64px 190px;gap:12px;align-items:center;padding:10px 16px;border-top:1px solid var(--border)}
+        .row:not(.row-h):hover{background:#fafbff}
+        .row-h{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:8px 16px;background:#f8fafc}
+        .r-name{display:flex;gap:10px;align-items:flex-start;min-width:0}
+        .r-t{font-weight:600;font-size:.88rem;overflow-wrap:anywhere}
+        .r-d{font-size:.76rem;color:var(--muted);margin-top:1px}
+        .r-resp{display:flex;align-items:center;gap:7px;font-size:.82rem;min-width:0}
+        .r-st{display:flex;align-items:center;gap:4px}
+        .muted{color:var(--muted)}
+        .dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex-shrink:0;margin-top:5px}
+        .s-doing .dot{background:var(--warn)}.s-done .dot{background:var(--ok)}
+        .row.s-done .r-t{text-decoration:line-through;color:var(--muted)}
+        .mini{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:.78rem;background:#fff;color:var(--text);cursor:pointer;outline:none}
+        .mini:focus{border-color:var(--acc)}
+        .row.s-done .mini.st{background:#dcfce7;border-color:#86efac}
+        .row.s-doing .mini.st{background:#fef3c7;border-color:#fde68a}
+        .row-empty{padding:14px 16px;font-size:.82rem;color:var(--muted)}
+        .add-row{width:100%;text-align:left;padding:10px 16px;background:none;border:none;border-top:1px solid var(--border);color:var(--muted);font-family:var(--font);font-size:.82rem;font-weight:600;cursor:pointer}
+        .add-row:hover{background:var(--acc-lt);color:var(--acc)}
+        .kb{display:grid;grid-template-columns:repeat(3,minmax(250px,1fr));gap:14px;align-items:start;overflow-x:auto;padding-bottom:8px}
+        .kb-col{background:#e6eaf6;border-radius:12px;padding:10px;min-height:220px;display:flex;flex-direction:column;gap:8px;transition:.15s;border:2px solid transparent}
+        .kb-col.over{border-color:var(--acc);background:var(--acc-lt)}
+        .kb-h{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.82rem;padding:4px 4px 6px}
+        .kb-h .dot{margin-top:0}
+        .kb-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 12px;cursor:grab;box-shadow:var(--sh);display:flex;flex-direction:column;gap:6px}
+        .kb-card:hover{border-color:#c7d2fe;box-shadow:var(--sh-md)}
+        .kb-f{display:flex;justify-content:space-between;align-items:center;gap:6px}
+        
         /* ── BADGES ── */
         .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:.7rem;font-weight:600;white-space:nowrap}
         .b-gray{background:#f1f5f9;color:#64748b} .b-amber{background:#fef3c7;color:#92400e}
@@ -343,6 +351,22 @@
         .notif-acesso-card .na-nome{font-weight:700;font-size:.86rem;color:#92400e}
         .notif-acesso-card .na-info{font-size:.77rem;color:#b45309;margin-top:2px}
         .notif-acesso-card .na-acts{display:flex;gap:6px;margin-top:8px}
+        @media(max-width:1100px){.row{grid-template-columns:minmax(0,1fr) 120px 120px 60px 170px}}
+        @media(max-width:860px){
+            #app{grid-template-columns:minmax(0,1fr)}
+            .sidebar{position:sticky;top:0;z-index:50;height:auto;flex-direction:row;align-items:center;gap:4px;padding:8px 10px;overflow-x:auto;overflow-y:hidden}
+            .sidebar>*{flex-shrink:0}
+            .sb-logo,.sb-sec,.sb-div,.ws-badge{display:none}
+            #admin-section:not(.hidden){display:flex;gap:4px}
+            .nav-btn{width:auto;white-space:nowrap;margin:0}
+            .sb-user{margin:0 0 0 auto;padding:6px 10px}
+            .main{padding:16px 14px}
+            .home-stat-row{grid-template-columns:repeat(2,1fr)}
+            .row-h{display:none}
+            .row{grid-template-columns:1fr 1fr;gap:8px}
+            .r-name,.r-st{grid-column:1/-1}
+            .kb{grid-template-columns:repeat(3,260px)}
+        }
     </style>
 </head>
 <body>
@@ -402,12 +426,12 @@
         <!-- PROJETOS -->
         <div id="tab-projetos" class="tab-c">
             <div class="ph" style="align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-                <div><div class="pt">Projetos</div><div class="ps">Projetos do workspace atual</div></div>
+                <div><div class="pt" id="proj-title">Projetos</div><div class="ps" id="proj-sub">Visão geral dos projetos do workspace</div></div>
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                    <button id="proj-back-btn" class="btn btn-s btn-sm hidden" onclick="exitProjFocus()">← Voltar</button>
-                    <div class="proj-view-switch">
+                    <button id="proj-back-btn" class="btn btn-s btn-sm hidden" onclick="exitProjFocus()">← Projetos</button>
+                    <div class="proj-view-switch hidden" id="proj-view-sw">
                         <button id="proj-view-list" class="btn btn-s btn-sm active" onclick="setProjetosViewMode('list')">Lista</button>
-                        <button id="proj-view-grid" class="btn btn-s btn-sm" onclick="setProjetosViewMode('grid')">Grade</button>
+                        <button id="proj-view-grid" class="btn btn-s btn-sm" onclick="setProjetosViewMode('board')">Quadro</button>
                     </div>
                     <button id="btn-novo-proj" class="btn btn-p hidden" onclick="abrirModalProjeto()">+ Novo Projeto</button>
                 </div>
@@ -599,72 +623,12 @@ const NOTES_KEY_BASE = 'fd-notes';
 function notesStorageKey() { return `${NOTES_KEY_BASE}-${currentWorkspace?.codigo||'global'}`; }
 
 function setProjetosViewMode(mode) {
-    projetosViewMode = mode === 'grid' ? 'grid' : 'list';
-    if (projetosViewMode === 'list') selectedProjetoId = null;
-    applyProjetosViewMode();
+    projetosViewMode = (mode === 'board' || mode === 'grid') ? 'board' : 'list';
+    renderProjetosView();
 }
-
-function applyProjetosViewMode() {
-    const container = document.getElementById('projetos-container');
-    const backBtn = document.getElementById('proj-back-btn');
-    if (!container) return;
-    const showBack = projetosViewMode === 'grid' && selectedProjetoId !== null;
-    if (backBtn) backBtn.classList.toggle('hidden', !showBack);
-
-    container.classList.toggle('proj-grid', projetosViewMode === 'grid');
-    container.classList.toggle('proj-list', projetosViewMode === 'list');
-
-    container.querySelectorAll('.proj-card').forEach(card => {
-        const body = card.querySelector('.proj-body');
-        const chev = card.querySelector('.chev');
-        const thisId = Number(card.dataset.proj);
-        const isSelected = selectedProjetoId === thisId;
-
-        if (projetosViewMode === 'grid' && selectedProjetoId !== null) {
-            card.style.display = isSelected ? '' : 'none';
-        } else {
-            card.style.display = '';
-        }
-
-        if (!body || !chev) return;
-
-        if (projetosViewMode === 'grid') {
-            if (selectedProjetoId !== null && isSelected) {
-                body.style.display = 'block';
-                chev.classList.add('open');
-                card.classList.add('selected');
-            } else {
-                body.style.display = 'none';
-                chev.classList.remove('open');
-                card.classList.remove('selected');
-            }
-        } else {
-            body.style.display = 'block';
-            chev.classList.remove('open');
-            card.classList.remove('selected');
-        }
-    });
-
-    const btnList = document.getElementById('proj-view-list');
-    const btnGrid = document.getElementById('proj-view-grid');
-    if (btnList) btnList.classList.toggle('active', projetosViewMode === 'list');
-    if (btnGrid) btnGrid.classList.toggle('active', projetosViewMode === 'grid');
-}
-
-function onProjHeaderClick(projId) {
-    if (projetosViewMode !== 'grid') {
-        toggleSec(`pb-${projId}`, `pc-${projId}`);
-        return;
-    }
-    if (selectedProjetoId === projId) return;
-    selectedProjetoId = projId;
-    applyProjetosViewMode();
-}
-
-function exitProjFocus() {
-    selectedProjetoId = null;
-    applyProjetosViewMode();
-}
+function abrirProjeto(id) { selectedProjetoId = id; renderProjetosView(); window.scrollTo(0, 0); }
+function exitProjFocus() { selectedProjetoId = null; renderProjetosView(); }
+function toggleGrp(id) { collapsedSess.has(id) ? collapsedSess.delete(id) : collapsedSess.add(id); renderProjetosView(); }
 
 // ─── INIT ─────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -801,9 +765,13 @@ async function desativarAviso() {
 }
 
 // ─── RENDER PROJECTS ──────────────────────────────
+const STATUS = ['Não iniciado','Em andamento','Concluído'];
+const ST_CLS = {'Não iniciado':'s-todo','Em andamento':'s-doing','Concluído':'s-done'};
+const collapsedSess = new Set();
+
 async function renderizarProjetos() {
     const c = document.getElementById('projetos-container');
-    c.innerHTML = `<div class="loading-c"><div class="spinner"></div><p style="margin-top:10px">Carregando...</p></div>`;
+    if (!wsProjetos.length) c.innerHTML = `<div class="loading-c"><div class="spinner"></div><p style="margin-top:10px">Carregando...</p></div>`;
     const { data: projs, error } = await sb.from('projetos')
         .select(`id, nome, descricao,
             projeto_usuarios(usuario_id),
@@ -813,108 +781,104 @@ async function renderizarProjetos() {
         .eq('workspace_id', currentWorkspace.id).order('id');
     wsProjetos = projs || [];
     if (error) { c.innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><h3>Erro</h3><p>${escH(error.message)}</p></div>`; return; }
-    if (!projs?.length) { c.innerHTML=`<div class="empty-state"><div class="ei">📁</div><h3>Nenhum projeto ainda</h3><p>Clique em "+ Novo Projeto" para começar.</p></div>`; return; }
-    c.innerHTML = projs.map(renderProj).join('');
-    applyProjetosViewMode();
+    renderProjetosView();
 }
 
-function renderProj(p) {
-    const total = (p.sessoes||[]).reduce((a,s) => a+(s.etapas||[]).length, 0);
-    const allSessionsComplete = (p.sessoes||[]).length > 0 && (p.sessoes||[]).every(s => (s.etapas||[]).length > 0 && (s.etapas||[]).every(e => e.status === 'Concluído'));
-    const doneClass = allSessionsComplete ? ' done' : '';
-    return `<div class="proj-card${doneClass}" data-proj="${p.id}">
-        <div class="proj-hdr${doneClass}" onclick="onProjHeaderClick(${p.id})">
-            <span class="chev open" id="pc-${p.id}" style="font-size:1.1rem;flex-shrink:0">▶</span>
-            <div class="proj-name">${escH(p.nome)}</div>
-            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-                <span class="badge b-acc">${(p.sessoes||[]).length} Atividades</span>
-                <span class="badge b-gray">${total} etapas</span>
-                ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="event.stopPropagation(); editarProjeto(${p.id})">✏️</button>` : ''}
-            </div>
-        </div>
-        <div id="pb-${p.id}" class="proj-body">
-            ${p.descricao ? `<p class="proj-desc">${escH(p.descricao)}</p>` : ''}
-            <div class="sess-grid">
-                ${(p.sessoes||[]).map(s => renderSess(p.id, s)).join('')}
-            </div>
-            ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="abrirModalSessao(${p.id})">+ Atividade</button>` : ''}
-            <button class="btn btn-s btn-sm" style="margin-left:6px" onclick="irParaAnexosProjeto(${p.id})">🔗 Anexos do Projeto</button>
-        </div>
-    </div>`;
+function renderProjetosView() {
+    const g = id => document.getElementById(id);
+    const c = g('projetos-container'); if (!c) return;
+    const p = wsProjetos.find(x => x.id === selectedProjetoId);
+    if (!p) selectedProjetoId = null;
+    g('proj-title').textContent = p ? p.nome : 'Projetos';
+    g('proj-sub').textContent = p ? (p.descricao || 'Sem descrição') : 'Visão geral dos projetos do workspace';
+    g('proj-back-btn').classList.toggle('hidden', !p);
+    g('proj-view-sw').classList.toggle('hidden', !p);
+    g('proj-view-list').classList.toggle('active', projetosViewMode === 'list');
+    g('proj-view-grid').classList.toggle('active', projetosViewMode === 'board');
+    if (!wsProjetos.length) { c.innerHTML = `<div class="empty-state"><div class="ei">📁</div><h3>Nenhum projeto ainda</h3><p>Clique em "+ Novo Projeto" para começar.</p></div>`; return; }
+    c.innerHTML = p ? renderProjDetail(p) : renderProjOverview();
 }
 
-function renderSess(pId, s) {
-    const colabs = (s.sessao_usuarios||[]).map(su => {
-        const u = wsMembers.find(x => x.id===su.usuario_id);
-        return u ? `<span class="colab-chip">${escH(u.nome)}</span>` : '';
+function projStats(p) {
+    const et = (p.sessoes||[]).flatMap(s => s.etapas||[]);
+    const done = et.filter(e => e.status === 'Concluído').length;
+    return { total: et.length, done, pct: et.length ? Math.round(done/et.length*100) : 0 };
+}
+function avatar(u) { return `<span class="av" style="background:${userColor(u.nome)}" title="${escH(u.nome)}">${initials(u.nome)}</span>`; }
+
+function renderProjOverview() {
+    return `<div class="pv-grid">${wsProjetos.map(p => {
+        const st = projStats(p);
+        const ids = [...new Set((p.projeto_usuarios||[]).map(x => x.usuario_id))];
+        const people = ids.map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
+        return `<div class="pv-card" onclick="abrirProjeto(${p.id})">
+            <div class="pv-top"><div class="pv-name">${escH(p.nome)}</div>${st.total && st.done === st.total ? '<span class="badge b-green">Concluído</span>' : ''}</div>
+            <div class="pv-desc">${escH(p.descricao || 'Sem descrição')}</div>
+            <div style="display:flex;align-items:center;gap:10px"><div class="pv-bar"><i style="width:${st.pct}%"></i></div><b style="font-size:.78rem">${st.pct}%</b></div>
+            <div class="pv-meta"><span>${(p.sessoes||[]).length} atividades · ${st.done}/${st.total} etapas</span>
+                <span class="avs">${people.slice(0,4).map(avatar).join('')}${people.length > 4 ? `<span class="av av-more">+${people.length-4}</span>` : ''}</span></div>
+        </div>`;
+    }).join('')}</div>`;
+}
+
+function renderProjDetail(p) {
+    const st = projStats(p);
+    const head = `<div class="pd-head">
+        <div class="pd-prog"><div class="pv-bar"><i style="width:${st.pct}%"></i></div><span>${st.pct}% · ${st.done}/${st.total} etapas</span></div>
+        <div class="pd-acts">
+            ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarProjeto(${p.id})">✏️ Editar</button><button class="btn btn-p btn-sm" onclick="abrirModalSessao(${p.id})">+ Atividade</button>` : ''}
+            <button class="btn btn-s btn-sm" onclick="irParaAnexosProjeto(${p.id})">🔗 Anexos</button>
+        </div></div>`;
+    if (!(p.sessoes||[]).length) return head + `<div class="empty-state"><div class="ei">🗂</div><h3>Nenhuma atividade</h3><p>Crie uma atividade para organizar as etapas deste projeto.</p></div>`;
+    return head + (projetosViewMode === 'board' ? renderBoard(p) : renderListView(p));
+}
+
+function renderListView(p) {
+    return (p.sessoes||[]).map(s => {
+        const et = s.etapas || [], closed = collapsedSess.has(s.id);
+        const done = et.filter(e => e.status === 'Concluído').length;
+        const colabs = (s.sessao_usuarios||[]).map(su => wsMembers.find(u => u.id === su.usuario_id)).filter(Boolean);
+        return `<section class="grp">
+            <div class="grp-h" onclick="toggleGrp(${s.id})">
+                <span class="chev ${closed ? '' : 'open'}">▶</span><b>${escH(s.nome)}</b>
+                <span class="badge b-gray">${done}/${et.length}</span><span class="avs">${colabs.map(avatar).join('')}</span><span class="grp-sp"></span>
+                ${currentUserCanEdit ? `<button class="ib" title="Editar atividade" onclick="event.stopPropagation();editarSessao(${s.id},${p.id})">✏️</button>` : ''}
+            </div>
+            ${closed ? '' : `${et.length ? `<div class="row row-h"><span>Etapa</span><span>Responsável</span><span>Prazo</span><span>Prio.</span><span>Status</span></div>${et.map(e => renderEtapa(p.id, s.id, e)).join('')}` : '<div class="row-empty" style="border-top:1px solid var(--border)">Nenhuma etapa ainda.</div>'}
+            ${currentUserCanEdit ? `<button class="add-row" onclick="abrirModalEtapa(${p.id},${s.id})">+ Nova etapa</button>` : ''}`}
+        </section>`;
     }).join('');
-    const allDone = (s.etapas||[]).length > 0 && (s.etapas||[]).every(e => e.status === 'Concluído');
-    const doneClass = allDone ? ' done' : '';
-    return `<div class="sess-box${doneClass}" data-proj="${pId}" data-sess="${s.id}">
-        <div class="sess-hdr${doneClass}" onclick="focusSess(${pId}, ${s.id})">
-            <div class="sess-name"><span>🗂</span> ${escH(s.nome)}</div>
-            <div style="display:flex;align-items:center;gap:7px">
-                <span class="badge b-gray">${(s.etapas||[]).length} etapas</span>
-                <span class="chev" id="sc-${s.id}">▶</span>
-            </div>
-        </div>
-        <div id="sb-${s.id}" class="sess-body" style="display:none;">
-            ${colabs ? `<div class="colab-list">${colabs}</div>` : ''}
-            <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:flex-end">
-                ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarSessao(${s.id}, ${pId})">✏️</button>` : ''}
-            </div>
-            ${(s.etapas||[]).map(e => renderEtapa(pId, s.id, e)).join('')}
-            ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" style="margin-top:5px" onclick="abrirModalEtapa(${pId}, ${s.id})">+ Etapa</button>` : ''}
-        </div>
-    </div>`;
 }
 
 function renderEtapa(pId, sId, e) {
-    const resp = wsMembers.find(u => u.id === e.responsavel_id);
-    const prioOptions = [0,1,2,3,4].map(p => `<option value="${p}" ${e.prioridade==p?'selected':''}>${p}</option>`).join('');
-    const statusOptions = ['Não iniciado','Em andamento','Concluído'].map(s => `<option value="${s}" ${e.status==s?'selected':''}>${s}</option>`).join('');
-    const doneClass = e.status === 'Concluído' ? ' done' : '';
-    return `<div class="step-item${doneClass}">
-        <div class="step-bar" style="width:4px;min-height:40px;border-radius:3px;background:${e.status==='Concluído'?'var(--ok)':e.status==='Em andamento'?'var(--warn)':'var(--muted)'}"></div>
-        <div class="step-info" style="flex:1;min-width:0">
-            <div class="step-name" style="font-weight:600;font-size:.87rem">${escH(e.nome)}</div>
-            ${e.descricao ? `<div class="step-desc" style="font-size:.78rem;color:var(--muted)">${escH(e.descricao)}</div>` : ''}
-            <div class="step-meta" style="display:flex;gap:5px;margin-top:3px;flex-wrap:wrap">
-                ${resp ? `<span class="badge b-purple">${escH(resp.nome)}</span>` : ''}
-                ${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : ''}
-            </div>
-        </div>
-        <div class="step-acts">
-            <select class="fsel step-sel" onchange="updateEtapaPrio(${e.id}, this.value)">${prioOptions}</select>
-            <select class="fsel step-sel" onchange="updateEtapaStatus(${e.id}, this.value)">${statusOptions}</select>
-            ${currentUserCanEdit ? `<button class="btn btn-sm" onclick="editarEtapa(${e.id})">✏️</button>` : ''}
-        </div>
+    const u = wsMembers.find(x => x.id === e.responsavel_id);
+    return `<div class="row ${ST_CLS[e.status]||''}">
+        <div class="r-name"><span class="dot"></span><div><div class="r-t">${escH(e.nome)}</div>${e.descricao ? `<div class="r-d">${escH(e.descricao)}</div>` : ''}</div></div>
+        <div class="r-resp">${u ? `${avatar(u)}<span>${escH(u.nome.split(' ')[0])}</span>` : '<span class="muted">—</span>'}</div>
+        <div>${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span class="muted">—</span>'}</div>
+        <div><select class="mini" title="Prioridade" onchange="updateEtapaPrio(${e.id}, this.value)">${[0,1,2,3,4].map(v => `<option ${e.prioridade==v?'selected':''}>${v}</option>`).join('')}</select></div>
+        <div class="r-st"><select class="mini st" onchange="updateEtapaStatus(${e.id}, this.value)">${STATUS.map(s => `<option ${e.status===s?'selected':''}>${s}</option>`).join('')}</select>
+            ${currentUserCanEdit ? `<button class="ib" title="Editar etapa" onclick="editarEtapa(${e.id})">✏️</button>` : ''}</div>
     </div>`;
 }
 
-function toggleSec(bodyId, chevId) {
-    const body = document.getElementById(bodyId);
-    const chev = document.getElementById(chevId);
-    if (body.style.display === 'none') { body.style.display = 'block'; chev.classList.add('open'); }
-    else { body.style.display = 'none'; chev.classList.remove('open'); }
+function renderBoard(p) {
+    const all = (p.sessoes||[]).flatMap(s => (s.etapas||[]).map(e => ({ e, s })));
+    return `<div class="kb">${STATUS.map(st => {
+        const items = all.filter(x => x.e.status === st);
+        return `<div class="kb-col ${ST_CLS[st]}" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="dropEtapa(event,'${st}')">
+            <div class="kb-h"><span class="dot"></span>${st}<span class="badge b-gray">${items.length}</span></div>
+            ${items.map(({ e, s }) => {
+                const u = wsMembers.find(x => x.id === e.responsavel_id);
+                return `<div class="kb-card" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','${e.id}')" ${currentUserCanEdit ? `onclick="editarEtapa(${e.id})"` : ''}>
+                    <div class="r-t">${escH(e.nome)}</div><div class="r-d">🗂 ${escH(s.nome)}</div>
+                    <div class="kb-f">${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span></span>'}${u ? avatar(u) : ''}</div></div>`;
+            }).join('') || '<div class="row-empty">Vazio</div>'}
+        </div>`;
+    }).join('')}</div>`;
 }
 
-function focusSess(pId, sId) {
-    document.querySelectorAll(`.sess-box[data-proj="${pId}"]`).forEach(box => {
-        const body = box.querySelector('.sess-body');
-        const chev = box.querySelector('.chev');
-        const isTarget = box.dataset.sess === String(sId);
-        if (!body || !chev) return;
-        if (isTarget) {
-            const isOpen = body.style.display === 'block';
-            body.style.display = isOpen ? 'none' : 'block';
-            chev.classList.toggle('open', !isOpen);
-        } else {
-            body.style.display = 'none';
-            chev.classList.remove('open');
-        }
-    });
-}
+function dropEtapa(ev, st) { ev.preventDefault(); const id = +ev.dataTransfer.getData('text/plain'); if (id) updateEtapaStatus(id, st); }
 
 // ─── CRUD PROJETOS ────────────────────────────────
 function abrirModalProjeto() {
@@ -1111,14 +1075,20 @@ async function editarEtapaSave(eId) {
     await addLog('update','etapa',null,{nome}); fecharModal(); toast('Atividade atualizada!'); await renderizarProjetos();
 }
 
-async function updateEtapaPrio(eId, prio) {
-    await sb.from('etapas').update({ prioridade: +prio }).eq('id', eId);
+function findEtapa(id) {
+    for (const p of wsProjetos) for (const s of p.sessoes||[]) { const e = (s.etapas||[]).find(x => x.id === id); if (e) return e; }
+    return null;
 }
-
+async function updateEtapaPrio(eId, prio) {
+    const e = findEtapa(eId); if (e) e.prioridade = +prio;
+    const { error } = await sb.from('etapas').update({ prioridade: +prio }).eq('id', eId);
+    if (error) toast('Erro ao atualizar prioridade.', 'error');
+}
 async function updateEtapaStatus(eId, status) {
+    const e = findEtapa(eId); if (!e || e.status === status) return;
+    const old = e.status; e.status = status; renderProjetosView();
     const { error } = await sb.from('etapas').update({ status }).eq('id', eId);
-    if (error) { toast('Erro ao atualizar status.', 'error'); return; }
-    await renderizarProjetos();
+    if (error) { e.status = old; renderProjetosView(); toast('Erro ao atualizar status.', 'error'); }
 }
 
 // ─── DELETAR ETAPA (direto, sem aprovação) ────────────────────────
@@ -2303,7 +2273,7 @@ async function carregarLogs() {
 
     p.innerHTML = Object.entries(grouped).map(([action, logs]) => {
         const actionLabel = LOG_ACOES[action] || action || 'Outro';
-        const actionColor = actionColor = {
+        const aColor = {
             create:'#3fb950', update:'#58a6ff', delete:'#f85149', upload:'#d2a8ff',
             login:'#56d364', logout:'#8b949e', invite:'#79c0ff', role_change:'#e3b341',
             aviso:'#f0883e', status_change:'#a8daff', prazo:'#ffa657', download:'#bc8cff', outro:'#8b949e'
@@ -2324,7 +2294,7 @@ async function carregarLogs() {
                 }
                 return `<div class="log-e" style="display:flex;gap:0;flex-wrap:wrap;align-items:baseline">
                     <span class="lt" style="margin-right:8px">${dtStr}</span>
-                    <span style="background:${actionColor}22;color:${actionColor};border-radius:4px;padding:0 6px;font-size:.68rem;font-weight:700;margin-right:7px;flex-shrink:0">${escH(actionLabel)}</span>
+                    <span style="background:${aColor}22;color:${aColor};border-radius:4px;padding:0 6px;font-size:.68rem;font-weight:700;margin-right:7px;flex-shrink:0">${escH(actionLabel)}</span>
                     ${eLabel ? `<span style="color:#8b949e;font-size:.7rem;margin-right:6px">[${escH(eLabel)}${l.entidade_id?` #${l.entidade_id}`:''}]</span>` : ''}
                     <span class="lu" style="margin-right:6px">@${escH(l.usuario_nome||'?')}</span>
                     <span class="lm">${escH(l.mensagem||'')}${payloadStr}</span>
