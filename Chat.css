@@ -1,0 +1,51 @@
+.chat-shell{display:grid;grid-template-columns:320px minmax(0,1fr);height:calc(100vh - 150px);min-height:440px;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--sh)}
+.chat-side{display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--border);background:#fafbff}
+.chat-side-h{padding:14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px}
+.chat-side-acts{display:flex;gap:8px}
+.chat-side-acts .btn{flex:1;padding:8px 10px;font-size:.78rem}
+.chat-list{flex:1;overflow-y:auto}
+.chat-list-vazio{padding:30px 18px;text-align:center;color:var(--muted);font-size:.84rem}
+.chat-item{display:flex;gap:11px;align-items:center;padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:.12s}
+.chat-item:hover{background:#f1f5ff}
+.chat-item.active{background:var(--acc-lt)}
+.chat-av{width:40px;height:40px;border-radius:50%;color:#fff;font-weight:700;font-size:.82rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-av.grp{border-radius:12px;font-size:1rem}
+.chat-it-body{flex:1;min-width:0}
+.chat-it-top,.chat-it-bot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chat-it-bot{margin-top:2px}
+.chat-it-name{font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-it-time{font-size:.68rem;color:var(--muted);flex-shrink:0}
+.chat-it-last{font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-unread,.chat-nav-badge{background:var(--acc);color:#fff;border-radius:999px;font-size:.66rem;font-weight:700;min-width:18px;height:18px;padding:0 5px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-nav-badge{margin-left:auto;background:var(--danger)}
+.chat-main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.chat-vazio{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);background:#f8faff;text-align:center;padding:20px}
+.chat-vazio .ei{font-size:3rem}
+.chat-conv{flex:1;display:flex;flex-direction:column;min-height:0}
+.chat-head{display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid var(--border);background:#fff}
+.chat-head-info{flex:1;min-width:0}
+.chat-back{display:none}
+.chat-msgs{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:3px;background:#f8faff}
+.chat-day{align-self:center;background:#e2e8f5;color:var(--muted);font-size:.68rem;font-weight:700;padding:3px 12px;border-radius:999px;margin:10px 0}
+.chat-msg{max-width:72%;display:flex;flex-direction:column;align-items:flex-start}
+.chat-msg.first{margin-top:8px}
+.chat-msg.me{align-self:flex-end;align-items:flex-end}
+.chat-sender{font-size:.7rem;font-weight:700;margin:0 0 2px 4px}
+.chat-bubble{padding:8px 12px;border-radius:14px;background:#fff;border:1px solid var(--border);font-size:.88rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.chat-msg.me .chat-bubble{background:linear-gradient(135deg,var(--acc),#6366f1);color:#fff;border-color:transparent}
+.chat-time{font-size:.64rem;color:var(--muted);margin-top:2px;padding:0 4px}
+.chat-compose{display:flex;gap:10px;align-items:flex-end;padding:12px 14px;border-top:1px solid var(--border);background:#fff}
+.chat-compose .fi{resize:none;min-height:42px;max-height:120px;padding:10px 14px}
+.chat-compose .btn{height:42px}
+.chat-pick{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:10px;cursor:pointer;transition:.12s}
+.chat-pick:hover{background:var(--acc-lt)}
+.chat-pick .chat-av{width:34px;height:34px;font-size:.74rem}
+.chat-tag{background:var(--acc-lt);color:var(--acc);font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:999px}
+@media(max-width:860px){
+    .chat-shell{grid-template-columns:minmax(0,1fr);height:calc(100vh - 140px)}
+    .chat-main{display:none}
+    .chat-shell.in-conv .chat-side{display:none}
+    .chat-shell.in-conv .chat-main{display:flex}
+    .chat-back{display:inline-block}
+    .chat-msg{max-width:88%}
+}

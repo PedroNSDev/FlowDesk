@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html>
 <head>
     <title>Login</title>
+    <link rel="icon" href="fav.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>

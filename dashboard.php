@@ -14,6 +14,7 @@ $projetos = $pdo->query("SELECT * FROM projetos")->fetchAll(PDO::FETCH_ASSOC);
 <html>
 <head>
     <title>Dashboard</title>
+    <link rel="icon" href="fav.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>

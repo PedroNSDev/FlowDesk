@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlowDesk - Workspace</title>
+    <link rel="icon" href="fav.ico" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="check_login.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -368,6 +369,7 @@
             .kb{grid-template-columns:repeat(3,260px)}
         }
     </style>
+    <link rel="stylesheet" href="chat.css">
 </head>
 <body>
 
@@ -2608,7 +2610,7 @@ function fecharModal() { document.getElementById('modal-ov').classList.add('hidd
 function toast(msg, type='success') {
     const t = document.createElement('div');
     t.className = `toast ${type==='error'?'error':type==='warning'?'warning':''}`;
-    t.textContent = msg;
+    t.textContent = msg;        
     document.getElementById('toast-ctr').appendChild(t);
     setTimeout(() => t.remove(), 4000);
 }
@@ -2624,5 +2626,6 @@ function userColor(name) {
 }
 function initials(name) { return name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2); }
 </script>
+<script src="chat.js"></script>
 </body>
 </html>
