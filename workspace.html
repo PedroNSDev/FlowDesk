@@ -13,7 +13,7 @@
             --bg:#f0f4ff; --surface:#fff; --sidebar:#0f172a;
             --acc:#4f46e5; --acc-lt:#eef2ff;
             --text:#0f172a; --muted:#64748b; --border:#e2e8f0;
-            --ok:#10b981; --warn:#f59e0b; --danger:#ef4444;
+            --ok:#10b991; --warn:#f59e0b; --danger:#ef4444;
             --sh:0 1px 3px rgba(0,0,0,.07); --sh-md:0 4px 12px rgba(0,0,0,.1); --sh-lg:0 12px 32px rgba(0,0,0,.14);
             --r:10px; --rsm:6px; --font:'Outfit',sans-serif; --mono:'JetBrains Mono',monospace;
             --session-done:#d1fae5; --session-done-header:#10b981;
@@ -2606,7 +2606,7 @@ function abrirModal(title, body, buttons=[]) {
 
 function fecharModal() { document.getElementById('modal-ov').classList.add('hidden'); }
 
-// ─── TOAST ────────────────────────────────────────
+// ─── TOAST ────────────────────────────────────────────────────────────────
 function toast(msg, type='success') {
     const t = document.createElement('div');
     t.className = `toast ${type==='error'?'error':type==='warning'?'warning':''}`;
