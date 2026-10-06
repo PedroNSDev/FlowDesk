@@ -370,6 +370,7 @@
         }
     </style>
     <link rel="stylesheet" href="Chat.css">
+    <link rel="stylesheet" href="Agenda.css">
 </head>
 <body>
 
@@ -386,7 +387,7 @@
         </div>
 
         <div class="sb-sec">Principal</div>
-        <button id="nav-home"           class="nav-btn active" onclick="switchTab('home')"><span class="ni">🏠</span> Início</button>
+        <button id="nav-home"           class="nav-btn active" onclick="switchTab('home')"><span class="ni">📊</span> Dashboard</button>
         <button id="nav-projetos"       class="nav-btn"        onclick="switchTab('projetos')"><span class="ni">📁</span> Projetos</button>
         <button id="nav-eventos"        class="nav-btn"        onclick="switchTab('eventos')"><span class="ni">📅</span> Agenda</button>
         <button id="nav-progresso"      class="nav-btn"        onclick="switchTab('progresso')"><span class="ni">📊</span> Progresso</button>
@@ -487,8 +488,8 @@
         <!-- EVENTOS -->
         <div id="tab-eventos" class="tab-c">
             <div class="ph">
-                <div><div class="pt">Eventos</div><div class="ps">Gerencie eventos do workspace</div></div>
-                <button class="btn btn-p" onclick="abrirModalEvento()">+ Novo Evento</button>
+                <div><div class="pt">Agenda</div><div class="ps">Eventos e prazos de etapas em um só calendário</div></div>
+                <button class="btn btn-p" onclick="agNovoEvento()">+ Novo Evento</button>
             </div>
             <div id="eventos-container">
                 <div class="loading-c"><div class="spinner"></div></div>
@@ -1092,8 +1093,7 @@ async function updateEtapaStatus(eId, status) {
     const { error } = await sb.from('etapas').update({ status }).eq('id', eId);
     if (error) { e.status = old; renderProjetosView(); toast('Erro ao atualizar status.', 'error'); }
 }
-
-// ─── DELETAR ETAPA (direto, sem aprovação) ────────────────────────
+// ─── DELETAR ETAPA (direto,PIMP  sem aprovação) ────────────────────────
 async function deletarEtapa(eId) {
     if (!confirm('Tem certeza que deseja excluir esta Atividade? Esta ação não pode ser desfeita.')) return;
     fecharModal();
@@ -1120,133 +1120,6 @@ async function responderAcesso(notifId, pedidoId, usuarioId, aceitar) {
     await sb.from('notificacoes').update({ lida: true }).eq('id', notifId);
     document.getElementById(`notif-${notifId}`)?.remove();
     await atualizarBellBadge();
-}
-
-// ─── HOME ─────────────────────────────────────────
-async function carregarHome() {
-    const c = document.getElementById('home-container');
-    c.innerHTML = '<div class="loading-c"><div class="spinner"></div></div>';
-
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const hora = hoje.getHours();
-    const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
-    const primeiroNome = currentUser.nome.split(' ')[0];
-
-    // Buscar etapas onde o usuário é responsável
-    const { data: etapas } = await sb.from('etapas')
-        .select('id, nome, status, prazo, prioridade, sessoes!inner(id, nome, projeto_id, projetos!inner(id, nome, workspace_id))')
-        .eq('responsavel_id', currentUser.id)
-        .eq('sessoes.projetos.workspace_id', currentWorkspace.id)
-        .order('prazo', { ascending: true, nullsFirst: false });
-
-    // Buscar próximos eventos (próximos 30 dias)
-    const em30 = new Date(hoje); em30.setDate(em30.getDate() + 60);
-    const { data: eventos } = await sb.from('eventos')
-        .select('*')
-        .eq('workspace_id', currentWorkspace.id)
-        .gte('data', hoje.toISOString().slice(0,10))
-        .lte('data', em30.toISOString().slice(0,10))
-        .order('data', { ascending: true })
-        .limit(8);
-
-    // Stats rápidas
-    const minhasEtapas = etapas || [];
-    const pendentes   = minhasEtapas.filter(e => e.status === 'Não iniciado');
-    const emAndamento = minhasEtapas.filter(e => e.status === 'Em andamento');
-    const concluidas  = minhasEtapas.filter(e => e.status === 'Concluído');
-    const vencidas    = minhasEtapas.filter(e => e.status !== 'Concluído' && e.prazo && new Date(e.prazo+'T00:00:00') < hoje);
-
-    function statusColor(s) {
-        return s==='Concluído' ? 'var(--ok)' : s==='Em andamento' ? 'var(--warn)' : 'var(--muted)';
-    }
-
-    function renderMinhaEtapa(e, idx) {
-        const projNome = e.sessoes?.projetos?.nome || '—';
-        const sessNome = e.sessoes?.nome || '—';
-        return `<div class="my-etapa-card anim-item" style="animation-delay:${0.05 + idx*0.06}s">
-            <div class="my-etapa-bar" style="background:${statusColor(e.status)}"></div>
-            <div style="flex:1;min-width:0">
-                <div class="my-etapa-nome">${escH(e.nome)}</div>
-                <div class="my-etapa-ctx">📁 ${escH(projNome)} › ${escH(sessNome)}</div>
-                <div class="my-etapa-foot">
-                    <span class="badge ${e.status==='Concluído'?'b-green':e.status==='Em andamento'?'b-amber':'b-gray'}">${e.status}</span>
-                    ${e.prazo
-                        ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>`
-                        : `<span class="badge b-gray">📅 Sem prazo</span>`}
-                </div>
-            </div>
-        </div>`;
-    }
-
-    function renderEvMini(ev, idx) {
-        const d = new Date(ev.data + 'T00:00:00');
-        const dia = d.getDate().toString().padStart(2,'0');
-        const mes = d.toLocaleDateString('pt-BR',{month:'short'}).replace('.','');
-        return `<div class="ev-mini-card anim-item" style="animation-delay:${0.1 + idx*0.06}s">
-            <div class="ev-mini-date">
-                <div class="ev-mini-day">${dia}</div>
-                <div class="ev-mini-mon">${mes}</div>
-            </div>
-            <div>
-                <div class="ev-mini-nome">${escH(ev.nome)}</div>
-                ${ev.hora ? `<div class="ev-mini-hora">🕐 ${ev.hora.slice(0,5)}</div>` : ''}
-                ${ev.descricao ? `<div style="font-size:.74rem;color:var(--muted);margin-top:2px">${escH(ev.descricao)}</div>` : ''}
-            </div>
-        </div>`;
-    }
-
-    // Aviso fixado inline na home
-    const avisoHtml = avisoAtivo
-        ? `<div class="notice-wrap anim-item" style="animation-delay:.02s;margin-bottom:20px">
-            <span class="n-icon">📌</span>
-            <div class="n-text">
-                <span class="n-label">Recado do Administrador</span>
-                <span class="n-msg">${escH(avisoAtivo.mensagem)}</span>
-            </div>
-           </div>`
-        : '';
-
-    c.innerHTML = `
-        <div class="anim-item" style="animation-delay:0s">
-            <div class="home-greeting">${saudacao}, ${escH(primeiroNome)}! 👋</div>
-            <div class="home-sub">${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})} · ${currentWorkspace.nome}</div>
-        </div>
-
-        ${avisoHtml}
-
-        <div class="home-stat-row anim-item" style="animation-delay:.04s">
-            <div class="home-stat">
-                <div class="home-stat-val" style="color:var(--muted)">${pendentes.length}</div>
-                <div class="home-stat-lbl">Não iniciadas</div>
-            </div>
-            <div class="home-stat">
-                <div class="home-stat-val" style="color:var(--warn)">${emAndamento.length}</div>
-                <div class="home-stat-lbl">Em andamento</div>
-            </div>
-            <div class="home-stat">
-                <div class="home-stat-val" style="color:var(--ok)">${concluidas.length}</div>
-                <div class="home-stat-lbl">Concluídas</div>
-            </div>
-            <div class="home-stat">
-                <div class="home-stat-val" style="color:${vencidas.length?'var(--danger)':'var(--muted)'}">${vencidas.length}</div>
-                <div class="home-stat-lbl">Vencidas</div>
-            </div>
-        </div>
-
-        <div class="home-grid">
-            <div>
-                <div class="home-col-title">✅ Minhas etapas (${minhasEtapas.length})</div>
-                ${minhasEtapas.length
-                    ? minhasEtapas.map((e,i) => renderMinhaEtapa(e,i)).join('')
-                    : `<div class="note-empty" style="padding:28px 20px"><div class="ei">🎉</div>Nenhuma atividade atribuída a você.</div>`}
-            </div>
-            <div>
-                <div class="home-col-title">📅 Próximos eventos</div>
-                ${(eventos||[]).length
-                    ? eventos.map((ev,i) => renderEvMini(ev,i)).join('')
-                    : `<div class="note-empty" style="padding:28px 20px"><div class="ei">📭</div>Sem eventos próximos.</div>`}
-            </div>
-        </div>`;
 }
 
 let progressoFiltro = 'todos';
@@ -1388,7 +1261,6 @@ function fmtBytes(b) {
 }
 
 async function carregarArquivosWorkspace() {
-    // Carregar pastas e contagens de arquivos por projeto em paralelo
     const [{ data: pastas }, { data: projArqs }] = await Promise.all([
         sb.from('pastas_arquivos').select('*').eq('workspace_id', currentWorkspace.id).order('nome'),
         sb.from('arquivos').select('projeto_id').eq('workspace_id', currentWorkspace.id).not('projeto_id', 'is', null)
@@ -1496,7 +1368,7 @@ async function renderArkFiles(key) {
     } else if (isPastaKey) {
         query = query.eq('pasta_id', key);
     }
-    // null = raiz: sem filtro adicional (mostra tudo, visibilidade filtra client-side)
+    
 
     query = query.order('created_at', { ascending: false });
     const { data: arquivos, error } = await query;
@@ -1850,10 +1722,10 @@ function prazoClass(prazo, status) {
     if (status === 'Concluído') return 'b-green';
     const hoje = new Date(); hoje.setHours(0,0,0,0);
     const d = new Date(prazo + 'T00:00:00');
-    const diff = Math.floor((d - hoje) / 86400000);
-    if (d < hoje) return 'b-rose';        // vencido
-    if (diff <= 2) return 'b-amber';      // urgente (≤2 dias)
-    if (diff <= 7) return 'b-amber';      // próximo (≤7 dias)
+    const diff = Math.floor((d - hoje) / 86400000); //PIMP Consolidar em uma função depois 
+    if (d < hoje) return 'b-rose';        
+    if (diff <= 2) return 'b-amber';      
+    if (diff <= 7) return 'b-amber';      
     return 'b-acc';
 }
 function prazoLabel(prazo, status) {
@@ -1870,182 +1742,6 @@ function prazoLabel(prazo, status) {
 }
 
 // ─── EVENTOS ──────────────────────────────────────
-function gerarCalendario(eventos) {
-    const hoje = new Date();
-    const ano = hoje.getFullYear();
-    const mes = hoje.getMonth();
-
-    const primeiroDia = new Date(ano, mes, 1);
-    const ultimoDia = new Date(ano, mes + 1, 0);
-
-    const startWeekDay = primeiroDia.getDay(); // 0=domingo
-    const totalDias = ultimoDia.getDate();
-
-    // ── Indexar eventos por data ──
-    const eventosPorDia = {};
-    eventos.forEach(e => {
-        const key = e.data; 
-        if (!eventosPorDia[key]) eventosPorDia[key] = [];
-        eventosPorDia[key].push(e);
-    });
-
-    let html = `<div class="calendar">`;
-
-    // HEADER
-    const diasSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-    html += `<div class="cal-header">` +
-        diasSemana.map(d => `<div>${d}</div>`).join('') +
-    `</div>`;
-
-    html += `<div class="cal-grid">`;
-    for (let i = 0; i < startWeekDay; i++) {
-        html += `<div class="cal-day empty"></div>`;
-    }
-    for (let d = 1; d <= totalDias; d++) {
-        const dataStr = `${ano}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        const temEvento = eventosPorDia[dataStr];
-
-        let tooltip = '';
-        if (temEvento) {
-            tooltip = temEvento.map(ev => escH(ev.nome)).join(' | ');
-        }
-
-        html += `
-        <div class="cal-day ${temEvento ? 'has-event' : ''}">
-            <span>${d}</span>
-            ${temEvento ? `<div class="tooltip">${tooltip}</div>` : ''}
-        </div>`;
-    }
-
-    html += `</div></div>`;
-
-    return html;
-}
-async function carregarEventos() {
-    const c = document.getElementById('eventos-container');
-    c.innerHTML = '<div class="loading-c"><div class="spinner"></div></div>';
-
-    // Carregar eventos e etapas com prazo em paralelo
-    const [{ data: eventos, error: evErr }, { data: etapasComPrazo, error: etErr }] = await Promise.all([
-        sb.from('eventos').select('*')
-            .eq('workspace_id', currentWorkspace.id)
-            .order('data', { ascending: true }),
-        sb.from('etapas')
-            .select('id, nome, status, prazo, responsavel_id, sessoes!inner(id, nome, projeto_id, projetos!inner(id, nome, workspace_id))')
-            .not('prazo', 'is', null)
-            .eq('sessoes.projetos.workspace_id', currentWorkspace.id)
-            .order('prazo', { ascending: true })
-    ]);
-
-    if (evErr) { c.innerHTML = `<div class="empty-state"><div class="ei">⚠️</div><h3>Erro ao carregar</h3><p>${escH(evErr.message)}</p></div>`; return; }
-
-    renderEventos(eventos || [], etapasComPrazo || []);
-}
-
-function renderEventos(eventos, etapasComPrazo) {
-    const c = document.getElementById('eventos-container');
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-
-    // ── Atividade de Eventos ──────────────────────────
-    let html = ''
-    const futuros = eventos.filter(e => new Date(e.data + 'T00:00:00') >= hoje);
-    const passados = eventos.filter(e => new Date(e.data + 'T00:00:00') < hoje);
-
-    function renderEventoCard(e) {
-        const d = new Date(e.data + 'T00:00:00');
-        const passado = d < hoje;
-        const dia = d.getDate().toString().padStart(2,'0');
-        const mes = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.','');
-        return `<div class="evento-card${passado?' evento-past':''}">
-            <div class="evento-date-strip">
-                <div class="ev-day">${dia}</div>
-                <div class="ev-month">${mes}</div>
-            </div>
-            <div class="evento-info">
-                <div>
-                    <div class="evento-nome">${escH(e.nome)}</div>
-                    ${e.descricao ? `<div class="evento-desc">${escH(e.descricao)}</div>` : ''}
-                    ${e.hora ? `<div class="evento-hora">🕐 ${e.hora.slice(0,5)}</div>` : ''}
-                </div>
-                <div style="display:flex;gap:6px;flex-shrink:0">
-                    ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarEvento(${e.id})">✏️</button>` : ''}
-                    ${currentUserIsWorkspaceAdmin ? `<button class="btn btn-sm" style="background:none;border:1px solid var(--danger);color:var(--danger)" onclick="deletarEvento(${e.id})">🗑</button>` : ''}
-                </div>
-            </div>
-        </div>`;
-    }
-
-    if (!eventos.length && !etapasComPrazo.length) {
-        c.innerHTML = `<div class="empty-state"><div class="ei">📅</div><h3>Nenhum evento ainda</h3><p>Crie eventos ou adicione prazos às etapas dos projetos.</p></div>`;
-        return;
-    }
-
-    if (futuros.length) {
-        html += `<div class="eventos-section-label">📅 Próximos eventos (${futuros.length})</div>`;
-        html += futuros.map(renderEventoCard).join('');
-    }
-    if (passados.length) {
-        html += `<div class="eventos-section-label" style="margin-top:${futuros.length?'24px':'0'}">🕓 Eventos passados (${passados.length})</div>`;
-        html += passados.map(renderEventoCard).join('');
-    }
-
-    // ── Seção de Prazos de Etapas ─────────────────
-    if (etapasComPrazo.length) {
-        const pendentes = etapasComPrazo.filter(e => e.status !== 'Concluído');
-        const concluidas = etapasComPrazo.filter(e => e.status === 'Concluído');
-
-        function renderPrazoCard(e) {
-            const d = new Date(e.prazo + 'T00:00:00');
-            const dia = d.getDate().toString().padStart(2,'0');
-            const mes = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.','');
-            const diff = Math.floor((d - hoje) / 86400000);
-            const vencido = d < hoje && e.status !== 'Concluído';
-            const resp = wsMembers.find(u => u.id === e.responsavel_id);
-            const projNome = e.sessoes?.projetos?.nome || '—';
-            const sessNome = e.sessoes?.nome || '—';
-
-            let stripClass = 'prazo-ok';
-            if (e.status === 'Concluído') stripClass = 'prazo-concluido';
-            else if (vencido) stripClass = 'prazo-vencido';
-            else if (diff <= 2) stripClass = 'prazo-urgente';
-            else if (diff <= 7) stripClass = 'prazo-proximo';
-
-            return `<div class="prazo-card ${stripClass}${vencido?' prazo-vencido':''}">
-                <div class="prazo-date-strip">
-                    <div class="ev-day">${dia}</div>
-                    <div class="ev-month">${mes}</div>
-                </div>
-                <div class="prazo-info">
-                    <div style="min-width:0">
-                        <div class="prazo-nome">${escH(e.nome)}</div>
-                        <div class="prazo-proj">📁 ${escH(projNome)} › ${escH(sessNome)}</div>
-                        ${resp ? `<div style="margin-top:4px"><span class="badge b-purple">${escH(resp.nome)}</span></div>` : ''}
-                    </div>
-                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
-                        <span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>
-                        <span class="badge ${e.status==='Concluído'?'b-green':e.status==='Em andamento'?'b-amber':'b-gray'}">${e.status}</span>
-                    </div>
-                </div>
-            </div>`;
-        }
-
-        html += `<div class="eventos-section-label" style="margin-top:${(futuros.length||passados.length)?'28px':'0'}">⏰ Prazos de etapas (${pendentes.length} pendente${pendentes.length!==1?'s':''})</div>`;
-
-        if (pendentes.length) {
-            html += pendentes.map(renderPrazoCard).join('');
-        } else {
-            html += `<div style="padding:12px;color:var(--ok);font-size:.85rem;font-weight:600">✅ Todas as etapas com prazo estão concluídas!</div>`;
-        }
-
-        if (concluidas.length) {
-            html += `<div class="eventos-section-label" style="margin-top:20px">✅ Prazos concluídos (${concluidas.length})</div>`;
-            html += concluidas.map(renderPrazoCard).join('');
-        }
-    }
-
-    c.innerHTML = html;
-}
-
 function abrirModalEvento(ev=null) {
     const nome = ev?.nome || '', desc = ev?.descricao || '';
     const data = ev?.data || '', hora = ev?.hora ? ev.hora.slice(0,5) : '';
@@ -2627,5 +2323,7 @@ function userColor(name) {
 function initials(name) { return name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2); }
 </script>
 <script src="Chat.js"></script>
+<script src="Dashboard.js"></script>
+<script src="Agenda.js"></script>
 </body>
 </html>
