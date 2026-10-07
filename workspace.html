@@ -18,6 +18,7 @@
             --r:10px; --rsm:6px; --font:'Outfit',sans-serif; --mono:'JetBrains Mono',monospace;
             --session-done:#d1fae5; --session-done-header:#10b981;
         }
+
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
         .hidden{display:none!important}
@@ -108,6 +109,8 @@
         .ib:hover{background:var(--acc-lt);color:var(--acc)}
         .row{display:grid;grid-template-columns:minmax(0,1fr) 140px 130px 64px 190px;gap:12px;align-items:center;padding:10px 16px;border-top:1px solid var(--border)}
         .row:not(.row-h):hover{background:#fafbff}
+        .row.s-done:not(.row-h){background:#f0fdf4}
+        .row.s-done:not(.row-h):hover{background:#dcfce7}
         .row-h{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:8px 16px;background:#f8fafc}
         .r-name{display:flex;gap:10px;align-items:flex-start;min-width:0}
         .r-t{font-weight:600;font-size:.88rem;overflow-wrap:anywhere}
@@ -902,7 +905,7 @@ async function criarProjeto() {
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     await sb.from('projeto_usuarios').insert({ projeto_id: data.id, usuario_id: currentUser.id });
     await addLog('create','projeto',null,{nome});
-    await pushNotificacao('📁', `${currentUser.nome} criou o projeto "${nome}".`, 'projeto');
+    await pushNotificacao('📁', `${currentUser.nome} criou o projeto "${nome}".`, 'projeto', `projeto:${data.id}`);
     fecharModal(); toast(`Projeto "${nome}" criado! 🎉`); await renderizarProjetos(); popularSelectProjetos();
 }
 
@@ -1235,10 +1238,13 @@ let arkPastas = [];        // pastas criadas pelo usuário
 let arkPastaAtual = null;  // null = raiz | number = pasta_id | 'proj_N' = projeto
 let arkProjFiles = {};     // { projeto_id: count } — projetos com pelo menos 1 arquivo
 
-function irParaAnexosProjeto(projetoId) {
+function irParaAnexos(pasta = null) {
     switchTab('arquivos');
-    // pequeno delay para a aba renderizar antes de navegar
-    setTimeout(() => navPasta(`proj_${projetoId}`), 120);
+    setTimeout(() => navPasta(pasta), 120);
+}
+
+function irParaAnexosProjeto(projetoId) {
+    irParaAnexos(`proj_${projetoId}`);
 }
 
 function fileIcon(nome) {
@@ -1653,7 +1659,8 @@ async function executarUpload() {
 
     if (sucesso) {
         await addLog('upload', 'arquivo', null, { quantidade: sucesso, destino: destino || 'raiz' });
-        await pushNotificacao('🔗', `${currentUser.nome} enviou ${sucesso} arquivo(s) ao workspace.`);
+        const pastaNotificacao = destino.startsWith('proj_') ? destino : 'raiz';
+        await pushNotificacao('🔗', `${currentUser.nome} enviou ${sucesso} arquivo(s) ao workspace.`, 'upload', `anexo:${pastaNotificacao}`);
     }
     if (erroMsgs.length) console.error('Upload errors:', erroMsgs);
 
@@ -1775,7 +1782,7 @@ async function salvarEvento() {
     });
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     await addLog('create','evento',null,{nome});
-    await pushNotificacao('📅', `${currentUser.nome} criou o evento "${nome}" para ${data}.`, 'evento');
+    await pushNotificacao('📅', `${currentUser.nome} criou o evento "${nome}" para ${data}.`, 'evento', `evento:${data}`);
     fecharModal(); toast('Evento criado! 📅'); await carregarEventos();
 }
 
@@ -2129,6 +2136,7 @@ function abrirFerramenta(path) { window.open(path, '_blank'); }
 // ─── NOTIFICAÇÕES (admin only) ────────────────────
 let notifInterval = null;
 let notifTipoFiltro = '';
+let notifCache = new Map();
 
 // Mapa visual por tipo
 const NOTIF_TIPO = {
@@ -2139,10 +2147,11 @@ const NOTIF_TIPO = {
     acesso:    { label:'Acesso',   cls:'background:#fef3c7;color:#92400e' },
 };
 
-async function pushNotificacao(icone, mensagem, tipo='geral') {
+async function pushNotificacao(icone, mensagem, tipo='geral', destino=null) {
     if (!currentUserIsWorkspaceAdmin && currentUser?.nivel !== 2) return;
     try {
-        await sb.from('notificacoes').insert({ workspace_id: currentWorkspace.id, icone, mensagem, tipo, lida: false });
+        const iconeComDestino = destino ? `${icone}:${destino}` : icone;
+        await sb.from('notificacoes').insert({ workspace_id: currentWorkspace.id, icone: iconeComDestino, mensagem, tipo, lida: false });
         if (document.getElementById('bell-btn') && !document.getElementById('bell-btn').classList.contains('hidden')) {
             await atualizarBellBadge();
         }
@@ -2189,9 +2198,11 @@ async function carregarNotificacoes() {
     const { data } = await q;
 
     if (!data?.length) {
+        notifCache.clear();
         list.innerHTML = '<div class="notif-empty"><div style="font-size:2rem;margin-bottom:8px">🔕</div>Nenhuma notificação' + (notifTipoFiltro ? ' neste filtro' : ' ainda') + '.</div>';
         return;
     }
+    notifCache = new Map(data.map(n => [String(n.id), n]));
 
     const agora = new Date();
     function tempoRelativo(iso) {
@@ -2226,7 +2237,7 @@ async function carregarNotificacoes() {
             </div>`;
         }
 
-        return `<div class="notif-item ${n.lida?'':'unread'}" onclick="marcarLida(${n.id}, this)">
+        return `<div class="notif-item ${n.lida?'':'unread'}" onclick="abrirNotificacao(${n.id}, this)">
             <div class="notif-icon">${escH((n.icone||'🔔').split(':')[0])}</div>
             <div class="notif-text">
                 <div class="notif-msg">${escH(n.mensagem)}</div>
@@ -2245,6 +2256,51 @@ async function marcarLida(id, el) {
     el?.classList.remove('unread');
     el?.querySelector('.notif-dot')?.remove();
     await atualizarBellBadge();
+}
+
+function destinoNotificacao(n) {
+    const partes = (n.icone || '').split(':');
+    if (partes[1] === 'projeto' && partes[2]) return { tipo: 'projeto', id: partes[2] };
+    if (partes[1] === 'evento' && partes[2]) return { tipo: 'evento', data: partes[2] };
+    if (partes[1] === 'anexo') return { tipo: 'anexo', pasta: partes[2] || 'raiz' };
+
+    if (n.tipo === 'projeto') {
+        const nome = n.mensagem.match(/criou o projeto "(.+)"\./)?.[1];
+        const projeto = nome && wsProjetos.find(p => p.nome === nome);
+        return projeto ? { tipo: 'projeto', id: projeto.id } : null;
+    }
+    if (n.tipo === 'evento') {
+        const data = n.mensagem.match(/\b\d{4}-\d{2}-\d{2}\b/)?.[0];
+        return data ? { tipo: 'evento', data } : null;
+    }
+    if (n.tipo === 'upload' || /enviou \d+ arquivo\(s\)/i.test(n.mensagem)) {
+        return { tipo: 'anexo', pasta: 'raiz' };
+    }
+    return null;
+}
+
+async function abrirNotificacao(id, el) {
+    const notificacao = notifCache.get(String(id));
+    await marcarLida(id, el);
+    if (!notificacao) return;
+
+    const destino = destinoNotificacao(notificacao);
+    if (!destino) return;
+
+    fecharNotificacoes();
+    if (destino.tipo === 'projeto') {
+        const projeto = wsProjetos.find(p => String(p.id) === String(destino.id));
+        if (!projeto) {
+            toast('Não foi possível localizar o projeto desta notificação.', 'warning');
+            return;
+        }
+        switchTab('projetos');
+        abrirProjeto(projeto.id);
+    } else if (destino.tipo === 'evento' && /^\d{4}-\d{2}-\d{2}$/.test(destino.data)) {
+        agIrParaData(destino.data);
+    } else if (destino.tipo === 'anexo') {
+        irParaAnexos(destino.pasta.startsWith('proj_') ? destino.pasta : null);
+    }
 }
 
 async function marcarTodasLidas() {

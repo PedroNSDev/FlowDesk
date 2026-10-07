@@ -8,8 +8,12 @@ const DASHBOARD_ESTILO = `.dash-head{display:flex;justify-content:space-between;
 .dash-kpi-v{font-size:1.65rem;font-weight:800;line-height:1.1;color:var(--c)}
 .dash-kpi-l{font-size:.76rem;font-weight:600;color:var(--text);margin-top:1px}
 .dash-kpi-s{font-size:.7rem;color:var(--muted);margin-top:1px}
+.dash-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,320px);gap:16px;align-items:start}
 .dash-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
 .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--sh);min-width:0}
+.dash-upcoming{display:flex;flex-direction:column;height:clamp(280px,55vh,560px);min-height:0}
+.dash-upcoming .dash-time{flex:1;min-height:0;overflow-y:auto;padding-right:4px}
+.dash-upcoming .dash-ti{flex-shrink:0}
 .dash-s3{grid-column:span 3}
 .dash-s4{grid-column:span 4}
 .dash-s5{grid-column:span 5}
@@ -60,7 +64,8 @@ const DASHBOARD_ESTILO = `.dash-head{display:flex;justify-content:space-between;
 .dash-in-ic{font-size:1.25rem;line-height:1.2}
 .dash-in-t{font-weight:700;font-size:.86rem}
 .dash-in-d{font-size:.78rem;color:var(--muted);margin-top:2px}
-.dash-foco{display:flex;flex-direction:column;gap:9px}
+.dash-foco{display:flex;flex-direction:column;gap:9px;max-height:360px;overflow-y:auto;padding-right:4px}
+.dash-minhas{cursor:pointer}
 .dash-fi{display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:.15s;background:#fff}
 .dash-fi:hover{border-color:var(--acc);box-shadow:var(--sh)}
 .dash-fi-b{width:4px;align-self:stretch;border-radius:4px;flex-shrink:0}
@@ -78,6 +83,10 @@ const DASHBOARD_ESTILO = `.dash-head{display:flex;justify-content:space-between;
 .dash-ti-s{font-size:.72rem;color:var(--muted)}
 @keyframes dashGrowY{from{transform:scaleY(0)}}
 @keyframes dashGrowX{from{transform:scaleX(0)}}
+@media(max-width:1000px){
+    .dash-content{grid-template-columns:minmax(0,1fr)}
+    .dash-upcoming{height:clamp(280px,55vh,420px)}
+}
 @media(max-width:1200px){
     .dash-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
     .dash-s3,.dash-s4,.dash-s5,.dash-s8{grid-column:span 6}
@@ -283,7 +292,7 @@ function dashInsights(m, porResp, porProj, semanas) {
 }
 
 function dashRenderInsight(i) {
-    return `<div class="dash-in ${i.cls}" ${i.data ? `onclick="dashIrData('${i.data}')"` : ''}>
+    return `<div class="dash-in ${i.cls}" onclick="${i.data ? `dashIrData('${i.data}')` : `switchTab('progresso')`}">
         <div class="dash-in-ic">${i.ic}</div>
         <div><div class="dash-in-t">${escH(i.t)}</div><div class="dash-in-d">${escH(i.d)}</div></div>
     </div>`;
@@ -296,17 +305,34 @@ function dashFoco(minhas) {
         if (!a.prazo) return 1;
         if (!b.prazo) return -1;
         return a.prazo.localeCompare(b.prazo);
-    }).slice(0, 5);
+    });
     if (!ord.length) return '<div class="dash-vazio">🎉 Nenhuma etapa em aberto atribuída a você.</div>';
     return `<div class="dash-foco">${ord.map(e => {
         const cor = !e.prazo ? '#cbd5e1' : dashDias(e.prazo) < 0 ? 'var(--danger)' : dashDias(e.prazo) <= 2 ? 'var(--warn)' : 'var(--acc)';
-        const proj = e.sessoes && e.sessoes.projetos ? e.sessoes.projetos.nome : '—';
-        return `<div class="dash-fi" ${e.prazo ? `onclick="dashIrData('${e.prazo}')"` : ''}>
+        const sessao = e.sessoes;
+        const projeto = sessao && sessao.projetos;
+        const projetoId = projeto && projeto.id != null ? projeto.id : sessao && sessao.projeto_id;
+        const proj = projeto ? projeto.nome : '—';
+        return `<div class="dash-fi" onclick="event.stopPropagation();dashIrParaProjeto(${projetoId})">
             <div class="dash-fi-b" style="background:${cor}"></div>
             <div class="dash-fi-i"><div class="dash-fi-n">${escH(e.nome)}</div><div class="dash-fi-c">📁 ${escH(proj)} · ${e.status}</div></div>
             ${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span class="badge b-gray">Sem prazo</span>'}
         </div>`;
     }).join('')}</div>`;
+}
+
+function dashIrParaProjeto(projetoId) {
+    if (projetoId == null) {
+        toast('Não foi possível identificar o projeto desta atividade.', 'warning');
+        return;
+    }
+    const projeto = wsProjetos.find(p => String(p.id) === String(projetoId));
+    if (!projeto) {
+        toast('Não foi possível localizar o projeto desta atividade.', 'warning');
+        return;
+    }
+    switchTab('projetos');
+    abrirProjeto(projeto.id);
 }
 
 function dashLinhaTempo(lista, eventos) {
@@ -316,7 +342,7 @@ function dashLinhaTempo(lista, eventos) {
         .forEach(e => itens.push({ data: e.prazo, nome: e.nome, sub: `⏰ Prazo · ${e.sessoes && e.sessoes.projetos ? e.sessoes.projetos.nome : '—'}`, pz: true }));
     itens.sort((a, b) => a.data.localeCompare(b.data));
     if (!itens.length) return '<div class="dash-vazio">📭 Nada agendado para os próximos 14 dias.</div>';
-    return `<div class="dash-time">${itens.slice(0, 7).map(i => {
+    return `<div class="dash-time">${itens.map(i => {
         const d = dashData(i.data);
         return `<div class="dash-ti" onclick="dashIrData('${i.data}')">
             <div class="dash-ti-d ${i.pz ? 'pz' : ''}"><b>${String(d.getDate()).padStart(2, '0')}</b><small>${d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')}</small></div>
@@ -401,6 +427,7 @@ function dashRender() {
                 <div class="dash-kpi-l">${k.l}</div><div class="dash-kpi-s">${k.sub}</div></div>
             </div>`).join('')}
         </div>
+        <div class="dash-content">
         <div class="dash-grid">
             <div class="dash-card dash-s4 anim-item" style="animation-delay:.1s">
                 <div class="dash-ct">Distribuição por status</div>
@@ -428,13 +455,9 @@ function dashRender() {
                 <div class="dash-ct">Insights</div>
                 <div class="dash-ins">${insights.map(dashRenderInsight).join('')}</div>
             </div>
-            <div class="dash-card dash-s6 anim-item" style="animation-delay:.3s">
-                <div class="dash-ct">Seu foco agora<span class="dash-cs">suas etapas mais urgentes</span></div>
+            <div class="dash-card dash-s6 anim-item ${meu ? 'dash-minhas' : ''}" ${meu ? `onclick="switchTab('progresso')"` : ''} style="animation-delay:.3s">
+                <div class="dash-ct">${meu ? 'Minhas tarefas' : 'Seu foco agora'}<span class="dash-cs">etapas em aberto atribuídas a você</span></div>
                 ${dashFoco(todas.filter(e => e.responsavel_id === currentUser.id))}
-            </div>
-            <div class="dash-card dash-s4 anim-item" style="animation-delay:.35s">
-                <div class="dash-ct">Próximos 14 dias</div>
-                ${dashLinhaTempo(escopo, eventos)}
             </div>
             <div class="dash-card ${meu ? 'dash-s8' : 'dash-s4'} anim-item" style="animation-delay:.4s">
                 <div class="dash-ct">Progresso por projeto</div>
@@ -444,6 +467,11 @@ function dashRender() {
                 <div class="dash-ct">Carga por responsável</div>
                 ${porResp.length ? dashLinhasResp(porResp) : vazioEscopo}
             </div>`}
+        </div>
+        <div class="dash-card dash-upcoming anim-item" style="animation-delay:.35s">
+            <div class="dash-ct">Próximos 14 dias</div>
+            ${dashLinhaTempo(escopo, eventos)}
+        </div>
         </div>`;
     dashAnimar(c);
 }
