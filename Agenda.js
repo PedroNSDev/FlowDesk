@@ -125,7 +125,9 @@ function agNovoEvento(d) {
     const alvo = d || agSelecionado || agHoje();
     abrirModalEvento();
     const campo = document.getElementById('ev-data');
-    if (campo) campo.value = alvo;
+    if (campo) campo.value = formatarDataEvento(alvo);
+    const seletorData = document.getElementById('ev-data-picker');
+    if (seletorData) seletorData.value = alvo;
 }
 
 function agChip(tipo, x, d) {

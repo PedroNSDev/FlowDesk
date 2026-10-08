@@ -47,10 +47,10 @@
         .err{font-size:.8rem;color:var(--danger);margin-top:4px;display:none}
 
         /* ── APP SHELL ── */
-        #app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
+        #app{display:grid;grid-template-columns:14% minmax(0,1fr);min-height:100vh}
 
         /* ── SIDEBAR ── */
-        .sidebar{background:var(--sidebar);padding:20px 13px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+        .sidebar{background:var(--sidebar);padding:20px 13px;display:flex;flex-direction:column;position:sticky;top:0;width:100%;min-width:0;max-width:100%;height:100vh;min-height:0;overflow:hidden}
         .sb-logo{font-size:1.2rem;font-weight:800;color:#fff;padding:4px 11px;margin-bottom:14px;letter-spacing:-.02em;cursor:pointer}
         .sb-logo span{color:var(--acc)}
         .ws-badge{background:rgba(255,255,255,.06);border-radius:var(--rsm);padding:10px 12px;margin-bottom:16px;display:flex;align-items:center;gap:9px}
@@ -67,6 +67,17 @@
         .sb-user .ur{color:#64748b;font-size:.73rem;margin-top:1px}
         .sb-user .lb{margin-top:7px;color:#475569;font-size:.73rem;background:none;border:none;cursor:pointer;font-family:var(--font);padding:0}
         .sb-user .lb:hover{color:var(--danger)}
+        @media(min-width:861px) and (max-height:850px){
+            .sidebar{padding:12px 13px}
+            .sb-logo{margin-bottom:8px}
+            .ws-badge{padding:8px 10px;margin-bottom:9px}
+            .sb-sec{margin-bottom:2px}
+            .nav-btn{padding:6px 11px;margin-bottom:0}
+            .sb-div{margin:7px 0}
+            .sb-user{padding:8px}
+            .sb-user>div{margin-bottom:3px!important}
+            .sb-user .lb{margin-top:4px}
+        }
 
         /* ── MAIN ── */
         .main{padding:26px 30px;overflow-y:auto;min-width:0}
@@ -358,7 +369,7 @@
         @media(max-width:1100px){.row{grid-template-columns:minmax(0,1fr) 120px 120px 60px 170px}}
         @media(max-width:860px){
             #app{grid-template-columns:minmax(0,1fr)}
-            .sidebar{position:sticky;top:0;z-index:50;height:auto;flex-direction:row;align-items:center;gap:4px;padding:8px 10px;overflow-x:auto;overflow-y:hidden}
+            .sidebar{position:sticky;top:0;z-index:50;width:auto;min-width:0;max-width:none;height:auto;flex-direction:row;align-items:center;gap:4px;padding:8px 10px;overflow-x:auto;overflow-y:hidden}
             .sidebar>*{flex-shrink:0}
             .sb-logo,.sb-sec,.sb-div,.ws-badge{display:none}
             #admin-section:not(.hidden){display:flex;gap:4px}
@@ -1751,30 +1762,161 @@ function prazoLabel(prazo, status) {
 // ─── EVENTOS ──────────────────────────────────────
 function abrirModalEvento(ev=null) {
     const nome = ev?.nome || '', desc = ev?.descricao || '';
-    const data = ev?.data || '', hora = ev?.hora ? ev.hora.slice(0,5) : '';
+    const data = ev?.data?.slice(0, 10) || dataLocalHojeISO(), hora = ev?.hora ? ev.hora.slice(0,5) : '';
     abrirModal(ev ? '✏️ Editar Evento' : '📅 Novo Evento', `
         <div class="fg"><label class="fl">Nome do evento</label>
             <input id="ev-nome" class="fi" value="${escH(nome)}" placeholder="Ex: Sprint Review, Reunião mensal..."/></div>
         <div class="fg"><label class="fl">Descrição <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
             <input id="ev-desc" class="fi" value="${escH(desc)}" placeholder="Detalhes do evento..."/></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="fg"><label class="fl">Data</label>
-                <input id="ev-data" type="date" class="fi" value="${data}"/></div>
-            <div class="fg"><label class="fl">Horário <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
-                <input id="ev-hora" type="time" class="fi" value="${hora}"/></div>
+            <div class="fg" style="position:relative"><label class="fl">Data <span style="font-weight:400;color:var(--muted)">(DD/MM/AA)</span></label>
+                <div style="display:flex;gap:6px">
+                    <input id="ev-data" type="text" class="fi" inputmode="numeric" maxlength="8" placeholder="DD/MM/AA" value="${formatarDataEvento(data)}" style="flex:1;min-width:0" oninput="formatarEntradaDataEvento(this, event)" onblur="completarAnoDataEvento(this)"/>
+                    <button type="button" class="btn btn-s" aria-label="Selecionar data" title="Selecionar data" onclick="abrirSeletorDataEvento()">📅</button>
+                    <input id="ev-data-picker" type="date" value="${data}" aria-label="Selecionar data" onchange="selecionarDataEvento(this)" style="position:absolute;right:0;bottom:0;width:48px;height:42px;opacity:0;pointer-events:none"/>
+                </div>
+            </div>
+            <div class="fg" style="position:relative"><label class="fl">Horário <span style="font-weight:400;color:var(--muted)">(24h, opcional)</span></label>
+                <div style="display:flex;gap:6px">
+                    <input id="ev-hora" type="text" class="fi" inputmode="numeric" maxlength="5" placeholder="HH:MM" value="${hora}" style="flex:1;min-width:0" oninput="formatarEntradaHorarioEvento(this, event)" onkeydown="teclaHorarioEvento(event)"/>
+                    <button type="button" class="btn btn-s" aria-label="Selecionar horário" title="Selecionar horário" onclick="toggleSeletorHorario()">🕒</button>
+                </div>
+                <div id="ev-hora-picker" class="hidden" style="position:absolute;top:76px;right:0;z-index:5;background:#fff;padding:12px;border:1px solid var(--border);border-radius:10px;box-shadow:var(--sh-md);display:flex;gap:8px;align-items:center">
+                    <select id="ev-hora-hora" class="fsel" aria-label="Hora">${Array.from({length:24},(_,h)=>`<option value="${String(h).padStart(2,'0')}">${String(h).padStart(2,'0')}</option>`).join('')}</select>
+                    <span>:</span>
+                    <select id="ev-hora-minuto" class="fsel" aria-label="Minuto">${Array.from({length:60},(_,m)=>`<option value="${String(m).padStart(2,'0')}">${String(m).padStart(2,'0')}</option>`).join('')}</select>
+                    <button type="button" class="btn btn-p btn-sm" onclick="aplicarHorarioEvento()">OK</button>
+                </div>
+            </div>
         </div>
     `, [
         { label: ev ? '💾 Salvar' : '+ Criar', cls: 'btn-p', action: ev ? `salvarEdicaoEvento(${ev.id})` : 'salvarEvento()' },
         { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
     ]);
+    document.getElementById('ev-data').value = formatarDataEvento(data);
+}
+
+function formatarDataEvento(data) {
+    const partes = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(data || ''));
+    return partes ? `${partes[3]}/${partes[2]}/${partes[1].slice(-2)}` : '';
+}
+
+function dataLocalHojeISO() {
+    const hoje = new Date();
+    return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+}
+
+function formatarEntradaDataEvento(input, event) {
+    const digitos = input.value.replace(/\D/g, '').slice(0, 6);
+    const apagando = event.inputType?.startsWith('delete');
+    let data = digitos.slice(0, 2);
+    if (digitos.length > 2 || (digitos.length === 2 && !apagando)) data += '/';
+    if (digitos.length > 2) data += digitos.slice(2, 4);
+    if (digitos.length > 4 || (digitos.length === 4 && !apagando)) data += '/';
+    if (digitos.length > 4) data += digitos.slice(4);
+    input.value = data;
+    input.setSelectionRange(data.length, data.length);
+}
+
+function completarAnoDataEvento(input) {
+    const valor = input.value.trim();
+    const partes = /^(\d{2}\/\d{2})\/?$/.exec(valor);
+    if (partes) input.value = `${partes[1]}/${String(new Date().getFullYear()).slice(-2)}`;
+}
+
+function selecionarDataEvento(picker) {
+    const campoData = document.getElementById('ev-data');
+    if (campoData) campoData.value = formatarDataEvento(picker.value);
+}
+
+function abrirSeletorDataEvento() {
+    const picker = document.getElementById('ev-data-picker');
+    if (picker.showPicker) picker.showPicker();
+    else picker.click();
+}
+
+function normalizarDataEvento() {
+    const valor = document.getElementById('ev-data')?.value?.trim() || '';
+    if (!valor) return false;
+    const partes = /^(\d{2})\/(\d{2})\/(\d{2})$/.exec(valor);
+    if (!partes) return false;
+    const dia = +partes[1], mes = +partes[2], ano = 2000 + +partes[3];
+    const data = new Date(Date.UTC(ano, mes - 1, dia));
+    if (data.getUTCFullYear() !== ano || data.getUTCMonth() !== mes - 1 || data.getUTCDate() !== dia) return false;
+    return `${ano}-${partes[2]}-${partes[1]}`;
+}
+
+function formatarEntradaHorarioEvento(input, event) {
+    const digitos = input.value.replace(/\D/g, '').slice(0, 4);
+    const apagando = event.inputType?.startsWith('delete');
+
+    if (digitos.length <= 2) {
+        input.value = digitos + (digitos.length === 2 && !apagando ? ':' : '');
+    } else {
+        input.value = `${digitos.slice(0, 2)}:${digitos.slice(2)}`;
+    }
+
+    input.setSelectionRange(input.value.length, input.value.length);
+}
+
+function teclaHorarioEvento(event) {
+    if (event.key !== 'Enter') return;
+    const input = document.getElementById('ev-hora');
+    const valor = input.value.trim();
+    const horaSemMinutos = valor.match(/^(\d{1,2})$/);
+
+    event.preventDefault();
+    if (horaSemMinutos) {
+        const hora = +horaSemMinutos[1];
+        if (hora > 23) { toast('A hora deve estar entre 0 e 23.', 'warning'); return; }
+        input.value = `${String(hora).padStart(2, '0')}:`;
+        input.setSelectionRange(input.value.length, input.value.length);
+        return;
+    }
+
+    const horario = normalizarHorarioEvento();
+    if (horario === false) { toast('Informe a hora e os minutos no formato 24 horas (HH:MM).', 'warning'); return; }
+    if (horario) input.value = horario;
+}
+
+function toggleSeletorHorario() {
+    const picker = document.getElementById('ev-hora-picker');
+    if (!picker) return;
+    const abrir = picker.classList.contains('hidden');
+    picker.classList.toggle('hidden', !abrir);
+    if (!abrir) return;
+
+    const valor = document.getElementById('ev-hora')?.value || '';
+    const partes = valor.match(/^(\d{1,2}):([0-5]\d)$/);
+    const hora = partes && +partes[1] <= 23 ? String(+partes[1]).padStart(2, '0') : '00';
+    const minuto = partes ? partes[2] : '00';
+    document.getElementById('ev-hora-hora').value = hora;
+    document.getElementById('ev-hora-minuto').value = minuto;
+}
+
+function aplicarHorarioEvento() {
+    const hora = document.getElementById('ev-hora-hora')?.value;
+    const minuto = document.getElementById('ev-hora-minuto')?.value;
+    document.getElementById('ev-hora').value = `${hora}:${minuto}`;
+    document.getElementById('ev-hora-picker').classList.add('hidden');
+}
+
+function normalizarHorarioEvento() {
+    const valor = document.getElementById('ev-hora')?.value?.trim() || '';
+    if (!valor) return null;
+    const partes = valor.match(/^(\d{1,2}):([0-5]\d)$/);
+    if (!partes || +partes[1] > 23) return false;
+    return `${String(+partes[1]).padStart(2, '0')}:${partes[2]}`;
 }
 
 async function salvarEvento() {
     const nome = document.getElementById('ev-nome')?.value?.trim();
     const desc = document.getElementById('ev-desc')?.value?.trim() || null;
-    const data = document.getElementById('ev-data')?.value;
-    const hora = document.getElementById('ev-hora')?.value || null;
-    if (!nome || !data) { toast('Preencha nome e data.', 'warning'); return; }
+    const data = normalizarDataEvento();
+    const hora = normalizarHorarioEvento();
+    if (!nome) { toast('Preencha o nome do evento.', 'warning'); return; }
+    if (!data) { toast('Informe uma data válida no formato DD/MM/AA.', 'warning'); return; }
+    if (hora === false) { toast('Informe o horário no formato 24 horas (HH:MM).', 'warning'); return; }
 
     const { error } = await sb.from('eventos').insert({
         nome, descricao: desc, data, hora,
@@ -1795,9 +1937,11 @@ async function editarEvento(eventoId) {
 async function salvarEdicaoEvento(eventoId) {
     const nome = document.getElementById('ev-nome')?.value?.trim();
     const desc = document.getElementById('ev-desc')?.value?.trim() || null;
-    const data = document.getElementById('ev-data')?.value;
-    const hora = document.getElementById('ev-hora')?.value || null;
-    if (!nome || !data) { toast('Preencha nome e data.', 'warning'); return; }
+    const data = normalizarDataEvento();
+    const hora = normalizarHorarioEvento();
+    if (!nome) { toast('Preencha o nome do evento.', 'warning'); return; }
+    if (!data) { toast('Informe uma data válida no formato DD/MM/AA.', 'warning'); return; }
+    if (hora === false) { toast('Informe o horário no formato 24 horas (HH:MM).', 'warning'); return; }
 
     const { error } = await sb.from('eventos').update({ nome, descricao: desc, data, hora }).eq('id', eventoId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
