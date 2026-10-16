@@ -42,7 +42,7 @@
         .fi,.fta,.fsel{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:12px;font-family:var(--font);font-size:.88rem;color:var(--text);background:#fff;outline:none;transition:.2s;resize:vertical}
         .fi:focus,.fta:focus,.fsel:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(79,70,229,.1)}
         .fta{min-height:100px}
-        .fsel{background:#fff url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2364748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,9 12,15 18,9"></polyline></svg>') no-repeat right 12px center;background-size:16px}
+        .fsel{-webkit-appearance:none;appearance:none;background:#fff url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2364748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,9 12,15 18,9"></polyline></svg>') no-repeat right 12px center;background-size:16px}
         .fhint{font-size:.78rem;color:var(--muted);margin-top:4px}
         .err{font-size:.8rem;color:var(--danger);margin-top:4px;display:none}
 
@@ -98,11 +98,19 @@
         .proj-view-switch .btn{min-width:84px;border-radius:8px;border:none;background:transparent;color:var(--muted);box-shadow:none;padding:7px 14px}
         .proj-view-switch .btn:hover{transform:none;box-shadow:none;color:var(--text)}
         .proj-view-switch .btn.active{background:#fff;color:var(--acc);box-shadow:var(--sh)}
+        .pv-folder-card{width:100%;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:.15s;box-shadow:var(--sh);font-family:var(--font);color:var(--text)}
+        .pv-folder-card:hover{border-color:#c7d2fe;box-shadow:var(--sh-md);transform:translateY(-2px)}
+        .pv-folder-card strong{font-size:.98rem}
+        .pv-folder-card span{font-size:.8rem;color:var(--muted)}
+        .pv-folder-back{margin-bottom:14px}
+        .pv-folder-empty{padding:14px 16px;background:var(--surface);border:1px dashed var(--border);border-radius:10px;color:var(--muted);font-size:.82rem}
         .pv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
         .pv-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;display:flex;flex-direction:column;gap:10px;transition:.15s;box-shadow:var(--sh)}
         .pv-card:hover{border-color:#c7d2fe;box-shadow:var(--sh-md);transform:translateY(-2px)}
         .pv-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
         .pv-name{font-weight:700;font-size:1.02rem;line-height:1.3;overflow-wrap:anywhere}
+        .pv-card-actions{margin-left:auto;display:flex;gap:4px}
+        .pv-card-actions .ib{width:28px;height:28px}
         .pv-desc{color:var(--muted);font-size:.82rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em}
         .pv-bar{height:6px;background:var(--border);border-radius:6px;overflow:hidden;flex:1}
         .pv-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--ok));border-radius:6px;transition:width .4s}
@@ -168,17 +176,38 @@
 
         /* ── CONTRIBUTOR POPUP ── */
         .cpop-ov{position:fixed;inset:0;background:rgba(15,23,42,.4);backdrop-filter:blur(3px);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px}
-        .cpop-card{background:var(--surface);border-radius:14px;width:100%;max-width:370px;box-shadow:var(--sh-lg);animation:popIn .2s ease;overflow:hidden}
+        .cpop-card{background:var(--surface);border-radius:14px;width:100%;max-width:580px;max-height:calc(100vh - 40px);display:flex;flex-direction:column;box-shadow:var(--sh-lg);animation:popIn .2s ease;overflow:hidden}
         @keyframes popIn{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
         .cpop-hdr{padding:18px 18px 13px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
         .cpop-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:#fff;flex-shrink:0}
         .cpop-info .cn{font-weight:700;font-size:.95rem} .cpop-info .cu{color:var(--muted);font-size:.76rem}
-        .cpop-body{padding:13px 18px 18px;max-height:290px;overflow-y:auto}
+        .cpop-body{padding:14px 18px 16px;flex:1;min-height:200px;overflow-y:auto}
         .cpop-sec{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:9px}
         .cpop-proj{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--rsm);border:1px solid var(--border);margin-bottom:6px;font-size:.84rem;font-weight:500}
         .cpop-proj:last-child{margin-bottom:0}
         .cpop-x{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.05rem;width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center}
         .cpop-x:hover{background:var(--bg)}
+        .cpop-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:12px 18px;border-bottom:1px solid var(--border);background:#fafbff;flex-shrink:0}
+        .cpop-st{text-align:center}
+        .cpop-st b{display:block;font-size:1.2rem;font-weight:800;line-height:1.2}
+        .cpop-st span{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+        .cpop-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+        .cpop-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:var(--acc-lt);color:var(--acc);font-size:.76rem;font-weight:600}
+        .cpop-grp{margin-bottom:14px}
+        .cpop-grp-h{display:flex;align-items:center;gap:7px;font-size:.8rem;font-weight:700;margin-bottom:7px}
+        .cpop-et{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--border);border-left-width:4px;border-left-color:#cbd5e1;border-radius:var(--rsm);margin-bottom:6px;background:#fff}
+        .cpop-et.s-an{border-left-color:#f59e0b}
+        .cpop-et.s-ok{border-left-color:#10b981;opacity:.7}
+        .cpop-et-i{flex:1;min-width:0}
+        .cpop-et-n{font-weight:600;font-size:.84rem;overflow-wrap:anywhere}
+        .cpop-et-s{font-size:.72rem;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
+        .cpop-et-b{display:flex;gap:5px;align-items:center;justify-content:flex-end;flex-wrap:wrap;flex-shrink:0}
+        .cpop-vazio{text-align:center;color:var(--muted);font-size:.84rem;padding:26px 10px}
+        .cpop-foot{padding:12px 18px;border-top:1px solid var(--border);background:#fff;display:flex;gap:8px;flex-shrink:0}
+        .cpop-foot .btn{flex:1}
+        .cpop-pick-bar{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:8px;margin-bottom:12px}
+        .cpop-pick-bar .fi,.cpop-pick-bar .fsel{padding:8px 11px;font-size:.82rem;border-width:1.5px}
+        @media(max-width:560px){.cpop-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.cpop-pick-bar{grid-template-columns:minmax(0,1fr)}.cpop-et{flex-wrap:wrap}.cpop-et-b{justify-content:flex-start}}
 
         /* ── LOGS ── */
         .logs-panel{background:#212224;border-radius:var(--r);padding:18px;font-family:var(--mono);font-size:.77rem;color:#8b949e;max-height:500px;overflow-y:auto;line-height:1.65}
@@ -258,6 +287,14 @@
         .m-x:hover{background:var(--bg)}
         .m-body{padding:18px 22px;max-height:62vh;overflow-y:auto}
         .m-foot{padding:13px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:7px}
+        .file-viewer-ov{position:fixed;inset:0;background:rgba(15,23,42,.78);backdrop-filter:blur(5px);z-index:1100;display:flex;align-items:center;justify-content:center;padding:20px}
+        .file-viewer-box{display:flex;flex-direction:column;background:#fff;border-radius:14px;width:100%;max-width:1100px;max-height:calc(100vh - 40px);box-shadow:var(--sh-lg);overflow:hidden;animation:mIn .2s ease}
+        .file-viewer-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+        .file-viewer-name{font-weight:700;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+        .file-viewer-content{padding:14px;display:flex;justify-content:center;align-items:center;min-height:0;overflow:auto;background:#f1f5f9}
+        .file-viewer-content img{display:block;max-width:100%;max-height:calc(100vh - 150px);object-fit:contain}
+        .file-viewer-content iframe{display:block;width:100%;height:min(75vh,900px);border:0;background:#fff}
+        .file-viewer-foot{padding:11px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end}
 
         /* ── TOAST ── */
         .toast-ctr{position:fixed;bottom:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:6px}
@@ -450,6 +487,7 @@
                         <button id="proj-view-list" class="btn btn-s btn-sm active" onclick="setProjetosViewMode('list')">Lista</button>
                         <button id="proj-view-grid" class="btn btn-s btn-sm" onclick="setProjetosViewMode('board')">Quadro</button>
                     </div>
+                    <button id="btn-nova-pasta-proj" class="btn btn-s hidden" onclick="abrirModalNovaPastaProjeto()">📁 Nova Pasta</button>
                     <button id="btn-novo-proj" class="btn btn-p hidden" onclick="abrirModalProjeto()">+ Novo Projeto</button>
                 </div>
             </div>
@@ -578,10 +616,9 @@
             <div style="margin-left:auto;display:flex;align-items:center;gap:5px" id="cpop-badges"></div>
             <button class="cpop-x" onclick="fecharCpop()">✕</button>
         </div>
-        <div class="cpop-body">
-            <div class="cpop-sec">Projetos neste workspace</div>
-            <div id="cpop-projs"><div class="spinner"></div></div>
-        </div>
+        <div class="cpop-stats hidden" id="cpop-stats"></div>
+        <div class="cpop-body" id="cpop-body"><div style="text-align:center;padding:30px"><div class="spinner"></div></div></div>
+        <div class="cpop-foot hidden" id="cpop-foot"></div>
     </div>
 </div>
 
@@ -591,6 +628,17 @@
         <div class="m-hdr"><div class="m-title" id="m-title">—</div><button class="m-x" onclick="fecharModal()">✕</button></div>
         <div class="m-body" id="m-body"></div>
         <div class="m-foot" id="m-foot"></div>
+    </div>
+</div>
+
+<div id="file-viewer-ov" class="file-viewer-ov hidden" role="dialog" aria-modal="true" aria-labelledby="file-viewer-name" onclick="if(event.target.id==='file-viewer-ov')fecharVisualizadorArquivo()">
+    <div class="file-viewer-box" onclick="event.stopPropagation()">
+        <div class="file-viewer-hdr">
+            <div id="file-viewer-name" class="file-viewer-name"></div>
+            <button class="m-x" aria-label="Fechar visualizador" onclick="fecharVisualizadorArquivo()">✕</button>
+        </div>
+        <div id="file-viewer-content" class="file-viewer-content"></div>
+        <div class="file-viewer-foot"><a id="file-viewer-open" class="btn btn-s btn-sm" target="_blank" rel="noopener noreferrer">Abrir em nova aba</a></div>
     </div>
 </div>
 
@@ -629,11 +677,13 @@
 let currentUser = null, currentWorkspace = null, currentWorkspaceCreatorId = null;
 let wsMembers = [];
 let wsProjetos = [];
+let wsPastasProjetos = [];
 let avisoAtivo = null;
 let currentUserCanEdit = false;
 let currentUserIsWorkspaceAdmin = false;
 let projetosViewMode = 'list';
 let selectedProjetoId = null;
+let selectedPastaProjeto = 'folders';
 let notes = [];
 let pendingNoteAttachments = [];
 const NOTES_KEY_BASE = 'fd-notes';
@@ -685,7 +735,10 @@ async function entrarNoDashboard() {
     const membership = memberships.find(m => m.usuario_id === currentUser.id);
     currentUserIsWorkspaceAdmin = membership?.role === 'admin';
     currentUserCanEdit = membership?.role === 'member' || membership?.role === 'admin';
-    if (currentUserCanEdit) document.getElementById('btn-novo-proj').classList.remove('hidden');
+    if (currentUserCanEdit) {
+        document.getElementById('btn-novo-proj').classList.remove('hidden');
+        document.getElementById('btn-nova-pasta-proj').classList.remove('hidden');
+    }
     if (currentUserIsWorkspaceAdmin || currentUser.nivel === 2) {
         document.getElementById('nav-logs').classList.remove('hidden');
         document.getElementById('admin-section').classList.remove('hidden');
@@ -789,15 +842,23 @@ const collapsedSess = new Set();
 async function renderizarProjetos() {
     const c = document.getElementById('projetos-container');
     if (!wsProjetos.length) c.innerHTML = `<div class="loading-c"><div class="spinner"></div><p style="margin-top:10px">Carregando...</p></div>`;
-    const { data: projs, error } = await sb.from('projetos')
-        .select(`id, nome, descricao,
+    const [{ data: projs, error: projError }, { data: pastas, error: pastasError }] = await Promise.all([
+        sb.from('projetos')
+        .select(`id, nome, descricao, pasta_id,
             projeto_usuarios(usuario_id),
             sessoes(id, nome, descricao,
                 sessao_usuarios(usuario_id),
                 etapas(id, nome, descricao, status, responsavel_id, prioridade, prazo))`)
-        .eq('workspace_id', currentWorkspace.id).order('id');
+        .eq('workspace_id', currentWorkspace.id).order('id'),
+        sb.from('pastas_projetos').select('id, nome').eq('workspace_id', currentWorkspace.id).order('nome')
+    ]);
     wsProjetos = projs || [];
-    if (error) { c.innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><h3>Erro</h3><p>${escH(error.message)}</p></div>`; return; }
+    if (projError || pastasError) {
+        const error = projError || pastasError;
+        c.innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><h3>Erro</h3><p>${escH(error.message)}</p></div>`;
+        return;
+    }
+    wsPastasProjetos = pastas || [];
     renderProjetosView();
 }
 
@@ -807,12 +868,13 @@ function renderProjetosView() {
     const p = wsProjetos.find(x => x.id === selectedProjetoId);
     if (!p) selectedProjetoId = null;
     g('proj-title').textContent = p ? p.nome : 'Projetos';
-    g('proj-sub').textContent = p ? (p.descricao || 'Sem descrição') : 'Visão geral dos projetos do workspace';
+    const pastaIdSelecionada = selectedPastaProjeto.startsWith('folder:') ? selectedPastaProjeto.slice('folder:'.length) : null;
+    const pastaSelecionada = wsPastasProjetos.find(item => String(item.id) === pastaIdSelecionada);
+    g('proj-sub').textContent = p ? (p.descricao || 'Sem descrição') : pastaSelecionada ? `Projetos na pasta ${pastaSelecionada.nome}` : selectedPastaProjeto === 'none' ? 'Projetos sem pasta' : 'Organize e acesse os projetos pelas pastas';
     g('proj-back-btn').classList.toggle('hidden', !p);
     g('proj-view-sw').classList.toggle('hidden', !p);
     g('proj-view-list').classList.toggle('active', projetosViewMode === 'list');
     g('proj-view-grid').classList.toggle('active', projetosViewMode === 'board');
-    if (!wsProjetos.length) { c.innerHTML = `<div class="empty-state"><div class="ei">📁</div><h3>Nenhum projeto ainda</h3><p>Clique em "+ Novo Projeto" para começar.</p></div>`; return; }
     c.innerHTML = p ? renderProjDetail(p) : renderProjOverview();
 }
 
@@ -824,18 +886,83 @@ function projStats(p) {
 function avatar(u) { return `<span class="av" style="background:${userColor(u.nome)}" title="${escH(u.nome)}">${initials(u.nome)}</span>`; }
 
 function renderProjOverview() {
-    return `<div class="pv-grid">${wsProjetos.map(p => {
-        const st = projStats(p);
-        const ids = [...new Set((p.projeto_usuarios||[]).map(x => x.usuario_id))];
-        const people = ids.map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
-        return `<div class="pv-card" onclick="abrirProjeto(${p.id})">
-            <div class="pv-top"><div class="pv-name">${escH(p.nome)}</div>${st.total && st.done === st.total ? '<span class="badge b-green">Concluído</span>' : ''}</div>
-            <div class="pv-desc">${escH(p.descricao || 'Sem descrição')}</div>
-            <div style="display:flex;align-items:center;gap:10px"><div class="pv-bar"><i style="width:${st.pct}%"></i></div><b style="font-size:.78rem">${st.pct}%</b></div>
-            <div class="pv-meta"><span>${(p.sessoes||[]).length} atividades · ${st.done}/${st.total} etapas</span>
-                <span class="avs">${people.slice(0,4).map(avatar).join('')}${people.length > 4 ? `<span class="av av-more">+${people.length-4}</span>` : ''}</span></div>
-        </div>`;
-    }).join('')}</div>`;
+    if (!wsProjetos.length && !wsPastasProjetos.length) {
+        return '<div class="empty-state"><div class="ei">📁</div><h3>Nenhum projeto ou pasta</h3><p>Crie uma pasta para organizar seus projetos ou comece criando um projeto.</p></div>';
+    }
+    if (selectedPastaProjeto === 'folders') {
+        const pastas = wsPastasProjetos.map(pasta => {
+            const count = wsProjetos.filter(projeto => String(projeto.pasta_id) === String(pasta.id)).length;
+            return `<button class="pv-folder-card" onclick="selecionarPastaProjeto('folder:${pasta.id}')">
+                <strong>📁 ${escH(pasta.nome)}</strong>
+                <span>${count} ${count === 1 ? 'projeto' : 'projetos'}</span>
+            </button>`;
+        });
+        const semPastaCount = wsProjetos.filter(projeto => !projeto.pasta_id).length;
+        if (semPastaCount) pastas.push(`<button class="pv-folder-card" onclick="selecionarPastaProjeto('none')">
+            <strong>📂 Sem pasta</strong><span>${semPastaCount} ${semPastaCount === 1 ? 'projeto' : 'projetos'}</span>
+        </button>`);
+        pastas.push(`<button class="pv-folder-card" onclick="selecionarPastaProjeto('all')">
+            <strong>🗂️ Todos os projetos</strong><span>${wsProjetos.length} ${wsProjetos.length === 1 ? 'projeto' : 'projetos'}</span>
+        </button>`);
+        return `<div class="pv-grid">${pastas.join('')}</div>`;
+    }
+
+    const pastaId = selectedPastaProjeto.startsWith('folder:') ? selectedPastaProjeto.slice('folder:'.length) : null;
+    const pasta = wsPastasProjetos.find(item => String(item.id) === pastaId);
+    const projetos = selectedPastaProjeto === 'all'
+        ? wsProjetos
+        : selectedPastaProjeto === 'none'
+            ? wsProjetos.filter(projeto => !projeto.pasta_id)
+            : wsProjetos.filter(projeto => String(projeto.pasta_id) === pastaId);
+    const titulo = pasta ? `📁 ${escH(pasta.nome)}` : selectedPastaProjeto === 'none' ? '📂 Sem pasta' : '🗂️ Todos os projetos';
+    return `<button class="btn btn-s btn-sm pv-folder-back" onclick="selecionarPastaProjeto('folders')">← Pastas</button>
+        <div class="pv-folder-empty" style="margin-bottom:14px">${titulo} · ${projetos.length} ${projetos.length === 1 ? 'projeto' : 'projetos'}</div>
+        ${projetos.length ? `<div class="pv-grid">${projetos.map(renderProjetoCard).join('')}</div>` : '<div class="pv-folder-empty">Esta pasta ainda não tem projetos.</div>'}`;
+}
+
+function selecionarPastaProjeto(id) {
+    selectedPastaProjeto = id;
+    renderProjetosView();
+}
+
+function renderProjetoCard(p) {
+    const st = projStats(p);
+    const ids = [...new Set((p.projeto_usuarios||[]).map(x => x.usuario_id))];
+    const people = ids.map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
+    return `<div class="pv-card" onclick="abrirProjeto(${p.id})">
+        <div class="pv-top"><div class="pv-name">${escH(p.nome)}</div>${st.total && st.done === st.total ? '<span class="badge b-green">Concluído</span>' : ''}
+            ${currentUserCanEdit ? `<div class="pv-card-actions"><button class="ib" title="Editar projeto" aria-label="Editar projeto ${escH(p.nome)}" onclick="event.stopPropagation();editarProjeto(${p.id})">✏️</button></div>` : ''}</div>
+        <div class="pv-desc">${escH(p.descricao || 'Sem descrição')}</div>
+        ${p.pasta_id ? `<span class="badge b-acc" style="align-self:flex-start">📁 ${escH(wsPastasProjetos.find(pasta => String(pasta.id) === String(p.pasta_id))?.nome || '')}</span>` : ''}
+        <div style="display:flex;align-items:center;gap:10px"><div class="pv-bar"><i style="width:${st.pct}%"></i></div><b style="font-size:.78rem">${st.pct}%</b></div>
+        <div class="pv-meta"><span>${(p.sessoes||[]).length} atividades · ${st.done}/${st.total} etapas</span>
+            <span class="avs">${people.slice(0,4).map(avatar).join('')}${people.length > 4 ? `<span class="av av-more">+${people.length-4}</span>` : ''}</span></div>
+    </div>`;
+}
+
+function abrirModalNovaPastaProjeto() {
+    abrirModal('📁 Criar pasta de projetos', `
+        <div class="fg"><label class="fl" for="m-pasta-projeto-nome">Nome da pasta</label><input id="m-pasta-projeto-nome" class="fi" maxlength="80" placeholder="Ex: Marketing"/></div>
+    `, [
+        { label: '+ Criar pasta', cls: 'btn-p', action: 'criarPastaProjeto()' },
+        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
+    ]);
+}
+
+async function criarPastaProjeto() {
+    const nome = document.getElementById('m-pasta-projeto-nome')?.value?.trim();
+    if (!nome) { toast('Informe o nome da pasta.', 'warning'); return; }
+    const { data, error } = await sb.from('pastas_projetos')
+        .insert({ workspace_id: currentWorkspace.id, nome })
+        .select('id, nome')
+        .single();
+    if (error) { toast('Erro ao criar pasta: ' + error.message, 'error'); return; }
+    wsPastasProjetos.push(data);
+    wsPastasProjetos.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    selectedPastaProjeto = String(data.id);
+    fecharModal();
+    renderProjetosView();
+    toast(`Pasta "${nome}" criada.`);
 }
 
 function renderProjDetail(p) {
@@ -930,14 +1057,21 @@ async function editarProjeto(projId) {
     abrirModal('✏️ Editar Projeto', `
         <div class="fg"><label class="fl">Nome</label><input id="m-pnome-edit" class="fi" value="${escH(proj.nome)}"/></div>
         <div class="fg"><label class="fl">Descrição</label><textarea id="m-pdesc-edit" class="fta">${escH(proj.descricao||'')}</textarea></div>
+        <div class="fg"><label class="fl" for="m-ppasta-edit">Pasta</label>
+            <select id="m-ppasta-edit" class="fsel">
+                <option value="">Sem pasta</option>
+                ${wsPastasProjetos.map(pasta => `<option value="${pasta.id}" ${String(pasta.id) === String(proj.pasta_id) ? 'selected' : ''}>${escH(pasta.nome)}</option>`).join('')}
+            </select>
+        </div>
     `, buttons);
 }
 
 async function salvarEdicaoProjeto(projId) {
     const nome = document.getElementById('m-pnome-edit')?.value?.trim();
     const desc = document.getElementById('m-pdesc-edit')?.value?.trim() || '';
+    const pastaId = document.getElementById('m-ppasta-edit')?.value || null;
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
-    const { error } = await sb.from('projetos').update({ nome, descricao: desc }).eq('id', projId);
+    const { error } = await sb.from('projetos').update({ nome, descricao: desc, pasta_id: pastaId }).eq('id', projId).eq('workspace_id', currentWorkspace.id);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     await addLog('update','projeto',null); fecharModal(); toast('Projeto atualizado!'); await renderizarProjetos(); popularSelectProjetos();
 }
@@ -1087,9 +1221,15 @@ async function editarEtapaSave(eId) {
     const prio = +document.getElementById('m-eprio')?.value || 0;
     const prazo = document.getElementById('m-eprazo')?.value || null;
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
-    const { error } = await sb.from('etapas').update({ nome, descricao: desc, responsavel_id: resp, status, prioridade: prio, prazo }).eq('id', eId);
+    const atualizacao = { nome, descricao: desc, responsavel_id: resp, status, prioridade: prio, prazo };
+    const { error } = await sb.from('etapas').update(atualizacao).eq('id', eId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
+    if (typeof dashDados !== 'undefined' && dashDados) {
+        const etapaDashboard = dashDados.etapas.find(etapa => etapa.id === eId);
+        if (etapaDashboard) Object.assign(etapaDashboard, atualizacao);
+    }
     await addLog('update','etapa',null,{nome}); fecharModal(); toast('Atividade atualizada!'); await renderizarProjetos();
+    if (typeof dashDados !== 'undefined' && dashDados && document.getElementById('tab-home')?.classList.contains('active')) dashRender();
 }
 
 function findEtapa(id) {
@@ -1270,6 +1410,38 @@ function isImage(nome) {
     return /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(nome||'');
 }
 
+function isPdf(nome) {
+    return /\.pdf$/i.test(nome||'');
+}
+
+function visualizarArquivo(button) {
+    const { url, name, type } = button.dataset;
+    if (!url || !name || (type !== 'image' && type !== 'pdf')) {
+        toast('Não foi possível abrir este anexo.', 'error');
+        return;
+    }
+
+    document.getElementById('file-viewer-name').textContent = name;
+    document.getElementById('file-viewer-open').href = url;
+    document.getElementById('file-viewer-content').innerHTML = type === 'image'
+        ? `<img src="${escH(url)}" alt="${escH(name)}" onerror="this.onerror=null;this.parentNode.textContent='Não foi possível carregar esta imagem.'">`
+        : `<iframe src="${escH(url)}" title="${escH(name)}"></iframe>`;
+    document.getElementById('file-viewer-ov').classList.remove('hidden');
+    document.querySelector('#file-viewer-ov .m-x').focus();
+}
+
+function fecharVisualizadorArquivo() {
+    const viewer = document.getElementById('file-viewer-ov');
+    viewer.classList.add('hidden');
+    document.getElementById('file-viewer-content').replaceChildren();
+}
+
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !document.getElementById('file-viewer-ov').classList.contains('hidden')) {
+        fecharVisualizadorArquivo();
+    }
+});
+
 function fmtBytes(b) {
     if (!b) return '';
     if (b < 1024) return b + ' B';
@@ -1422,6 +1594,7 @@ async function renderArkFiles(key) {
 function renderArkFileCard(f) {
     const { data: urlData } = sb.storage.from('workspace-files').getPublicUrl(f.path);
     const url = urlData?.publicUrl || '#';
+    const viewerType = isImage(f.nome) ? 'image' : isPdf(f.nome) ? 'pdf' : '';
     const criador = wsMembers.find(u => u.id === f.criado_por);
     const isOwner = f.criado_por === currentUser.id;
     const visClass = f.visibilidade === 'privado' ? 'ark-vis-priv' : 'ark-vis-pub';
@@ -1431,7 +1604,7 @@ function renderArkFileCard(f) {
         ? `<img src="${url}" alt="${escH(f.nome)}" loading="lazy" onerror="this.parentNode.innerHTML='${fileIcon(f.nome)}'">`
         : fileIcon(f.nome);
 
-    return `<div class="ark-file-card" title="${escH(f.nome)}">
+    return `<div class="ark-file-card" title="${escH(f.nome)}" ${viewerType ? `role="button" tabindex="0" aria-label="Visualizar ${escH(f.nome)}" data-url="${escH(url)}" data-name="${escH(f.nome)}" data-type="${viewerType}" onclick="if(!event.target.closest('a,button'))visualizarArquivo(this)" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();visualizarArquivo(this)}"` : ''}>
         <div class="ark-file-thumb">
             ${thumb}
             <span class="ark-vis-badge ${visClass}">${visLabel}</span>
@@ -1777,16 +1950,7 @@ function abrirModalEvento(ev=null) {
                 </div>
             </div>
             <div class="fg" style="position:relative"><label class="fl">Horário <span style="font-weight:400;color:var(--muted)">(24h, opcional)</span></label>
-                <div style="display:flex;gap:6px">
-                    <input id="ev-hora" type="text" class="fi" inputmode="numeric" maxlength="5" placeholder="HH:MM" value="${hora}" style="flex:1;min-width:0" oninput="formatarEntradaHorarioEvento(this, event)" onkeydown="teclaHorarioEvento(event)"/>
-                    <button type="button" class="btn btn-s" aria-label="Selecionar horário" title="Selecionar horário" onclick="toggleSeletorHorario()">🕒</button>
-                </div>
-                <div id="ev-hora-picker" class="hidden" style="position:absolute;top:76px;right:0;z-index:5;background:#fff;padding:12px;border:1px solid var(--border);border-radius:10px;box-shadow:var(--sh-md);display:flex;gap:8px;align-items:center">
-                    <select id="ev-hora-hora" class="fsel" aria-label="Hora">${Array.from({length:24},(_,h)=>`<option value="${String(h).padStart(2,'0')}">${String(h).padStart(2,'0')}</option>`).join('')}</select>
-                    <span>:</span>
-                    <select id="ev-hora-minuto" class="fsel" aria-label="Minuto">${Array.from({length:60},(_,m)=>`<option value="${String(m).padStart(2,'0')}">${String(m).padStart(2,'0')}</option>`).join('')}</select>
-                    <button type="button" class="btn btn-p btn-sm" onclick="aplicarHorarioEvento()">OK</button>
-                </div>
+                <input id="ev-hora" type="text" class="fi" inputmode="numeric" maxlength="5" placeholder="HH:MM" value="${hora}" oninput="formatarEntradaHorarioEvento(this, event)" onkeydown="teclaHorarioEvento(event)"/>
             </div>
         </div>
     `, [
@@ -1879,28 +2043,6 @@ function teclaHorarioEvento(event) {
     if (horario) input.value = horario;
 }
 
-function toggleSeletorHorario() {
-    const picker = document.getElementById('ev-hora-picker');
-    if (!picker) return;
-    const abrir = picker.classList.contains('hidden');
-    picker.classList.toggle('hidden', !abrir);
-    if (!abrir) return;
-
-    const valor = document.getElementById('ev-hora')?.value || '';
-    const partes = valor.match(/^(\d{1,2}):([0-5]\d)$/);
-    const hora = partes && +partes[1] <= 23 ? String(+partes[1]).padStart(2, '0') : '00';
-    const minuto = partes ? partes[2] : '00';
-    document.getElementById('ev-hora-hora').value = hora;
-    document.getElementById('ev-hora-minuto').value = minuto;
-}
-
-function aplicarHorarioEvento() {
-    const hora = document.getElementById('ev-hora-hora')?.value;
-    const minuto = document.getElementById('ev-hora-minuto')?.value;
-    document.getElementById('ev-hora').value = `${hora}:${minuto}`;
-    document.getElementById('ev-hora-picker').classList.add('hidden');
-}
-
 function normalizarHorarioEvento() {
     const valor = document.getElementById('ev-hora')?.value?.trim() || '';
     if (!valor) return null;
@@ -1973,8 +2115,35 @@ async function renderContribuidor() {
         </div>`).join('')}</div>`;
 }
 
+let cpopUserId = null;
+let cpopEtapas = [];
+let cpopProjetos = [];
+let cpopModo = 'lista';
+let cpopBusy = false;
+let cpopFiltro = { busca: '', projeto: '' };
+
+function cpopVencida(e) {
+    if (!e.prazo || e.status === 'Concluído') return false;
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    return new Date(e.prazo + 'T00:00:00') < hoje;
+}
+
+function cpopOrdenar(a, b) {
+    const fa = a.status === 'Concluído', fb = b.status === 'Concluído';
+    if (fa !== fb) return fa ? 1 : -1;
+    if (a.prazo && b.prazo && a.prazo !== b.prazo) return a.prazo.localeCompare(b.prazo);
+    if (!!a.prazo !== !!b.prazo) return a.prazo ? -1 : 1;
+    return a.nome.localeCompare(b.nome);
+}
+
 async function verContribuidor(userId) {
     const u = wsMembers.find(x => x.id===userId); if (!u) return;
+    cpopUserId = userId;
+    cpopModo = 'lista';
+    cpopFiltro = { busca: '', projeto: '' };
+    cpopEtapas = [];
+    cpopProjetos = [];
     document.getElementById('cpop-av').style.background = userColor(u.nome);
     document.getElementById('cpop-av').textContent = initials(u.nome);
     document.getElementById('cpop-name').textContent = u.nome;
@@ -1984,17 +2153,188 @@ async function verContribuidor(userId) {
         ? `<select class="fsel" onchange="alterarRole(${u.id}, this.value)">${roleOptions}</select>`
         : `<span class="badge ${u.wsAdmin?'b-acc':'b-gray'}">${u.wsAdmin?'Admin':'Membro'}</span>`;
     document.getElementById('cpop-badges').innerHTML = roleSelect;
-    document.getElementById('cpop-projs').innerHTML = '<div class="spinner"></div>';
+    document.getElementById('cpop-stats').classList.add('hidden');
+    document.getElementById('cpop-foot').classList.add('hidden');
+    document.getElementById('cpop-body').innerHTML = '<div style="text-align:center;padding:30px"><div class="spinner"></div></div>';
     document.getElementById('cpop-ov').classList.remove('hidden');
-    const { data: rows } = await sb.from('projeto_usuarios')
-        .select('projetos!inner(id, nome, workspace_id)')
-        .eq('usuario_id', userId).eq('projetos.workspace_id', currentWorkspace.id);
-    const el = document.getElementById('cpop-projs');
-    if (!rows?.length) { el.innerHTML = `<p style="font-size:.82rem;color:var(--muted)">Não está em nenhum projeto ainda.</p>`; return; }
-    el.innerHTML = rows.map(r => `<div class="cpop-proj"><span>📁</span> ${escH(r.projetos.nome)}</div>`).join('');
+    const [rEt, rPr] = await Promise.all([
+        sb.from('etapas')
+            .select('id, nome, status, prazo, prioridade, responsavel_id, sessoes!inner(id, nome, projeto_id, projetos!inner(id, nome, workspace_id))')
+            .eq('sessoes.projetos.workspace_id', currentWorkspace.id),
+        sb.from('projeto_usuarios')
+            .select('projetos!inner(id, nome, workspace_id)')
+            .eq('usuario_id', userId).eq('projetos.workspace_id', currentWorkspace.id)
+    ]);
+    if (cpopUserId !== userId) return;
+    if (rEt.error) {
+        document.getElementById('cpop-body').innerHTML = `<div class="cpop-vazio">Erro ao carregar as etapas: ${escH(rEt.error.message)}</div>`;
+        return;
+    }
+    cpopEtapas = rEt.data || [];
+    cpopProjetos = (rPr.data || []).map(r => r.projetos);
+    renderCpop();
 }
 
-function fecharCpop() { document.getElementById('cpop-ov').classList.add('hidden'); }
+function cpopDesenharStats() {
+    const minhas = cpopEtapas.filter(e => e.responsavel_id === cpopUserId);
+    const el = document.getElementById('cpop-stats');
+    const cel = (v, l, cor) => `<div class="cpop-st"><b style="color:${cor}">${v}</b><span>${l}</span></div>`;
+    el.innerHTML = cel(minhas.length, 'Etapas', 'var(--text)')
+        + cel(minhas.filter(e => e.status === 'Em andamento').length, 'Em andamento', 'var(--warn)')
+        + cel(minhas.filter(cpopVencida).length, 'Vencidas', 'var(--danger)')
+        + cel(minhas.filter(e => e.status === 'Concluído').length, 'Concluídas', 'var(--ok)');
+    el.classList.remove('hidden');
+}
+
+function cpopLinhaMinha(e) {
+    const cls = e.status === 'Concluído' ? 's-ok' : e.status === 'Em andamento' ? 's-an' : '';
+    const stCls = e.status === 'Concluído' ? 'b-green' : e.status === 'Em andamento' ? 'b-amber' : 'b-gray';
+    return `<div class="cpop-et ${cls}">
+        <div class="cpop-et-i"><div class="cpop-et-n">${escH(e.nome)}</div><div class="cpop-et-s">🗂 ${escH(e.sessoes.nome)}</div></div>
+        <div class="cpop-et-b">
+            <span class="badge ${stCls}">${e.status}</span>
+            ${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : ''}
+            <span class="badge b-purple" title="Prioridade">P${e.prioridade || 0}</span>
+        </div>
+    </div>`;
+}
+
+function renderCpopLista() {
+    const u = wsMembers.find(x => x.id === cpopUserId);
+    const minhas = cpopEtapas.filter(e => e.responsavel_id === cpopUserId).sort(cpopOrdenar);
+    const grupos = new Map();
+    minhas.forEach(e => {
+        const p = e.sessoes.projetos;
+        if (!grupos.has(p.id)) grupos.set(p.id, { nome: p.nome, itens: [] });
+        grupos.get(p.id).itens.push(e);
+    });
+    const ordem = [...grupos.values()].sort((a, b) => b.itens.filter(e => e.status !== 'Concluído').length - a.itens.filter(e => e.status !== 'Concluído').length);
+    const chips = cpopProjetos.length
+        ? `<div class="cpop-chips">${cpopProjetos.map(p => `<span class="cpop-chip">📁 ${escH(p.nome)}</span>`).join('')}</div>`
+        : `<p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Não está em nenhum projeto ainda.</p>`;
+    const lista = ordem.length
+        ? ordem.map(g => `<div class="cpop-grp">
+            <div class="cpop-grp-h">📁 ${escH(g.nome)} <span class="badge b-gray">${g.itens.length}</span></div>
+            ${g.itens.map(cpopLinhaMinha).join('')}
+        </div>`).join('')
+        : `<div class="cpop-vazio">Nenhuma etapa sob responsabilidade de ${escH(u.nome.split(' ')[0])}.${currentUserCanEdit ? '<br>Use o botão abaixo para atribuir uma.' : ''}</div>`;
+    document.getElementById('cpop-body').innerHTML = `
+        <div class="cpop-sec">Projetos</div>${chips}
+        <div class="cpop-sec">Etapas sob responsabilidade (${minhas.length})</div>${lista}`;
+    const foot = document.getElementById('cpop-foot');
+    if (currentUserCanEdit) {
+        foot.innerHTML = '<button class="btn btn-p" onclick="cpopAbrirAtribuir()">＋ Atribuir a uma etapa</button>';
+        foot.classList.remove('hidden');
+    } else {
+        foot.classList.add('hidden');
+    }
+}
+
+function renderCpop() {
+    if (!wsMembers.find(x => x.id === cpopUserId)) return;
+    cpopDesenharStats();
+    if (cpopModo === 'atribuir') renderCpopAtribuir();
+    else renderCpopLista();
+}
+
+function cpopAbrirAtribuir() {
+    if (!currentUserCanEdit) return;
+    cpopModo = 'atribuir';
+    cpopFiltro = { busca: '', projeto: '' };
+    renderCpopAtribuir();
+}
+
+function cpopVoltar() {
+    cpopModo = 'lista';
+    renderCpopLista();
+}
+
+function renderCpopAtribuir() {
+    const u = wsMembers.find(x => x.id === cpopUserId);
+    const projetos = new Map();
+    cpopEtapas.forEach(e => { const p = e.sessoes.projetos; projetos.set(p.id, p.nome); });
+    const opts = [...projetos.entries()].sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([id, nome]) => `<option value="${id}" ${String(id) === cpopFiltro.projeto ? 'selected' : ''}>${escH(nome)}</option>`).join('');
+    document.getElementById('cpop-body').innerHTML = `
+        <div class="cpop-sec">Atribuir a ${escH(u.nome)}</div>
+        <div class="cpop-pick-bar">
+            <input class="fi" id="cpop-busca" placeholder="Buscar etapa ou atividade..." value="${escH(cpopFiltro.busca)}" oninput="cpopFiltrar()">
+            <select class="fsel" id="cpop-proj" onchange="cpopFiltrar()"><option value="">Todos os projetos</option>${opts}</select>
+        </div>
+        <div id="cpop-pick-list"></div>`;
+    const foot = document.getElementById('cpop-foot');
+    foot.innerHTML = '<button class="btn btn-s" onclick="cpopVoltar()">← Voltar às etapas</button>';
+    foot.classList.remove('hidden');
+    cpopDesenharCandidatas();
+}
+
+function cpopFiltrar() {
+    cpopFiltro.busca = document.getElementById('cpop-busca').value;
+    cpopFiltro.projeto = document.getElementById('cpop-proj').value;
+    cpopDesenharCandidatas();
+}
+
+function cpopDesenharCandidatas() {
+    const el = document.getElementById('cpop-pick-list');
+    if (!el) return;
+    const termo = cpopFiltro.busca.trim().toLowerCase();
+    const todas = cpopEtapas.filter(e => e.responsavel_id !== cpopUserId && e.status !== 'Concluído');
+    const lista = todas.filter(e =>
+        (!cpopFiltro.projeto || String(e.sessoes.projetos.id) === cpopFiltro.projeto) &&
+        (!termo || e.nome.toLowerCase().includes(termo) || e.sessoes.nome.toLowerCase().includes(termo))
+    ).sort((a, b) => {
+        if (!a.responsavel_id !== !b.responsavel_id) return a.responsavel_id ? 1 : -1;
+        return cpopOrdenar(a, b);
+    });
+    if (!lista.length) {
+        el.innerHTML = `<div class="cpop-vazio">${todas.length ? 'Nenhuma etapa encontrada.' : 'Não há etapas em aberto para atribuir.'}</div>`;
+        return;
+    }
+    const LIMITE = 80;
+    el.innerHTML = lista.slice(0, LIMITE).map(e => {
+        const atual = wsMembers.find(x => x.id === e.responsavel_id);
+        const cls = e.status === 'Em andamento' ? 's-an' : '';
+        return `<div class="cpop-et ${cls}">
+            <div class="cpop-et-i">
+                <div class="cpop-et-n">${escH(e.nome)}</div>
+                <div class="cpop-et-s">📁 ${escH(e.sessoes.projetos.nome)} › 🗂 ${escH(e.sessoes.nome)}</div>
+            </div>
+            <div class="cpop-et-b">
+                ${atual ? `<span class="badge b-purple" title="Responsável atual">${escH(atual.nome)}</span>` : '<span class="badge b-amber">Sem responsável</span>'}
+                ${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : ''}
+                <button class="btn btn-p btn-sm" onclick="cpopAtribuir(${e.id})">Atribuir</button>
+            </div>
+        </div>`;
+    }).join('') + (lista.length > LIMITE ? `<div class="cpop-vazio">Mostrando ${LIMITE} de ${lista.length}. Refine a busca para ver as demais.</div>` : '');
+}
+
+async function cpopAtribuir(eId) {
+    if (cpopBusy || !currentUserCanEdit) return;
+    const uid = cpopUserId;
+    const e = cpopEtapas.find(x => x.id === eId);
+    const u = wsMembers.find(x => x.id === uid);
+    if (!e || !u) return;
+    const atual = wsMembers.find(x => x.id === e.responsavel_id);
+    if (atual && !confirm(`"${e.nome}" já está com ${atual.nome}. Reatribuir para ${u.nome}?`)) return;
+    cpopBusy = true;
+    const { error } = await sb.from('etapas').update({ responsavel_id: uid }).eq('id', eId);
+    cpopBusy = false;
+    if (error) { toast('Erro ao atribuir: ' + error.message, 'error'); return; }
+    e.responsavel_id = uid;
+    const local = findEtapa(eId);
+    if (local) local.responsavel_id = uid;
+    await addLog('update', 'etapa', eId, { nome: `"${e.nome}" atribuída a ${u.nome}` });
+    await pushNotificacao('👤', `${currentUser.nome} atribuiu a etapa "${e.nome}" a ${u.nome}.`, 'geral', `projeto:${e.sessoes.projetos.id}`);
+    toast(`Etapa atribuída a ${u.nome}. ✅`);
+    if (cpopUserId !== uid) return;
+    cpopDesenharStats();
+    cpopDesenharCandidatas();
+}
+
+function fecharCpop() {
+    cpopUserId = null;
+    document.getElementById('cpop-ov').classList.add('hidden');
+}
 
 async function alterarRole(userId, newRole) {
     if (!currentUserIsWorkspaceAdmin) return;
@@ -2510,7 +2850,7 @@ function toast(msg, type='success') {
     document.getElementById('toast-ctr').appendChild(t);
     setTimeout(() => t.remove(), 4000);
 }
-
+    
 // ─── UTILS ────────────────────────────────────────
 function escH(str) {
     if (!str) return '';

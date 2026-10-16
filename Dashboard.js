@@ -34,6 +34,7 @@ const DASHBOARD_ESTILO = `.dash-head{display:flex;justify-content:space-between;
 .dash-cols{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:8px;height:190px;align-items:end}
 .dash-col{display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:4px}
 .dash-col[onclick]{cursor:pointer}
+.dash-col[onclick]:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:8px}
 .dash-col-n{font-size:.74rem;font-weight:700;height:16px;color:var(--text)}
 .dash-col-track{flex:1;width:100%;display:flex;align-items:flex-end;background:#f4f6fd;border-radius:7px;overflow:hidden}
 .dash-col-bar{width:100%;background:linear-gradient(180deg,#818cf8,var(--acc));border-radius:7px 7px 0 0;transform-origin:bottom;animation:dashGrowY .7s cubic-bezier(.2,.8,.2,1) both;transition:filter .15s}
@@ -47,10 +48,16 @@ const DASHBOARD_ESTILO = `.dash-head{display:flex;justify-content:space-between;
 .dash-row-n{display:flex;align-items:center;gap:7px;min-width:0}
 .dash-row-n span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
 .dash-row-t{font-size:.72rem;color:var(--muted);white-space:nowrap}
+.dash-row[onclick]{cursor:pointer;border-radius:8px;padding:3px 5px;margin:-3px -5px;transition:background .15s}
+.dash-row[onclick]:hover{background:var(--acc-lt)}
+.dash-row[onclick]:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .dash-bar{height:10px;border-radius:999px;background:#eef1fb;overflow:hidden;display:flex}
 .dash-bar>div{height:100%;transform-origin:left;animation:dashGrowX .8s cubic-bezier(.2,.8,.2,1) both}
 .dash-prios{display:flex;flex-direction:column;gap:10px}
 .dash-prio{display:grid;grid-template-columns:62px minmax(0,1fr) 24px;gap:8px;align-items:center;font-size:.76rem}
+.dash-prio[onclick]{cursor:pointer;border-radius:8px}
+.dash-prio[onclick]:hover{background:var(--acc-lt)}
+.dash-prio[onclick]:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .dash-prio-l{color:var(--muted)}
 .dash-prio-n{text-align:right;font-weight:700}
 .dash-ins{display:flex;flex-direction:column;gap:10px}
@@ -72,6 +79,9 @@ const DASHBOARD_ESTILO = `.dash-head{display:flex;justify-content:space-between;
 .dash-fi-i{flex:1;min-width:0}
 .dash-fi-n{font-weight:600;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dash-fi-c{font-size:.72rem;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-fi-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.dash-fi-edit{width:auto;padding:5px 8px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);font:600 .72rem var(--font);cursor:pointer}
+.dash-fi-edit:hover{border-color:var(--acc);color:var(--acc)}
 .dash-time{display:flex;flex-direction:column;gap:9px}
 .dash-ti{display:flex;align-items:center;gap:11px;cursor:pointer;padding:6px;border-radius:10px;transition:.15s}
 .dash-ti:hover{background:var(--acc-lt)}
@@ -204,11 +214,54 @@ function dashDonut(partes, centro, sub) {
 function dashColunas(semanas) {
     const max = Math.max(1, ...semanas.map(s => s.n));
     return `<div class="dash-cols">${semanas.map(s => `
-        <div class="dash-col ${s.tipo}" ${s.data ? `onclick="dashIrData('${s.data}')"` : ''} title="${s.n} ${dashPl(s.n, 'prazo', 'prazos')}">
+        <div class="dash-col ${s.tipo}" role="button" tabindex="0" onclick="dashMostrarEtapasSemana('${s.tipo}','${s.data || ''}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();dashMostrarEtapasSemana('${s.tipo}','${s.data || ''}')}" title="${s.n} ${dashPl(s.n, 'prazo', 'prazos')} · clique para ver etapas">
             <div class="dash-col-n">${s.n || ''}</div>
             <div class="dash-col-track"><div class="dash-col-bar" style="height:${s.n ? Math.max(6, s.n / max * 100) : 0}%"></div></div>
             <div class="dash-col-l">${s.rotulo}</div>
         </div>`).join('')}</div>`;
+}
+
+function dashMostrarEtapasSemana(tipo, inicio) {
+    const hoje = dashFmt(dashHoje());
+    const fimSemana = new Date(dashData(inicio));
+    fimSemana.setDate(fimSemana.getDate() + 7);
+    const etapas = dashEtapasNoEscopo().filter(etapa => {
+        if (etapa.status === 'Concluído' || !etapa.prazo) return false;
+        return tipo === 'late'
+            ? etapa.prazo < hoje
+            : etapa.prazo >= inicio && etapa.prazo < dashFmt(fimSemana);
+    }).sort((a, b) => a.prazo.localeCompare(b.prazo));
+
+    const titulo = tipo === 'late'
+        ? 'Etapas atrasadas'
+        : `Etapas da semana de ${dashCurta(inicio)}`;
+    const conteudo = etapas.length ? `<div class="dash-foco">${etapas.map(etapa => {
+        const sessao = etapa.sessoes;
+        const projeto = sessao?.projetos;
+        return `<div class="dash-fi" ${projeto ? `onclick="dashAbrirProjetoEtapa(${projeto.id})"` : ''}>
+            <span class="dash-fi-b" style="background:${etapa.status === 'Em andamento' ? 'var(--warn)' : '#cbd5e1'}"></span>
+            <div class="dash-fi-i">
+                <div class="dash-fi-n">${escH(etapa.nome)}</div>
+                <div class="dash-fi-c">${escH(projeto?.nome || 'Projeto')} · ${escH(sessao?.nome || 'Atividade')} · ${dashCurta(etapa.prazo)}</div>
+            </div>
+            <div class="dash-fi-actions"><span class="badge ${etapa.status === 'Em andamento' ? 'b-amber' : 'b-gray'}">${escH(etapa.status)}</span>
+                ${currentUserCanEdit ? `<button class="dash-fi-edit" onclick="event.stopPropagation();editarEtapa(${etapa.id})">✏️ Editar</button>` : ''}
+            </div>
+        </div>`;
+    }).join('')}</div>` : '<div class="dash-vazio">Nenhuma etapa em aberto neste período.</div>';
+    abrirModal(titulo, conteudo, [{ label: 'Fechar', cls: 'btn-s', action: 'fecharModal()' }]);
+}
+
+function dashEtapasNoEscopo() {
+    return dashEscopo === 'meu'
+        ? dashDados.etapas.filter(etapa => etapa.responsavel_id === currentUser.id)
+        : dashDados.etapas;
+}
+
+function dashAbrirProjetoEtapa(projetoId) {
+    fecharModal();
+    switchTab('projetos');
+    abrirProjeto(projetoId);
 }
 
 function dashLinhasResp(rows) {
@@ -217,12 +270,42 @@ function dashLinhasResp(rows) {
         const u = wsMembers.find(x => x.id === r.id);
         const av = u ? avatar(u) : `<span class="av" style="background:#94a3b8">?</span>`;
         const w = k => r[k] / max * 100;
-        return `<div class="dash-row" title="${escH(r.nome)}: ${r.ok} concluídas · ${r.and} em andamento · ${r.nao} não iniciadas">
+        return `<div class="dash-row" role="button" tabindex="0" onclick="dashMostrarEtapasResponsavel(${r.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();dashMostrarEtapasResponsavel(${r.id})}" title="${escH(r.nome)}: ${r.ok} concluídas · ${r.and} em andamento · ${r.nao} não iniciadas · clique para ver etapas">
             <div class="dash-row-n">${av}<span>${escH(r.nome)}</span></div>
             <div class="dash-bar"><div style="width:${w('ok')}%;background:${DASH_COR_STATUS.concluido}"></div><div style="width:${w('and')}%;background:${DASH_COR_STATUS.andamento}"></div><div style="width:${w('nao')}%;background:${DASH_COR_STATUS.naoIniciado}"></div></div>
             <div class="dash-row-t">${r.abertas} ${dashPl(r.abertas, 'aberta', 'abertas')}</div>
         </div>`;
     }).join('')}</div>`;
+}
+
+function dashMostrarEtapasResponsavel(responsavelId) {
+    const etapas = dashEtapasNoEscopo().filter(etapa =>
+        (etapa.responsavel_id || 0) === responsavelId
+    ).sort((a, b) => {
+        if (a.status === 'Concluído' && b.status !== 'Concluído') return 1;
+        if (a.status !== 'Concluído' && b.status === 'Concluído') return -1;
+        if (!a.prazo) return 1;
+        if (!b.prazo) return -1;
+        return a.prazo.localeCompare(b.prazo);
+    });
+    const nome = responsavelId
+        ? wsMembers.find(membro => membro.id === responsavelId)?.nome || 'Ex-membro'
+        : 'Sem responsável';
+    const conteudo = etapas.length ? `<div class="dash-foco">${etapas.map(etapa => {
+        const sessao = etapa.sessoes;
+        const projeto = sessao?.projetos;
+        return `<div class="dash-fi" ${projeto ? `onclick="dashAbrirProjetoEtapa(${projeto.id})"` : ''}>
+            <span class="dash-fi-b" style="background:${etapa.status === 'Concluído' ? 'var(--ok)' : etapa.status === 'Em andamento' ? 'var(--warn)' : '#cbd5e1'}"></span>
+            <div class="dash-fi-i">
+                <div class="dash-fi-n">${escH(etapa.nome)}</div>
+                <div class="dash-fi-c">${escH(projeto?.nome || 'Projeto')} · ${escH(sessao?.nome || 'Atividade')}${etapa.prazo ? ` · ${dashCurta(etapa.prazo)}` : ''}</div>
+            </div>
+            <div class="dash-fi-actions"><span class="badge ${etapa.status === 'Concluído' ? 'b-green' : etapa.status === 'Em andamento' ? 'b-amber' : 'b-gray'}">${escH(etapa.status)}</span>
+                ${currentUserCanEdit ? `<button class="dash-fi-edit" onclick="event.stopPropagation();editarEtapa(${etapa.id})">✏️ Editar</button>` : ''}
+            </div>
+        </div>`;
+    }).join('')}</div>` : '<div class="dash-vazio">Nenhuma etapa para este responsável neste filtro.</div>';
+    abrirModal(`Etapas · ${escH(nome)}`, conteudo, [{ label: 'Fechar', cls: 'btn-s', action: 'fecharModal()' }]);
 }
 
 function dashLinhasProj(rows) {
@@ -239,9 +322,32 @@ function dashLinhasProj(rows) {
 function dashLinhasPrio(n) {
     const max = Math.max(1, ...n);
     return `<div class="dash-prios">${n.map((v, i) => `
-        <div class="dash-prio"><span class="dash-prio-l">${DASH_LBL_PRIO[i]}</span>
+        <div class="dash-prio" role="button" tabindex="0" onclick="dashMostrarEtapasPrioridade(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();dashMostrarEtapasPrioridade(${i})}" title="Clique para ver as etapas">
+        <span class="dash-prio-l">${DASH_LBL_PRIO[i]}</span>
         <div class="dash-bar"><div style="width:${v / max * 100}%;background:${DASH_COR_PRIO[i]}"></div></div>
         <span class="dash-prio-n">${v}</span></div>`).join('')}</div>`;
+}
+
+function dashMostrarEtapasPrioridade(prioridade) {
+    const etapas = dashEtapasNoEscopo().filter(etapa =>
+        etapa.status !== 'Concluído' &&
+        Math.min(4, Math.max(0, etapa.prioridade || 0)) === prioridade
+    );
+    const conteudo = etapas.length ? `<div class="dash-foco">${etapas.map(etapa => {
+        const sessao = etapa.sessoes;
+        const projeto = sessao?.projetos;
+        return `<div class="dash-fi" ${projeto ? `onclick="dashAbrirProjetoEtapa(${projeto.id})"` : ''}>
+            <span class="dash-fi-b" style="background:${DASH_COR_PRIO[prioridade]}"></span>
+            <div class="dash-fi-i">
+                <div class="dash-fi-n">${escH(etapa.nome)}</div>
+                <div class="dash-fi-c">${escH(projeto?.nome || 'Projeto')} · ${escH(sessao?.nome || 'Atividade')}${etapa.prazo ? ` · ${dashCurta(etapa.prazo)}` : ''}</div>
+            </div>
+            <div class="dash-fi-actions"><span class="badge ${etapa.status === 'Em andamento' ? 'b-amber' : 'b-gray'}">${escH(etapa.status)}</span>
+                ${currentUserCanEdit ? `<button class="dash-fi-edit" onclick="event.stopPropagation();editarEtapa(${etapa.id})">✏️ Editar</button>` : ''}
+            </div>
+        </div>`;
+    }).join('')}</div>` : '<div class="dash-vazio">Nenhuma etapa aberta nesta prioridade.</div>';
+    abrirModal(`Prioridade ${DASH_LBL_PRIO[prioridade]}`, conteudo, [{ label: 'Fechar', cls: 'btn-s', action: 'fecharModal()' }]);
 }
 
 function dashInsights(m, porResp, porProj, semanas) {
@@ -444,7 +550,7 @@ function dashRender() {
                     </div></div>` : vazioEscopo}
             </div>
             <div class="dash-card dash-s5 anim-item" style="animation-delay:.15s">
-                <div class="dash-ct">Prazos por semana<span class="dash-cs">etapas em aberto · clique para abrir na Agenda</span></div>
+                <div class="dash-ct">Prazos por semana<span class="dash-cs">etapas em aberto · clique para ver etapas</span></div>
                 ${dashColunas(semanas)}
             </div>
             <div class="dash-card dash-s3 anim-item" style="animation-delay:.2s">
