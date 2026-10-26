@@ -11,6 +11,7 @@ const DASHBOARD_ESTILO = `.dash-head{display:flex;justify-content:space-between;
 .dash-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,320px);gap:16px;align-items:start}
 .dash-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
 .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--sh);min-width:0}
+.dash-s4:has(.dash-leg-i:hover),.dash-s4:has(.dash-leg-i:focus-visible){z-index:40}
 .dash-upcoming{display:flex;flex-direction:column;height:clamp(280px,55vh,560px);min-height:0}
 .dash-upcoming .dash-time{flex:1;min-height:0;overflow-y:auto;padding-right:4px}
 .dash-upcoming .dash-ti{flex-shrink:0}
@@ -28,9 +29,17 @@ const DASHBOARD_ESTILO = `.dash-head{display:flex;justify-content:space-between;
 .dash-donut-v{font-size:26px;font-weight:800;fill:var(--text);font-family:var(--font)}
 .dash-donut-l{font-size:9.5px;fill:var(--muted);font-family:var(--font)}
 .dash-leg{display:flex;flex-direction:column;gap:9px;font-size:.8rem}
-.dash-leg-i{display:flex;align-items:center;gap:8px}
+.dash-leg-i{position:relative;display:flex;width:100%;align-items:center;gap:8px;padding:6px 8px;border:0;border-radius:8px;background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.dash-leg-i:hover,.dash-leg-i:focus-visible{background:var(--acc-lt)}
+.dash-leg-i:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .dash-leg-i i{width:10px;height:10px;border-radius:3px;display:inline-block}
-.dash-leg-i b{margin-left:auto;padding-left:14px}
+.dash-status-count{margin-left:auto;padding-left:14px;font-weight:700}
+.dash-status-tip{position:absolute;z-index:30;top:0;left:calc(100% + 8px);width:250px;max-width:calc(100vw - 32px);padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);box-shadow:var(--sh-md);color:var(--text);text-align:left;visibility:hidden;opacity:0;transform:translateX(-3px);transition:opacity .15s,transform .15s,visibility .15s;pointer-events:auto}
+.dash-status-tip::before{position:absolute;top:0;right:100%;width:8px;height:100%;content:''}
+.dash-leg-i:hover .dash-status-tip,.dash-leg-i:focus-visible .dash-status-tip{visibility:visible;opacity:1;transform:translateX(0)}
+.dash-status-list{display:flex;flex-direction:column;gap:6px}
+.dash-status-item{display:block;overflow:hidden;font-size:.75rem;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+.dash-status-empty{display:block;color:var(--muted);font-size:.75rem;font-weight:500}
 .dash-cols{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:8px;height:190px;align-items:end}
 .dash-col{display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:4px}
 .dash-col[onclick]{cursor:pointer}
@@ -209,6 +218,35 @@ function dashDonut(partes, centro, sub) {
         return s;
     }).join('');
     return `<svg viewBox="0 0 140 140" class="dash-donut"><circle cx="70" cy="70" r="${r}" fill="none" stroke="#eef2ff" stroke-width="16"/>${segs}<text x="70" y="70" text-anchor="middle" class="dash-donut-v">${centro}</text><text x="70" y="87" text-anchor="middle" class="dash-donut-l">${sub}</text></svg>`;
+}
+
+function dashLegendaStatus(chave, nome, status, cor, etapas) {
+    const correspondentes = etapas.filter(etapa => etapa.status === status);
+    const relacionadas = correspondentes.slice(0, 5);
+    const tooltipId = `dash-status-${chave}`;
+    const lista = relacionadas.length
+        ? `<span class="dash-status-list">${relacionadas.map(etapa => `<span class="dash-status-item">${escH(etapa.nome)}</span>`).join('')}</span>`
+        : '<span class="dash-status-empty">Nenhuma etapa neste status.</span>';
+    return `<button type="button" class="dash-leg-i" onclick="dashMostrarEtapasStatus('${status}','${nome}')" aria-label="${nome}: ${correspondentes.length} ${dashPl(correspondentes.length, 'etapa', 'etapas')}" aria-describedby="${tooltipId}"><i style="background:${cor}"></i>${nome}<span class="dash-status-count">${correspondentes.length}</span><span class="dash-status-tip" id="${tooltipId}" role="tooltip">${lista}</span></button>`;
+}
+
+function dashMostrarEtapasStatus(status, nome) {
+    const etapas = dashEtapasNoEscopo().filter(etapa => etapa.status === status);
+    const conteudo = etapas.length ? `<div class="dash-foco">${etapas.map(etapa => {
+        const sessao = etapa.sessoes;
+        const projeto = sessao?.projetos;
+        return `<div class="dash-fi" ${projeto ? `onclick="dashAbrirProjetoEtapa(${projeto.id})"` : ''}>
+            <span class="dash-fi-b" style="background:${status === 'Concluído' ? 'var(--ok)' : status === 'Em andamento' ? 'var(--warn)' : '#cbd5e1'}"></span>
+            <div class="dash-fi-i">
+                <div class="dash-fi-n">${escH(etapa.nome)}</div>
+                <div class="dash-fi-c">${escH(projeto?.nome || 'Projeto')} · ${escH(sessao?.nome || 'Atividade')}${etapa.prazo ? ` · ${dashCurta(etapa.prazo)}` : ''}</div>
+            </div>
+            <div class="dash-fi-actions"><span class="badge ${status === 'Concluído' ? 'b-green' : status === 'Em andamento' ? 'b-amber' : 'b-gray'}">${escH(status)}</span>
+                ${currentUserCanEdit ? `<button class="dash-fi-edit" onclick="event.stopPropagation();editarEtapa(${etapa.id})">✏️ Editar</button>` : ''}
+            </div>
+        </div>`;
+    }).join('')}</div>` : '<div class="dash-vazio">Nenhuma etapa neste status.</div>';
+    abrirModal(`Etapas · ${escH(nome)}`, conteudo, [{ label: 'Fechar', cls: 'btn-s', action: 'fecharModal()' }]);
 }
 
 function dashColunas(semanas) {
@@ -544,9 +582,9 @@ function dashRender() {
                         { nome: 'Não iniciadas', v: m.naoIniciado, cor: DASH_COR_STATUS.naoIniciado }
                     ], m.taxa + '%', 'concluído')}
                     <div class="dash-leg">
-                        <div class="dash-leg-i"><i style="background:${DASH_COR_STATUS.concluido}"></i>Concluídas<b>${m.concluidas}</b></div>
-                        <div class="dash-leg-i"><i style="background:${DASH_COR_STATUS.andamento}"></i>Em andamento<b>${m.andamento}</b></div>
-                        <div class="dash-leg-i"><i style="background:${DASH_COR_STATUS.naoIniciado}"></i>Não iniciadas<b>${m.naoIniciado}</b></div>
+                        ${dashLegendaStatus('concluidas', 'Concluídas', 'Concluído', DASH_COR_STATUS.concluido, escopo)}
+                        ${dashLegendaStatus('andamento', 'Em andamento', 'Em andamento', DASH_COR_STATUS.andamento, escopo)}
+                        ${dashLegendaStatus('nao-iniciadas', 'Não iniciadas', 'Não iniciado', DASH_COR_STATUS.naoIniciado, escopo)}
                     </div></div>` : vazioEscopo}
             </div>
             <div class="dash-card dash-s5 anim-item" style="animation-delay:.15s">

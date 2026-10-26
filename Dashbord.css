@@ -11,6 +11,7 @@
 .dash-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,320px);gap:16px;align-items:start}
 .dash-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
 .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--sh);min-width:0}
+.dash-s4:has(.dash-leg-i:hover),.dash-s4:has(.dash-leg-i:focus-visible){z-index:40}
 .dash-upcoming{display:flex;flex-direction:column;height:clamp(280px,55vh,560px);min-height:0}
 .dash-upcoming .dash-time{flex:1;min-height:0;overflow-y:auto;padding-right:4px}
 .dash-upcoming .dash-ti{flex-shrink:0}
@@ -28,9 +29,17 @@
 .dash-donut-v{font-size:26px;font-weight:800;fill:var(--text);font-family:var(--font)}
 .dash-donut-l{font-size:9.5px;fill:var(--muted);font-family:var(--font)}
 .dash-leg{display:flex;flex-direction:column;gap:9px;font-size:.8rem}
-.dash-leg-i{display:flex;align-items:center;gap:8px}
+.dash-leg-i{position:relative;display:flex;width:100%;align-items:center;gap:8px;padding:6px 8px;border:0;border-radius:8px;background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.dash-leg-i:hover,.dash-leg-i:focus-visible{background:var(--acc-lt)}
+.dash-leg-i:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .dash-leg-i i{width:10px;height:10px;border-radius:3px;display:inline-block}
-.dash-leg-i b{margin-left:auto;padding-left:14px}
+.dash-status-count{margin-left:auto;padding-left:14px;font-weight:700}
+.dash-status-tip{position:absolute;z-index:30;top:0;left:calc(100% + 8px);width:250px;max-width:calc(100vw - 32px);padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);box-shadow:var(--sh-md);color:var(--text);text-align:left;visibility:hidden;opacity:0;transform:translateX(-3px);transition:opacity .15s,transform .15s,visibility .15s;pointer-events:auto}
+.dash-status-tip::before{position:absolute;top:0;right:100%;width:8px;height:100%;content:''}
+.dash-leg-i:hover .dash-status-tip,.dash-leg-i:focus-visible .dash-status-tip{visibility:visible;opacity:1;transform:translateX(0)}
+.dash-status-list{display:flex;flex-direction:column;gap:6px}
+.dash-status-item{display:block;overflow:hidden;font-size:.75rem;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+.dash-status-empty{display:block;color:var(--muted);font-size:.75rem;font-weight:500}
 .dash-cols{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:8px;height:190px;align-items:end}
 .dash-col{display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:4px}
 .dash-col[onclick]{cursor:pointer}
@@ -90,7 +99,7 @@
 @media(max-width:1200px){
     .dash-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
     .dash-s3,.dash-s4,.dash-s5,.dash-s8{grid-column:span 6}
-}
+}     
 @media(max-width:760px){
     .dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
     .dash-s3,.dash-s4,.dash-s5,.dash-s6,.dash-s8{grid-column:span 12}
