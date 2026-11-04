@@ -422,6 +422,142 @@
     </style>
     <link rel="stylesheet" href="Chat.css">
     <link rel="stylesheet" href="Agenda.css">
+
+    <style id="ui-refresh">
+        
+        :root{
+            --bg:#f5f6fb; --border:#e5e8f0; --r:12px; --rsm:8px;
+            --sh:0 1px 2px rgba(16,24,40,.05);
+            --sh-md:0 8px 20px -6px rgba(16,24,40,.12);
+            --sh-lg:0 20px 48px -12px rgba(16,24,40,.22);
+            --stick-top:0px;
+        }
+        @media(max-width:860px){:root{--stick-top:52px}}
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+        *{scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
+        :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+        input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
+
+        /* ── Botões e campos: mais leves ── */
+        .btn{padding:9px 16px;border-radius:10px}
+        .btn::before{display:none}
+        .btn-p{background:var(--acc);box-shadow:0 1px 2px rgba(79,70,229,.35)}
+        .btn-p:hover{background:#4338ca;transform:translateY(-1px);box-shadow:0 6px 14px -4px rgba(79,70,229,.5)}
+        .btn-s{border:1px solid var(--border);box-shadow:none}
+        .btn-s:hover{border-color:#c7d2fe;background:var(--acc-lt);box-shadow:none}
+        .btn-sm{padding:7px 12px;border-radius:9px}
+        .fi,.fta,.fsel{border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+        .fi:focus,.fta:focus,.fsel:focus{box-shadow:0 0 0 3px rgba(79,70,229,.12)}
+
+        /* ── Sidebar calma (ícones SVG, ativo sutil) ── */
+        .nav-btn{color:#8b93a7;font-size:.85rem;padding:8px 10px;border-radius:8px;gap:10px;position:relative}
+        .nav-btn:hover{background:rgba(255,255,255,.06);color:#e5e7f0}
+        .nav-btn.active{background:rgba(129,140,248,.16);color:#fff}
+        .nav-btn.active::before{content:'';position:absolute;left:-12px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:#818cf8}
+        .nav-btn.active .ni{color:#a5b4fc}
+        .ni{display:inline-flex;align-items:center;justify-content:center}
+        .ni svg,.ws-icon svg{stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+        .ni svg{width:17px;height:17px}
+        .ws-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--acc),#818cf8);display:flex;align-items:center;justify-content:center;color:#fff}
+        .ws-icon svg{width:16px;height:16px}
+        /* contraste: estes textos estavam quase invisíveis no fundo escuro */
+        .sb-sec{color:#64748b}
+        .ws-code{color:#7c8aa5}
+        .sb-user .ur{color:#8592a8}
+        .sb-user .lb{color:#8592a8}
+        @media(min-width:861px){
+            #app{grid-template-columns:236px minmax(0,1fr)}
+            .sidebar{padding:18px 12px;background:linear-gradient(180deg,#0f1224,#0b0e1c);border-right:1px solid rgba(255,255,255,.05);overflow-y:auto}
+            .sidebar::-webkit-scrollbar{width:0}
+        }
+        @media(min-width:861px) and (max-height:800px){
+            .nav-btn{padding:6px 10px}
+            .sb-logo{margin-bottom:8px}
+        }
+        @media(max-width:860px){.nav-btn.active::before{display:none}}
+
+        /* ── Área principal ── */
+        .main{padding:28px 36px 56px;overflow:visible}
+        .tab-c{max-width:1360px;margin:0 auto}
+        .ph{margin-bottom:22px}
+        .pt{font-size:1.5rem;letter-spacing:-.02em}
+        .home-greeting{font-size:1.7rem;letter-spacing:-.02em}
+        @media(max-width:860px){.main{padding:16px 14px 40px}}
+
+        /* ── Dashboard (Dashboard.js injeta o CSS depois, por isso #app) ── */
+        #app .dash-card{border-radius:16px}
+        #app .dash-kpi{border-radius:16px}
+        #app .dash-ct{letter-spacing:.07em}
+
+        /* ── Projetos: cards de visão geral ── */
+        .pv-card,.pv-folder-card{position:relative;overflow:hidden}
+        .pv-card::before,.pv-folder-card::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--acc),#818cf8);opacity:0;transition:opacity .15s}
+        .pv-card:hover::before,.pv-folder-card:hover::before{opacity:1}
+        .pv-folder-card strong{font-size:1rem}
+
+        /* ── Lista: cabeçalho fixo, ações no hover, concluídas recuam ── */
+        .grp{overflow:visible;border-radius:12px}
+        .grp-h{position:sticky;top:var(--stick-top);z-index:3;background:var(--surface);border-radius:12px 12px 0 0}
+        .grp>:last-child{border-radius:0 0 12px 12px}
+        .row{padding:9px 16px;border-top:1px solid #eef0f6}
+        .row:not(.row-h):hover{background:#f8f9fe}
+        .row.s-done:not(.row-h){background:transparent;opacity:.6}
+        .row.s-done:not(.row-h):hover{opacity:1;background:#f8f9fe}
+        .row.s-done .mini.st{background:#fff;border-color:var(--border)}
+        .row .ib,.grp-h .ib{opacity:0;transition:opacity .12s,background .12s}
+        .row:hover .ib,.row:focus-within .ib,.grp-h:hover .ib,.grp-h:focus-within .ib,.ib:focus-visible{opacity:1}
+        @media(hover:none){.row .ib,.grp-h .ib{opacity:1}}
+
+        /* status por ícone: vazio → meio → cheio */
+        .dot{width:12px;height:12px;border:2px solid #cbd5e1;background:transparent;margin-top:3px}
+        .s-doing .dot{border-color:var(--warn);background:conic-gradient(var(--warn) 0 50%,transparent 0)}
+        .s-done .dot{border-color:var(--ok);background:var(--ok)}
+
+        /* ── Quadro: cards compactos, atrasadas em destaque ── */
+        .kb{grid-template-columns:repeat(3,minmax(260px,1fr));gap:16px}
+        .kb-col{background:#eef0f7;border-radius:14px}
+        .kb-card{transition:transform .12s,box-shadow .12s,border-color .12s}
+        .kb-card:hover{transform:translateY(-1px)}
+        .kb-card:active{cursor:grabbing}
+        .kb-card.late{border-left:3px solid var(--danger)}
+        .kb-col.s-done .kb-card{opacity:.7}
+
+        /* ── Pastas/projetos: cards de destaque + pin ── */
+        .pv-section-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:2px 2px 10px}
+        .pv-grid+.pv-section-label{margin-top:26px}
+        .pv-folder-card{gap:14px;padding:18px;border-radius:16px;cursor:pointer}
+        .pf-top{display:flex;align-items:center;gap:12px}
+        .pf-ic{--c:var(--acc);width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--c);flex-shrink:0}
+        .pf-ic svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+        .pf-info{min-width:0;flex:1;display:flex;flex-direction:column;gap:1px}
+        .pf-info strong{font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .pf-prog{display:flex;align-items:center;gap:10px}
+        .pf-prog b{font-size:.78rem}
+        .pf-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.76rem;color:var(--muted);min-height:20px}
+        .pin-btn{width:30px;height:30px;padding:0;border:none;background:none;border-radius:8px;cursor:pointer;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0;transition:opacity .12s,background .12s,color .12s}
+        .pin-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transform:rotate(45deg)}
+        .pin-btn:hover{background:var(--acc-lt);color:var(--acc)}
+        .pin-btn.on{opacity:1;color:var(--acc)}
+        .pin-btn.on svg{fill:currentColor}
+        .pv-card:hover .pin-btn,.pv-folder-card:hover .pin-btn,.pv-card:focus-within .pin-btn,.pv-folder-card:focus-within .pin-btn,.pin-btn:focus-visible{opacity:1}
+        @media(hover:none){.pin-btn{opacity:1}}
+        .pv-card.pinned,.pv-folder-card.pinned{border-color:#a5b4fc;background:linear-gradient(180deg,var(--acc-lt),var(--surface) 65%)}
+        .pv-card.pinned::before,.pv-folder-card.pinned::before{opacity:1}
+
+        /* ── Projetos: breadcrumb ── */
+        .pj-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+        .pj-crumbs{display:flex;align-items:center;gap:2px;min-width:0;flex-wrap:wrap;font-size:.86rem}
+        .pj-crumb{display:inline-block;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 9px;border-radius:8px;border:none;background:none;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;transition:background .12s,color .12s}
+        button.pj-crumb:hover{background:var(--acc-lt);color:var(--acc)}
+        .pj-crumb.cur{color:var(--text);cursor:default}
+        .pj-sep{color:#cbd5e1;user-select:none}
+        .pj-copy{margin-left:auto}
+
+        /* ── Modais ── */
+        .modal-box{border-radius:16px;max-width:480px}
+        .m-hdr{padding:18px 22px 14px}
+        .m-title{font-size:1rem}
+    </style>
 </head>
 <body>
 
@@ -430,7 +566,7 @@
     <nav class="sidebar">
         <div class="sb-logo" onclick="window.location.href='homepage.html'">Flow<span>Desk</span></div>
         <div class="ws-badge">
-            <span class="ws-icon">🏢</span>
+            <span class="ws-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/></svg></span>
             <div style="overflow:hidden;flex:1">
                 <div class="ws-name" id="sb-ws-name">—</div>
                 <div class="ws-code" id="sb-ws-code">—</div>
@@ -438,24 +574,24 @@
         </div>
 
         <div class="sb-sec">Principal</div>
-        <button id="nav-home"           class="nav-btn active" onclick="switchTab('home')"><span class="ni">📊</span> Dashboard</button>
-        <button id="nav-projetos"       class="nav-btn"        onclick="switchTab('projetos')"><span class="ni">📁</span> Projetos</button>
-        <button id="nav-eventos"        class="nav-btn"        onclick="switchTab('eventos')"><span class="ni">📅</span> Agenda</button>
-        <button id="nav-progresso"      class="nav-btn"        onclick="switchTab('progresso')"><span class="ni">📊</span> Progresso</button>
-        <button id="nav-contribuidores" class="nav-btn"        onclick="switchTab('contribuidores')"><span class="ni">👥</span> Colaboradores</button>
+        <button id="nav-home"           class="nav-btn active" onclick="switchTab('home')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span> Dashboard</button>
+        <button id="nav-projetos"       class="nav-btn"        onclick="switchTab('projetos')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span> Projetos</button>
+        <button id="nav-eventos"        class="nav-btn"        onclick="switchTab('eventos')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> Agenda</button>
+        <button id="nav-progresso"      class="nav-btn"        onclick="switchTab('progresso')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span> Progresso</button>
+        <button id="nav-contribuidores" class="nav-btn"        onclick="switchTab('contribuidores')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Colaboradores</button>
          <hr class="sb-div">
         <div class="sb-sec">Arquivos</div>
-        <button id="nav-anotacoes"      class="nav-btn"        onclick="switchTab('anotacoes')"><span class="ni">📝</span> Anotações</button>
-        <button id="nav-arquivos"       class="nav-btn"        onclick="switchTab('arquivos')"><span class="ni">📂</span> Anexos</button>
-        <button id="nav-ferramentas"    class="nav-btn"        onclick="switchTab('ferramentas')"><span class="ni">🛠️</span> Ferramentas</button>
+        <button id="nav-anotacoes"      class="nav-btn"        onclick="switchTab('anotacoes')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></span> Anotações</button>
+        <button id="nav-arquivos"       class="nav-btn"        onclick="switchTab('arquivos')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></span> Anexos</button>
+        <button id="nav-ferramentas"    class="nav-btn"        onclick="switchTab('ferramentas')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/></svg></span> Ferramentas</button>
 
         <hr class="sb-div">
 
         <div id="admin-section" class="hidden">
             <div class="sb-sec">Admin</div>
-            <button id="nav-logs" class="nav-btn hidden" onclick="switchTab('logs')"><span class="ni">📋</span> System Logs</button>
-            <button class="nav-btn" onclick="abrirModalAviso()"><span class="ni">📌</span> Recado Fixado</button>
-            <button class="nav-btn" onclick="abrirModalAddMembro()"><span class="ni">➕</span> Adicionar Membro</button>
+            <button id="nav-logs" class="nav-btn hidden" onclick="switchTab('logs')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 12h6M9 16h4"/></svg></span> System Logs</button>
+            <button class="nav-btn" onclick="abrirModalAviso()"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg></span> Recado Fixado</button>
+            <button class="nav-btn" onclick="abrirModalAddMembro()"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span> Adicionar Membro</button>
         </div>
 
         <div class="sb-user">
@@ -482,7 +618,7 @@
             <div class="ph" style="align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
                 <div><div class="pt" id="proj-title">Projetos</div><div class="ps" id="proj-sub">Visão geral dos projetos do workspace</div></div>
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                    <button id="proj-back-btn" class="btn btn-s btn-sm hidden" onclick="exitProjFocus()">← Projetos</button>
+                    
                     <div class="proj-view-switch hidden" id="proj-view-sw">
                         <button id="proj-view-list" class="btn btn-s btn-sm active" onclick="setProjetosViewMode('list')">Lista</button>
                         <button id="proj-view-grid" class="btn btn-s btn-sm" onclick="setProjetosViewMode('board')">Quadro</button>
@@ -684,6 +820,7 @@ let currentUserIsWorkspaceAdmin = false;
 let projetosViewMode = 'list';
 let selectedProjetoId = null;
 let selectedPastaProjeto = 'folders';
+let abaAtual = 'home';
 let notes = [];
 let pendingNoteAttachments = [];
 const NOTES_KEY_BASE = 'fd-notes';
@@ -693,8 +830,96 @@ function setProjetosViewMode(mode) {
     projetosViewMode = (mode === 'board' || mode === 'grid') ? 'board' : 'list';
     renderProjetosView();
 }
-function abrirProjeto(id) { selectedProjetoId = id; renderProjetosView(); window.scrollTo(0, 0); }
-function exitProjFocus() { selectedProjetoId = null; renderProjetosView(); }
+function abrirProjeto(id) { selectedProjetoId = id; syncRota(); renderProjetosView(); window.scrollTo(0, 0); }
+function exitProjFocus() { selectedProjetoId = null; syncRota(); renderProjetosView(); }
+// ─── ROTAS: URL própria para cada aba/pasta/projeto + breadcrumb ───
+// Home:      ?codigo=XXX
+// Aba:       ?codigo=XXX&aba=eventos
+// Projetos:  ?codigo=XXX&aba=projetos
+// Pasta:     ?codigo=XXX&pasta=3   (ou pasta=none | pasta=all)
+// Projeto:   ?codigo=XXX&projeto=12
+const ABAS_VALIDAS = ['home','projetos','progresso','contribuidores','anotacoes','arquivos','logs','eventos','ferramentas'];
+
+function montarRotaUrl() {
+    const u = new URL(window.location.href);
+    ['aba', 'pasta', 'projeto'].forEach(k => u.searchParams.delete(k));
+    if (abaAtual === 'projetos') {
+        if (selectedProjetoId != null) u.searchParams.set('projeto', selectedProjetoId);
+        else if (selectedPastaProjeto.startsWith('folder:')) u.searchParams.set('pasta', selectedPastaProjeto.slice('folder:'.length));
+        else if (selectedPastaProjeto === 'none' || selectedPastaProjeto === 'all') u.searchParams.set('pasta', selectedPastaProjeto);
+        else u.searchParams.set('aba', 'projetos');
+    } else if (abaAtual !== 'home') u.searchParams.set('aba', abaAtual);
+    return u;
+}
+function syncRota(replace = false) {
+    try {
+        const u = montarRotaUrl();
+        if (u.href === window.location.href) return;
+        history[replace ? 'replaceState' : 'pushState'](null, '', u);
+    } catch (e) { /* ambiente sem history (ex.: file://): a URL é só um complemento */ }
+}
+function lerRota() {
+    const q = new URLSearchParams(window.location.search);
+    const pr = parseInt(q.get('projeto'), 10);
+    return { projeto: Number.isFinite(pr) ? pr : null, pasta: q.get('pasta'), aba: q.get('aba') };
+}
+function aplicarRota(r) {
+    let aba = 'home';
+    if (r.projeto != null || r.pasta) aba = 'projetos';
+    else if (r.aba && ABAS_VALIDAS.includes(r.aba)) aba = r.aba;
+    if (aba === 'logs' && !(currentUserIsWorkspaceAdmin || currentUser?.nivel === 2)) aba = 'home';
+    if (aba === 'projetos') {
+        selectedProjetoId = null;
+        selectedPastaProjeto = 'folders';
+        if (r.projeto != null) {
+            if (wsProjetos.some(p => p.id === r.projeto)) selectedProjetoId = r.projeto;
+            else toast('Projeto não encontrado neste workspace.', 'warning');
+        } else if (r.pasta) {
+            if (r.pasta === 'all' || r.pasta === 'none') selectedPastaProjeto = r.pasta;
+            else if (wsPastasProjetos.some(x => String(x.id) === r.pasta)) selectedPastaProjeto = 'folder:' + r.pasta;
+            else toast('Pasta não encontrada.', 'warning');
+        }
+    }
+    switchTab(aba, true);
+    if (aba === 'projetos') renderProjetosView();
+}
+function projIr(nav) {
+    selectedProjetoId = null;
+    selectedPastaProjeto = nav;
+    syncRota();
+    renderProjetosView();
+}
+async function copiarLinkProj() {
+    const url = window.location.href;
+    try { await navigator.clipboard.writeText(url); toast('Link copiado! 🔗'); }
+    catch { window.prompt('Copie o link:', url); }
+}
+function projToolbar() {
+    const p = wsProjetos.find(x => x.id === selectedProjetoId);
+    const ctx = selectedPastaProjeto;
+    if (!p && ctx === 'folders') return '';
+    const nomePasta = id => wsPastasProjetos.find(x => String(x.id) === String(id))?.nome || 'Pasta';
+    const pastaDe = c => c === 'all' ? { label: 'Todos os projetos', nav: 'all' }
+        : c === 'none' ? { label: 'Sem pasta', nav: 'none' }
+        : { label: nomePasta(c.slice('folder:'.length)), nav: c };
+    const cr = [{ label: 'Projetos', nav: 'folders' }];
+    if (p) {
+        cr.push(pastaDe(ctx === 'all' ? 'all' : (p.pasta_id ? `folder:${p.pasta_id}` : 'none')));
+        cr.push({ label: p.nome, nav: null });
+    } else {
+        cr.push({ ...pastaDe(ctx), nav: null });
+    }
+    const pai = cr[cr.length - 2];
+    const itens = cr.map(c => c.nav
+        ? `<button type="button" class="pj-crumb" title="${escH(c.label)}" onclick="projIr('${c.nav}')">${escH(c.label)}</button>`
+        : `<span class="pj-crumb cur" aria-current="page" title="${escH(c.label)}">${escH(c.label)}</span>`
+    ).join('<span class="pj-sep" aria-hidden="true">/</span>');
+    return `<div class="pj-bar">
+        <button type="button" class="btn btn-s btn-sm" onclick="projIr('${pai.nav}')">← ${pai.nav === 'folders' ? 'Pastas' : escH(pai.label)}</button>
+        <nav class="pj-crumbs" aria-label="Caminho">${itens}</nav>
+        <button type="button" class="btn btn-s btn-sm pj-copy" title="Copiar o link desta página" onclick="copiarLinkProj()">🔗 Copiar link</button>
+    </div>`;
+}
 function toggleGrp(id) { collapsedSess.has(id) ? collapsedSess.delete(id) : collapsedSess.add(id); renderProjetosView(); }
 
 // ─── INIT ─────────────────────────────────────────
@@ -720,6 +945,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentWorkspaceCreatorId = ws.criado_por;
     document.getElementById('app').classList.remove('hidden');
     await entrarNoDashboard();
+    const rota = lerRota();
+    if (rota.projeto != null || rota.pasta || rota.aba) { aplicarRota(rota); syncRota(true); }
+    window.addEventListener('popstate', () => aplicarRota(lerRota()));
 });
 
 // ─── DASHBOARD ────────────────────────────────────
@@ -760,7 +988,8 @@ async function entrarNoDashboard() {
 }
 
 // ─── TABS ─────────────────────────────────────────
-function switchTab(tab) {
+function switchTab(tab, fromRoute = false) {
+    abaAtual = tab;
     ['home','projetos','progresso','contribuidores','anotacoes','arquivos','logs','eventos','ferramentas'].forEach(t => {
         const c = document.getElementById(`tab-${t}`);
         const b = document.getElementById(`nav-${t}`);
@@ -774,6 +1003,7 @@ function switchTab(tab) {
     if (tab === 'arquivos') carregarArquivosWorkspace();
     if (tab === 'home') carregarHome();
     if (tab === 'progresso') carregarProgresso();
+    if (!fromRoute) syncRota();
 }
 
 // ─── LOGOUT ───────────────────────────────────────
@@ -866,16 +1096,15 @@ function renderProjetosView() {
     const g = id => document.getElementById(id);
     const c = g('projetos-container'); if (!c) return;
     const p = wsProjetos.find(x => x.id === selectedProjetoId);
-    if (!p) selectedProjetoId = null;
+    if (!p && selectedProjetoId !== null) { selectedProjetoId = null; syncRota(true); }
     g('proj-title').textContent = p ? p.nome : 'Projetos';
     const pastaIdSelecionada = selectedPastaProjeto.startsWith('folder:') ? selectedPastaProjeto.slice('folder:'.length) : null;
     const pastaSelecionada = wsPastasProjetos.find(item => String(item.id) === pastaIdSelecionada);
     g('proj-sub').textContent = p ? (p.descricao || 'Sem descrição') : pastaSelecionada ? `Projetos na pasta ${pastaSelecionada.nome}` : selectedPastaProjeto === 'none' ? 'Projetos sem pasta' : 'Organize e acesse os projetos pelas pastas';
-    g('proj-back-btn').classList.toggle('hidden', !p);
     g('proj-view-sw').classList.toggle('hidden', !p);
     g('proj-view-list').classList.toggle('active', projetosViewMode === 'list');
     g('proj-view-grid').classList.toggle('active', projetosViewMode === 'board');
-    c.innerHTML = p ? renderProjDetail(p) : renderProjOverview();
+    c.innerHTML = projToolbar() + (p ? renderProjDetail(p) : renderProjOverview());
 }
 
 function projStats(p) {
@@ -885,26 +1114,79 @@ function projStats(p) {
 }
 function avatar(u) { return `<span class="av" style="background:${userColor(u.nome)}" title="${escH(u.nome)}">${initials(u.nome)}</span>`; }
 
+// ─── PINS (fixar no topo — só para o usuário, salvo neste navegador) ───
+let pinsCache = null;
+function pinsStorageKey() { return `fd-pins-${currentUser?.id || 'anon'}-${currentWorkspace?.codigo || 'global'}`; }
+function getPins() {
+    if (!pinsCache) {
+        try { pinsCache = new Set(JSON.parse(localStorage.getItem(pinsStorageKey()) || '[]')); }
+        catch { pinsCache = new Set(); }
+    }
+    return pinsCache;
+}
+function isPinned(key) { return getPins().has(key); }
+function togglePin(key, ev) {
+    if (ev) ev.stopPropagation();
+    const pins = getPins();
+    const fixar = !pins.has(key);
+    fixar ? pins.add(key) : pins.delete(key);
+    try { localStorage.setItem(pinsStorageKey(), JSON.stringify([...pins])); } catch {}
+    toast(fixar ? 'Fixado no topo 📌' : 'Desafixado.');
+    renderProjetosView();
+}
+function pinBtn(key) {
+    const on = isPinned(key), label = on ? 'Desafixar' : 'Fixar no topo';
+    return `<button type="button" class="pin-btn${on ? ' on' : ''}" title="${label}" aria-label="${label}" aria-pressed="${on}" onclick="togglePin('${key}',event)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg></button>`;
+}
+
+const PASTA_ICONS = {
+    folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    none:   '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke-dasharray="3 3"/>',
+    layers: '<path d="M12 2l10 5-10 5L2 7z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>'
+};
+
+function folderStats(projs) {
+    let total = 0, done = 0, late = 0;
+    projs.forEach(pr => (pr.sessoes || []).forEach(s => (s.etapas || []).forEach(e => {
+        total++;
+        if (e.status === 'Concluído') done++;
+        else if (e.prazo && prazoClass(e.prazo, e.status) === 'b-rose') late++;
+    })));
+    return { total, done, late, pct: total ? Math.round(done / total * 100) : 0 };
+}
+
+function renderPastaCard(c) {
+    const st = folderStats(c.projs), on = isPinned(c.key), n = c.projs.length;
+    const cor = c.cor || userColor(c.nome);
+    return `<div class="pv-folder-card${on ? ' pinned' : ''}" role="button" tabindex="0" onclick="selecionarPastaProjeto('${c.nav}')" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();selecionarPastaProjeto('${c.nav}')}">
+        <div class="pf-top">
+            <div class="pf-ic" style="--c:${cor}"><svg viewBox="0 0 24 24" aria-hidden="true">${PASTA_ICONS[c.icon]}</svg></div>
+            <div class="pf-info"><strong>${escH(c.nome)}</strong><span>${n} ${n === 1 ? 'projeto' : 'projetos'}</span></div>
+            ${pinBtn(c.key)}
+        </div>
+        ${st.total ? `<div class="pf-prog"><div class="pv-bar"><i style="width:${st.pct}%"></i></div><b>${st.pct}%</b></div>` : ''}
+        <div class="pf-meta"><span>${st.total ? `${st.done}/${st.total} etapas` : 'Sem etapas ainda'}</span>${st.late ? `<span class="badge b-rose">⚠️ ${st.late} ${st.late === 1 ? 'atrasada' : 'atrasadas'}</span>` : ''}</div>
+    </div>`;
+}
+
 function renderProjOverview() {
     if (!wsProjetos.length && !wsPastasProjetos.length) {
         return '<div class="empty-state"><div class="ei">📁</div><h3>Nenhum projeto ou pasta</h3><p>Crie uma pasta para organizar seus projetos ou comece criando um projeto.</p></div>';
     }
     if (selectedPastaProjeto === 'folders') {
-        const pastas = wsPastasProjetos.map(pasta => {
-            const count = wsProjetos.filter(projeto => String(projeto.pasta_id) === String(pasta.id)).length;
-            return `<button class="pv-folder-card" onclick="selecionarPastaProjeto('folder:${pasta.id}')">
-                <strong>📁 ${escH(pasta.nome)}</strong>
-                <span>${count} ${count === 1 ? 'projeto' : 'projetos'}</span>
-            </button>`;
-        });
-        const semPastaCount = wsProjetos.filter(projeto => !projeto.pasta_id).length;
-        if (semPastaCount) pastas.push(`<button class="pv-folder-card" onclick="selecionarPastaProjeto('none')">
-            <strong>📂 Sem pasta</strong><span>${semPastaCount} ${semPastaCount === 1 ? 'projeto' : 'projetos'}</span>
-        </button>`);
-        pastas.push(`<button class="pv-folder-card" onclick="selecionarPastaProjeto('all')">
-            <strong>🗂️ Todos os projetos</strong><span>${wsProjetos.length} ${wsProjetos.length === 1 ? 'projeto' : 'projetos'}</span>
-        </button>`);
-        return `<div class="pv-grid">${pastas.join('')}</div>`;
+        const cards = wsPastasProjetos.map(pasta => ({
+            key: `f:${pasta.id}`, nav: `folder:${pasta.id}`, nome: pasta.nome, icon: 'folder',
+            projs: wsProjetos.filter(projeto => String(projeto.pasta_id) === String(pasta.id))
+        }));
+        const semPasta = wsProjetos.filter(projeto => !projeto.pasta_id);
+        if (semPasta.length) cards.push({ key: 'f:none', nav: 'none', nome: 'Sem pasta', icon: 'none', cor: '#64748b', projs: semPasta });
+        cards.push({ key: 'f:all', nav: 'all', nome: 'Todos os projetos', icon: 'layers', cor: '#4f46e5', projs: wsProjetos });
+        const fixados = cards.filter(c => isPinned(c.key));
+        const demais = cards.filter(c => !isPinned(c.key));
+        const grid = lista => `<div class="pv-grid">${lista.map(renderPastaCard).join('')}</div>`;
+        if (!fixados.length) return grid(cards);
+        return `<div class="pv-section-label">Fixados</div>${grid(fixados)}`
+            + (demais.length ? `<div class="pv-section-label">Pastas</div>${grid(demais)}` : '');
     }
 
     const pastaId = selectedPastaProjeto.startsWith('folder:') ? selectedPastaProjeto.slice('folder:'.length) : null;
@@ -915,13 +1197,13 @@ function renderProjOverview() {
             ? wsProjetos.filter(projeto => !projeto.pasta_id)
             : wsProjetos.filter(projeto => String(projeto.pasta_id) === pastaId);
     const titulo = pasta ? `📁 ${escH(pasta.nome)}` : selectedPastaProjeto === 'none' ? '📂 Sem pasta' : '🗂️ Todos os projetos';
-    return `<button class="btn btn-s btn-sm pv-folder-back" onclick="selecionarPastaProjeto('folders')">← Pastas</button>
-        <div class="pv-folder-empty" style="margin-bottom:14px">${titulo} · ${projetos.length} ${projetos.length === 1 ? 'projeto' : 'projetos'}</div>
-        ${projetos.length ? `<div class="pv-grid">${projetos.map(renderProjetoCard).join('')}</div>` : '<div class="pv-folder-empty">Esta pasta ainda não tem projetos.</div>'}`;
+    return `<div class="pv-folder-empty" style="margin-bottom:14px">${titulo} · ${projetos.length} ${projetos.length === 1 ? 'projeto' : 'projetos'}</div>
+        ${projetos.length ? `<div class="pv-grid">${[...projetos].sort((x, y) => isPinned('p:'+y.id) - isPinned('p:'+x.id)).map(renderProjetoCard).join('')}</div>` : '<div class="pv-folder-empty">Esta pasta ainda não tem projetos.</div>'}`;
 }
 
 function selecionarPastaProjeto(id) {
     selectedPastaProjeto = id;
+    syncRota();
     renderProjetosView();
 }
 
@@ -929,9 +1211,9 @@ function renderProjetoCard(p) {
     const st = projStats(p);
     const ids = [...new Set((p.projeto_usuarios||[]).map(x => x.usuario_id))];
     const people = ids.map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
-    return `<div class="pv-card" onclick="abrirProjeto(${p.id})">
+    return `<div class="pv-card${isPinned('p:'+p.id) ? ' pinned' : ''}" onclick="abrirProjeto(${p.id})">
         <div class="pv-top"><div class="pv-name">${escH(p.nome)}</div>${st.total && st.done === st.total ? '<span class="badge b-green">Concluído</span>' : ''}
-            ${currentUserCanEdit ? `<div class="pv-card-actions"><button class="ib" title="Editar projeto" aria-label="Editar projeto ${escH(p.nome)}" onclick="event.stopPropagation();editarProjeto(${p.id})">✏️</button></div>` : ''}</div>
+            <div class="pv-card-actions">${pinBtn('p:'+p.id)}${currentUserCanEdit ? `<button class="ib" title="Editar projeto" aria-label="Editar projeto ${escH(p.nome)}" onclick="event.stopPropagation();editarProjeto(${p.id})">✏️</button>` : ''}</div></div>
         <div class="pv-desc">${escH(p.descricao || 'Sem descrição')}</div>
         ${p.pasta_id ? `<span class="badge b-acc" style="align-self:flex-start">📁 ${escH(wsPastasProjetos.find(pasta => String(pasta.id) === String(p.pasta_id))?.nome || '')}</span>` : ''}
         <div style="display:flex;align-items:center;gap:10px"><div class="pv-bar"><i style="width:${st.pct}%"></i></div><b style="font-size:.78rem">${st.pct}%</b></div>
@@ -959,7 +1241,8 @@ async function criarPastaProjeto() {
     if (error) { toast('Erro ao criar pasta: ' + error.message, 'error'); return; }
     wsPastasProjetos.push(data);
     wsPastasProjetos.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-    selectedPastaProjeto = String(data.id);
+    selectedPastaProjeto = 'folder:' + data.id;
+    syncRota();
     fecharModal();
     renderProjetosView();
     toast(`Pasta "${nome}" criada.`);
@@ -1014,7 +1297,7 @@ function renderBoard(p) {
             <div class="kb-h"><span class="dot"></span>${st}<span class="badge b-gray">${items.length}</span></div>
             ${items.map(({ e, s }) => {
                 const u = wsMembers.find(x => x.id === e.responsavel_id);
-                return `<div class="kb-card" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','${e.id}')" ${currentUserCanEdit ? `onclick="editarEtapa(${e.id})"` : ''}>
+                return `<div class="kb-card ${e.prazo && e.status !== 'Concluído' && prazoClass(e.prazo, e.status) === 'b-rose' ? 'late' : ''}" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','${e.id}')" ${currentUserCanEdit ? `onclick="editarEtapa(${e.id})"` : ''}>
                     <div class="r-t">${escH(e.nome)}</div><div class="r-d">🗂 ${escH(s.nome)}</div>
                     <div class="kb-f">${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span></span>'}${u ? avatar(u) : ''}</div></div>`;
             }).join('') || '<div class="row-empty">Vazio</div>'}
@@ -2841,6 +3124,9 @@ function abrirModal(title, body, buttons=[]) {
 }
 
 function fecharModal() { document.getElementById('modal-ov').classList.add('hidden'); }
+document.addEventListener('keydown', ev => {
+    if (ev.key === 'Escape' && !document.getElementById('modal-ov').classList.contains('hidden')) fecharModal();
+});
 
 // ─── TOAST ────────────────────────────────────────────────────────────────
 function toast(msg, type='success') {

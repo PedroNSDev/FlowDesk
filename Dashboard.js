@@ -114,7 +114,56 @@ const DASHBOARD_ESTILO = `.dash-head{display:flex;justify-content:space-between;
     .dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
     .dash-s3,.dash-s4,.dash-s5,.dash-s6,.dash-s8{grid-column:span 12}
     .dash-row{grid-template-columns:minmax(0,100px) minmax(0,1fr) auto}
-}`;
+}
+/* ===== Layout em uma tela (sem rolagem da pagina) ===== */
+.dash-wrap{display:flex;flex-direction:column;gap:12px;min-width:0}
+.dash-wrap .dash-head{margin-bottom:0;align-items:center}
+.dash-wrap .home-greeting{font-size:1.4rem;margin-bottom:0;line-height:1.2}
+.dash-wrap .home-sub{margin-bottom:0;font-size:.8rem}
+.dash-wrap .dash-kpis{margin-bottom:0;gap:12px}
+.dash-wrap .dash-kpi{padding:10px 14px;gap:10px}
+.dash-wrap .dash-kpi-ic{width:36px;height:36px;font-size:1.05rem;border-radius:10px}
+.dash-wrap .dash-kpi-v{font-size:1.4rem}
+.dash-wrap .dash-kpi-l{font-size:.74rem}
+.dash-wrap .notice-wrap{margin:0!important;padding:8px 14px}
+.dash-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.dash-c{padding:14px 16px;display:flex;flex-direction:column;min-width:0;min-height:260px}
+.dash-c .dash-ct{margin-bottom:10px;flex-shrink:0}
+.dash-scroll{flex:1;min-height:0;overflow-y:auto;padding-right:4px}
+.dash-scroll .dash-foco{max-height:none;overflow:visible;padding-right:0}
+.dash-c .dash-row{grid-template-columns:minmax(0,86px) minmax(0,1fr) auto;gap:8px;font-size:.76rem}
+.dash-c.ga-mp .dash-row{grid-template-columns:minmax(0,150px) minmax(0,1fr) auto}
+.dash-c .dash-in{padding:8px 11px;gap:10px}
+.dash-c .dash-in-d{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dash-line-box{position:relative;flex:1;min-height:200px}
+.dash-line-svg{position:absolute;left:0;top:0;display:block}
+.dash-nota{display:block;margin-top:6px;flex-shrink:0;color:var(--muted)}
+.dash-lg{display:flex;gap:12px;font-size:.7rem;font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted)}
+.dash-lg i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+@media(max-width:760px){.dash-body{grid-template-columns:minmax(0,1fr)}}
+@media(min-width:1201px) and (min-height:600px){
+    .main:has(#tab-home.active){padding-top:20px;padding-bottom:20px}
+    .dash-wrap{height:calc(100vh - 40px);height:calc(100dvh - 40px)}
+    .dash-body{flex:1;min-height:0;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
+    .dash-c{min-height:0;overflow:hidden}
+    .dash-line-box{min-height:0}
+    .dash-body.ws{grid-template-areas:"st st st ln ln ln ln ln ln px px px" "pj pj pj rs rs rs in in in px px px"}
+    .dash-body.me{grid-template-areas:"fo fo fo fo fo ln ln ln ln px px px" "mp mp mp mp mp in in in in px px px"}
+    .ga-st{grid-area:st;overflow:visible}
+    .ga-ln{grid-area:ln}
+    .ga-px{grid-area:px}
+    .ga-pj{grid-area:pj}
+    .ga-rs{grid-area:rs}
+    .ga-in{grid-area:in}
+    .ga-fo{grid-area:fo}
+    .ga-mp{grid-area:mp}
+    .dash-c:has(.dash-leg-i:hover),.dash-c:has(.dash-leg-i:focus-visible){z-index:40}
+    .dash-c .dash-donut{width:clamp(88px,14vh,112px);height:clamp(88px,14vh,112px)}
+    .dash-c .dash-donut-wrap{flex-wrap:nowrap;gap:10px;justify-content:center}
+    .dash-c .dash-leg{gap:2px;font-size:.74rem;min-width:0}
+    .dash-c .dash-leg-i{padding:4px 6px}
+}
+`;
 
 document.head.appendChild(Object.assign(document.createElement('style'), { textContent: DASHBOARD_ESTILO }));
 
@@ -309,7 +358,7 @@ function dashLinhasResp(rows) {
         const av = u ? avatar(u) : `<span class="av" style="background:#94a3b8">?</span>`;
         const w = k => r[k] / max * 100;
         return `<div class="dash-row" role="button" tabindex="0" onclick="dashMostrarEtapasResponsavel(${r.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();dashMostrarEtapasResponsavel(${r.id})}" title="${escH(r.nome)}: ${r.ok} concluídas · ${r.and} em andamento · ${r.nao} não iniciadas · clique para ver etapas">
-            <div class="dash-row-n">${av}<span>${escH(r.nome)}</span></div>
+            <div class="dash-row-n">${av}<span>${escH(r.id ? r.nome.split(' ')[0] : 'Sem resp.')}</span></div>
             <div class="dash-bar"><div style="width:${w('ok')}%;background:${DASH_COR_STATUS.concluido}"></div><div style="width:${w('and')}%;background:${DASH_COR_STATUS.andamento}"></div><div style="width:${w('nao')}%;background:${DASH_COR_STATUS.naoIniciado}"></div></div>
             <div class="dash-row-t">${r.abertas} ${dashPl(r.abertas, 'aberta', 'abertas')}</div>
         </div>`;
@@ -388,7 +437,7 @@ function dashMostrarEtapasPrioridade(prioridade) {
     abrirModal(`Prioridade ${DASH_LBL_PRIO[prioridade]}`, conteudo, [{ label: 'Fechar', cls: 'btn-s', action: 'fecharModal()' }]);
 }
 
-function dashInsights(m, porResp, porProj, semanas) {
+function dashInsights(m, porResp, porProj, semanas, extra = []) {
     const l = [];
     const ws = dashEscopo === 'workspace';
     if (m.vencidas.length) {
@@ -431,6 +480,7 @@ function dashInsights(m, porResp, porProj, semanas) {
     } else if (m.taxa >= 70 && !m.vencidas.length) {
         l.push({ p: 0, cls: 'ok', ic: '🚀', t: 'Bom ritmo', d: `${m.taxa}% das etapas concluídas e nenhuma vencida.` });
     }
+    l.push(...extra);
     if (!l.length) l.push({ p: 0, cls: 'info', ic: '✨', t: 'Nada a destacar', d: 'Sem alertas por enquanto.' });
     return l.sort((a, b) => b.p - a.p).slice(0, 5);
 }
@@ -521,6 +571,105 @@ function dashAnimar(c) {
     });
 }
 
+function dashMeusProjetoIds() {
+    const uid = currentUser.id, ids = new Set();
+    (typeof wsProjetos !== 'undefined' ? wsProjetos : []).forEach(p => {
+        const noProjeto = (p.projeto_usuarios || []).some(x => x.usuario_id === uid);
+        const emSessao = (p.sessoes || []).some(s => (s.sessao_usuarios || []).some(x => x.usuario_id === uid));
+        if (noProjeto || emSessao) ids.add(p.id);
+    });
+    dashDados.etapas.forEach(e => { if (e.responsavel_id === uid && e.sessoes?.projetos) ids.add(e.sessoes.projetos.id); });
+    return ids;
+}
+
+function dashMeusProjetos(todas) {
+    const ids = dashMeusProjetoIds(), uid = currentUser.id;
+    return (typeof wsProjetos !== 'undefined' ? wsProjetos : []).filter(p => ids.has(p.id)).map(p => {
+        const et = todas.filter(e => e.sessoes?.projetos?.id === p.id);
+        const minhas = et.filter(e => e.responsavel_id === uid && e.status !== 'Concluído');
+        const ok = et.filter(e => e.status === 'Concluído').length;
+        return { id: p.id, nome: p.nome, total: et.length, ok, pct: dashPct(ok, et.length), minhas: minhas.length, atrasadas: minhas.filter(e => e.prazo && dashDias(e.prazo) < 0).length };
+    }).sort((a, b) => b.minhas - a.minhas || b.atrasadas - a.atrasadas || a.nome.localeCompare(b.nome, 'pt-BR'));
+}
+
+function dashLinhasMeusProj(rows) {
+    return `<div class="dash-rows">${rows.map(p => `<div class="dash-row" role="button" tabindex="0" onclick="dashIrParaProjeto(${p.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();dashIrParaProjeto(${p.id})}" title="${escH(p.nome)}: ${p.ok} de ${p.total} etapas concluídas">
+        <div class="dash-row-n"><span>${escH(p.nome)}</span></div>
+        <div class="dash-bar"><div style="width:${p.pct}%;background:linear-gradient(90deg,#34d399,${DASH_COR_STATUS.concluido})"></div></div>
+        <div class="dash-row-t">${p.pct}% · <b>${p.minhas}</b> ${dashPl(p.minhas, 'sua', 'suas')}${p.atrasadas ? ` · <b style="color:var(--danger)">${p.atrasadas}⚠</b>` : ''}</div>
+    </div>`).join('')}</div>`;
+}
+
+// Serie acumulada por semana de prazo: 4 semanas para tras e 8 para frente.
+// Planejado = etapas com prazo ate o fim da semana; Concluido = dessas, as ja concluidas.
+function dashSerieTempo(lista) {
+    const ANT = 4, POS = 8, hoje = dashHoje();
+    const seg = new Date(hoje);
+    seg.setDate(seg.getDate() - ((seg.getDay() + 6) % 7) - ANT * 7);
+    const comPrazo = lista.filter(e => e.prazo);
+    const pontos = [];
+    let fim0 = null;
+    for (let i = 0; i <= ANT + POS; i++) {
+        const fim = new Date(seg);
+        fim.setDate(fim.getDate() + i * 7 + 6);
+        if (i === 0) fim0 = fim;
+        const ate = comPrazo.filter(e => e.prazo <= dashFmt(fim));
+        pontos.push({ rotulo: dashCurta(dashFmt(fim)), plan: ate.length, feito: ate.filter(e => e.status === 'Concluído').length, atual: i === ANT });
+    }
+    return {
+        pontos, idxAtual: ANT,
+        hojeFrac: (hoje - fim0) / (7 * 86400000),
+        semPrazo: lista.length - comPrazo.length,
+        max: pontos[pontos.length - 1].plan
+    };
+}
+
+function dashLinhaSvg(serie, w, h) {
+    const PL = 28, PR = 12, PT = 12, PB = 22;
+    const iw = w - PL - PR, ih = h - PT - PB, P = serie.pontos, n = P.length;
+    const max = Math.max(4, Math.ceil(serie.max / 4) * 4);
+    const X = i => PL + i * iw / (n - 1);
+    const Y = v => PT + ih - v / max * ih;
+    const f = v => v.toFixed(1);
+    const trecho = (key, de, ate) => P.slice(de, ate + 1).map((p, k) => `${k ? 'L' : 'M'}${f(X(de + k))} ${f(Y(p[key]))}`).join(' ');
+    const grade = [0, 1, 2, 3, 4].map(k => {
+        const v = max / 4 * k, y = Y(v);
+        return `<line x1="${PL}" x2="${w - PR}" y1="${f(y)}" y2="${f(y)}" stroke="#eef1fb"/><text x="${PL - 6}" y="${f(y + 3)}" text-anchor="end" font-size="9.5" fill="#94a3b8">${v}</text>`;
+    }).join('');
+    const passo = iw / (n - 1) < 40 ? 2 : 1;
+    const eixo = P.map((p, i) => i % passo ? '' : `<text x="${f(X(i))}" y="${h - 6}" text-anchor="middle" font-size="9.5" fill="#94a3b8">${p.rotulo}</text>`).join('');
+    const at = serie.idxAtual, xHoje = X(serie.hojeFrac);
+    const area = `${trecho('feito', 0, at)} L${f(X(at))} ${f(Y(0))} L${f(X(0))} ${f(Y(0))} Z`;
+    const zonas = P.map((p, i) => `<rect x="${f(X(i) - iw / (n - 1) / 2)}" y="${PT}" width="${f(iw / (n - 1))}" height="${ih}" fill="transparent"><title>Até ${p.rotulo}: planejado ${p.plan} · concluído ${p.feito}</title></rect>`).join('');
+    const dots = P.map((p, i) => i <= at ? `<circle cx="${f(X(i))}" cy="${f(Y(p.feito))}" r="${i === at ? 3.5 : 2.2}" fill="#10b991"/>` : '').join('')
+        + P.map((p, i) => `<circle cx="${f(X(i))}" cy="${f(Y(p.plan))}" r="${i === at ? 3.5 : 2.2}" fill="#4f46e5"/>`).join('');
+    return `<svg class="dash-line-svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Gráfico de linha: etapas planejadas e concluídas por semana de prazo">
+        <defs><linearGradient id="dashGradFeito" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10b991" stop-opacity=".22"/><stop offset="1" stop-color="#10b991" stop-opacity="0"/></linearGradient></defs>
+        ${grade}${eixo}
+        <path d="${area}" fill="url(#dashGradFeito)"/>
+        <line x1="${f(xHoje)}" x2="${f(xHoje)}" y1="${PT}" y2="${PT + ih}" stroke="#cbd5e1" stroke-dasharray="3 3"/>
+        <text x="${f(xHoje + 4)}" y="${PT + 8}" font-size="9" fill="#94a3b8">hoje</text>
+        <path d="${trecho('plan', 0, at)}" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+        <path d="${trecho('plan', at, n - 1)}" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-dasharray="5 4" stroke-linecap="round" opacity=".75"/>
+        <path d="${trecho('feito', 0, at)}" fill="none" stroke="#10b991" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+        ${dots}${zonas}
+    </svg>`;
+}
+
+let dashRO = null;
+function dashMontarLinha(c, serie) {
+    if (dashRO) { dashRO.disconnect(); dashRO = null; }
+    const box = c.querySelector('.dash-line-box');
+    if (!box) return;
+    const desenhar = () => {
+        const w = box.clientWidth, h = box.clientHeight;
+        if (w < 120 || h < 80) return;
+        box.innerHTML = dashLinhaSvg(serie, w, h);
+    };
+    desenhar();
+    if ('ResizeObserver' in window) { dashRO = new ResizeObserver(desenhar); dashRO.observe(box); }
+}
+
 function dashRender() {
     const c = document.getElementById('home-container');
     const todas = dashDados.etapas;
@@ -530,28 +679,92 @@ function dashRender() {
     const porResp = dashPorResponsavel(escopo);
     const porProj = dashPorProjeto(escopo);
     const semanas = dashSemanas(m.abertas);
-    const prios = dashPrioridades(m.abertas);
-    const insights = dashInsights(m, porResp, porProj, semanas);
+    const meusProj = meu ? dashMeusProjetos(todas) : [];
+    const extra = [];
+    if (meu) {
+        const ids = new Set(meusProj.map(p => p.id));
+        const orfas = todas.filter(e => e.status !== 'Concluído' && !e.responsavel_id && ids.has(e.sessoes?.projetos?.id));
+        if (orfas.length) extra.push({ p: 3, cls: 'warn', ic: '🙋', t: `${orfas.length} ${dashPl(orfas.length, 'etapa sem responsável', 'etapas sem responsável')} nos seus projetos`, d: 'Você pode assumir algumas pela aba Projetos.' });
+    }
+    const insights = dashInsights(m, porResp, porProj, semanas, extra);
+    const serie = dashSerieTempo(escopo);
     const hora = new Date().getHours();
     const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
     const eventos = dashDados.eventos.filter(ev => dashDias(ev.data) <= 14);
     const proxPrazo = [...m.hoje, ...m.proximas][0];
 
     const kpis = [
-        { ic: '📋', l: 'Total de etapas', v: m.total, sub: `${m.abertas.length} em aberto`, cor: 'var(--acc)', alvo: 'progresso' },
-        { ic: '🎯', l: 'Taxa de conclusão', v: m.taxa, s: '%', sub: `${m.concluidas} de ${m.total} concluídas`, cor: 'var(--ok)', alvo: 'progresso' },
+        meu
+            ? { ic: '📁', l: 'Meus projetos', v: meusProj.length, sub: `${m.abertas.length} ${dashPl(m.abertas.length, 'etapa sua em aberto', 'etapas suas em aberto')}`, cor: 'var(--acc)', alvo: 'projetos' }
+            : { ic: '📋', l: 'Total de etapas', v: m.total, sub: `${m.abertas.length} em aberto`, cor: 'var(--acc)', alvo: 'progresso' },
+        { ic: '🎯', l: meu ? 'Minha conclusão' : 'Taxa de conclusão', v: m.taxa, s: '%', sub: `${m.concluidas} de ${m.total} concluídas`, cor: 'var(--ok)', alvo: 'progresso' },
         { ic: '⚡', l: 'Em andamento', v: m.andamento, sub: `${m.naoIniciado} ainda não iniciadas`, cor: 'var(--warn)', alvo: 'progresso' },
         { ic: '🔥', l: 'Vencidas', v: m.vencidas.length, sub: m.hoje.length ? `${m.hoje.length} ${dashPl(m.hoje.length, 'vence', 'vencem')} hoje` : 'nenhuma vence hoje', cor: m.vencidas.length ? 'var(--danger)' : 'var(--muted)', alvo: 'eventos' },
         { ic: '⏳', l: 'Próximos 7 dias', v: m.hoje.length + m.proximas.length, sub: proxPrazo ? `próximo: ${dashCurta(proxPrazo.prazo)}` : 'sem prazos à vista', cor: '#7c3aed', alvo: 'eventos' }
     ];
 
     const avisoHtml = typeof avisoAtivo !== 'undefined' && avisoAtivo
-        ? `<div class="notice-wrap anim-item" style="margin-bottom:16px"><span class="n-icon">📌</span><div class="n-text"><span class="n-label">Recado do Administrador</span><span class="n-msg">${escH(avisoAtivo.mensagem)}</span></div></div>`
+        ? `<div class="notice-wrap anim-item"><span class="n-icon">📌</span><div class="n-text"><span class="n-label">Recado do Administrador</span><span class="n-msg">${escH(avisoAtivo.mensagem)}</span></div></div>`
         : '';
+    const vazio = '<div class="dash-vazio">Sem etapas para exibir.</div>';
 
-    const vazioEscopo = '<div class="dash-vazio">Sem etapas para exibir.</div>';
+    const cardLinha = `<div class="dash-card dash-c ga-ln anim-item" style="animation-delay:.12s">
+        <div class="dash-ct">${meu ? 'Meu ritmo no tempo' : 'Prazos no tempo'}<span class="dash-lg"><span><i style="background:#4f46e5"></i>Planejado</span><span><i style="background:#10b991"></i>Concluído</span></span></div>
+        ${serie.max
+            ? `<div class="dash-line-box"></div><span class="dash-cs dash-nota">Acumulado por semana de prazo${serie.semPrazo ? ` · ${serie.semPrazo} sem prazo ficam fora` : ''}</span>`
+            : '<div class="dash-vazio">Nenhuma etapa com prazo para montar o gráfico.</div>'}
+    </div>`;
+    const cardProx = `<div class="dash-card dash-c ga-px anim-item" style="animation-delay:.2s">
+        <div class="dash-ct">Próximos 14 dias<span class="dash-cs">${meu ? 'seus prazos e eventos' : 'prazos e eventos'}</span></div>
+        <div class="dash-scroll">${dashLinhaTempo(escopo, eventos)}</div>
+    </div>`;
+    const cardInsights = `<div class="dash-card dash-c ga-in anim-item" style="animation-delay:.18s">
+        <div class="dash-ct">${meu ? 'Para você' : 'Insights'}</div>
+        <div class="dash-scroll"><div class="dash-ins">${insights.slice(0, 4).map(dashRenderInsight).join('')}</div></div>
+    </div>`;
 
-    c.innerHTML = `
+    const corpoWs = `
+        <div class="dash-card dash-c ga-st anim-item" style="animation-delay:.08s">
+            <div class="dash-ct">Status das etapas</div>
+            ${m.total ? `<div class="dash-donut-wrap">
+                ${dashDonut([
+                    { nome: 'Concluídas', v: m.concluidas, cor: DASH_COR_STATUS.concluido },
+                    { nome: 'Em andamento', v: m.andamento, cor: DASH_COR_STATUS.andamento },
+                    { nome: 'Não iniciadas', v: m.naoIniciado, cor: DASH_COR_STATUS.naoIniciado }
+                ], m.taxa + '%', 'concluído')}
+                <div class="dash-leg">
+                    ${dashLegendaStatus('concluidas', 'Concluídas', 'Concluído', DASH_COR_STATUS.concluido, escopo)}
+                    ${dashLegendaStatus('andamento', 'Em andamento', 'Em andamento', DASH_COR_STATUS.andamento, escopo)}
+                    ${dashLegendaStatus('nao-iniciadas', 'Não iniciadas', 'Não iniciado', DASH_COR_STATUS.naoIniciado, escopo)}
+                </div></div>` : vazio}
+        </div>
+        ${cardLinha}
+        <div class="dash-card dash-c ga-pj anim-item" style="animation-delay:.14s">
+            <div class="dash-ct">Progresso por projeto</div>
+            <div class="dash-scroll">${porProj.length ? dashLinhasProj(porProj) : vazio}</div>
+        </div>
+        <div class="dash-card dash-c ga-rs anim-item" style="animation-delay:.16s">
+            <div class="dash-ct">Carga por responsável</div>
+            <div class="dash-scroll">${porResp.length ? dashLinhasResp(porResp) : vazio}</div>
+        </div>
+        ${cardInsights}
+        ${cardProx}`;
+
+    const meuFoco = todas.filter(e => e.responsavel_id === currentUser.id);
+    const corpoMeu = `
+        <div class="dash-card dash-c ga-fo anim-item" style="animation-delay:.08s">
+            <div class="dash-ct">Meu foco<span class="dash-cs">${m.abertas.length} em aberto · por prazo</span></div>
+            <div class="dash-scroll">${dashFoco(meuFoco)}</div>
+        </div>
+        ${cardLinha}
+        <div class="dash-card dash-c ga-mp anim-item" style="animation-delay:.14s">
+            <div class="dash-ct">Meus projetos<span class="dash-cs">progresso do projeto · etapas suas em aberto</span></div>
+            <div class="dash-scroll">${meusProj.length ? dashLinhasMeusProj(meusProj) : '<div class="dash-vazio">Você ainda não está em nenhum projeto.</div>'}</div>
+        </div>
+        ${cardInsights}
+        ${cardProx}`;
+
+    c.innerHTML = `<div class="dash-wrap">
         <div class="dash-head anim-item">
             <div>
                 <div class="home-greeting">${saudacao}, ${escH(currentUser.nome.split(' ')[0])}! 👋</div>
@@ -571,53 +784,10 @@ function dashRender() {
                 <div class="dash-kpi-l">${k.l}</div><div class="dash-kpi-s">${k.sub}</div></div>
             </div>`).join('')}
         </div>
-        <div class="dash-content">
-        <div class="dash-grid">
-            <div class="dash-card dash-s4 anim-item" style="animation-delay:.1s">
-                <div class="dash-ct">Distribuição por status</div>
-                ${m.total ? `<div class="dash-donut-wrap">
-                    ${dashDonut([
-                        { nome: 'Concluídas', v: m.concluidas, cor: DASH_COR_STATUS.concluido },
-                        { nome: 'Em andamento', v: m.andamento, cor: DASH_COR_STATUS.andamento },
-                        { nome: 'Não iniciadas', v: m.naoIniciado, cor: DASH_COR_STATUS.naoIniciado }
-                    ], m.taxa + '%', 'concluído')}
-                    <div class="dash-leg">
-                        ${dashLegendaStatus('concluidas', 'Concluídas', 'Concluído', DASH_COR_STATUS.concluido, escopo)}
-                        ${dashLegendaStatus('andamento', 'Em andamento', 'Em andamento', DASH_COR_STATUS.andamento, escopo)}
-                        ${dashLegendaStatus('nao-iniciadas', 'Não iniciadas', 'Não iniciado', DASH_COR_STATUS.naoIniciado, escopo)}
-                    </div></div>` : vazioEscopo}
-            </div>
-            <div class="dash-card dash-s5 anim-item" style="animation-delay:.15s">
-                <div class="dash-ct">Prazos por semana<span class="dash-cs">etapas em aberto · clique para ver etapas</span></div>
-                ${dashColunas(semanas)}
-            </div>
-            <div class="dash-card dash-s3 anim-item" style="animation-delay:.2s">
-                <div class="dash-ct">Prioridade<span class="dash-cs">em aberto</span></div>
-                ${m.abertas.length ? dashLinhasPrio(prios) : '<div class="dash-vazio">Nada em aberto.</div>'}
-            </div>
-            <div class="dash-card dash-s6 anim-item" style="animation-delay:.25s">
-                <div class="dash-ct">Insights</div>
-                <div class="dash-ins">${insights.map(dashRenderInsight).join('')}</div>
-            </div>
-            <div class="dash-card dash-s6 anim-item ${meu ? 'dash-minhas' : ''}" ${meu ? `onclick="switchTab('progresso')"` : ''} style="animation-delay:.3s">
-                <div class="dash-ct">${meu ? 'Minhas tarefas' : 'Seu foco agora'}<span class="dash-cs">etapas em aberto atribuídas a você</span></div>
-                ${dashFoco(todas.filter(e => e.responsavel_id === currentUser.id))}
-            </div>
-            <div class="dash-card ${meu ? 'dash-s8' : 'dash-s4'} anim-item" style="animation-delay:.4s">
-                <div class="dash-ct">Progresso por projeto</div>
-                ${porProj.length ? dashLinhasProj(porProj) : vazioEscopo}
-            </div>
-            ${meu ? '' : `<div class="dash-card dash-s4 anim-item" style="animation-delay:.45s">
-                <div class="dash-ct">Carga por responsável</div>
-                ${porResp.length ? dashLinhasResp(porResp) : vazioEscopo}
-            </div>`}
-        </div>
-        <div class="dash-card dash-upcoming anim-item" style="animation-delay:.35s">
-            <div class="dash-ct">Próximos 14 dias</div>
-            ${dashLinhaTempo(escopo, eventos)}
-        </div>
-        </div>`;
+        <div class="dash-body ${meu ? 'me' : 'ws'}">${meu ? corpoMeu : corpoWs}</div>
+    </div>`;
     dashAnimar(c);
+    dashMontarLinha(c, serie);
 }
 
 async function carregarHome() {
@@ -641,4 +811,4 @@ async function carregarHome() {
     }
     dashDados = { etapas: rEt.data || [], eventos: rEv.data || [] };
     dashRender();
-}
+}    
