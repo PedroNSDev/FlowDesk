@@ -424,7 +424,7 @@
     <link rel="stylesheet" href="Agenda.css">
 
     <style id="ui-refresh">
-        
+        /* ═══════════ UI REFRESH ═══════════*/
         :root{
             --bg:#f5f6fb; --border:#e5e8f0; --r:12px; --rsm:8px;
             --sh:0 1px 2px rgba(16,24,40,.05);
@@ -438,7 +438,7 @@
         :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
         input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 
-        /* ── Botões e campos: mais leves ── */
+        /* ── Botões ── */
         .btn{padding:9px 16px;border-radius:10px}
         .btn::before{display:none}
         .btn-p{background:var(--acc);box-shadow:0 1px 2px rgba(79,70,229,.35)}
@@ -449,7 +449,7 @@
         .fi,.fta,.fsel{border:1px solid var(--border);border-radius:10px;padding:10px 12px}
         .fi:focus,.fta:focus,.fsel:focus{box-shadow:0 0 0 3px rgba(79,70,229,.12)}
 
-        /* ── Sidebar calma (ícones SVG, ativo sutil) ── */
+        /* ── Sidebar ── */
         .nav-btn{color:#8b93a7;font-size:.85rem;padding:8px 10px;border-radius:8px;gap:10px;position:relative}
         .nav-btn:hover{background:rgba(255,255,255,.06);color:#e5e7f0}
         .nav-btn.active{background:rgba(129,140,248,.16);color:#fff}
@@ -460,7 +460,7 @@
         .ni svg{width:17px;height:17px}
         .ws-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--acc),#818cf8);display:flex;align-items:center;justify-content:center;color:#fff}
         .ws-icon svg{width:16px;height:16px}
-        /* contraste: estes textos estavam quase invisíveis no fundo escuro */
+        
         .sb-sec{color:#64748b}
         .ws-code{color:#7c8aa5}
         .sb-user .ur{color:#8592a8}
@@ -484,18 +484,18 @@
         .home-greeting{font-size:1.7rem;letter-spacing:-.02em}
         @media(max-width:860px){.main{padding:16px 14px 40px}}
 
-        /* ── Dashboard (Dashboard.js injeta o CSS depois, por isso #app) ── */
+        /* ── Dashboard ── */
         #app .dash-card{border-radius:16px}
         #app .dash-kpi{border-radius:16px}
         #app .dash-ct{letter-spacing:.07em}
 
-        /* ── Projetos: cards de visão geral ── */
+        /* ── Projetos: cards ── */
         .pv-card,.pv-folder-card{position:relative;overflow:hidden}
         .pv-card::before,.pv-folder-card::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--acc),#818cf8);opacity:0;transition:opacity .15s}
         .pv-card:hover::before,.pv-folder-card:hover::before{opacity:1}
         .pv-folder-card strong{font-size:1rem}
 
-        /* ── Lista: cabeçalho fixo, ações no hover, concluídas recuam ── */
+        /* ── Lista: ── */
         .grp{overflow:visible;border-radius:12px}
         .grp-h{position:sticky;top:var(--stick-top);z-index:3;background:var(--surface);border-radius:12px 12px 0 0}
         .grp>:last-child{border-radius:0 0 12px 12px}
@@ -508,12 +508,12 @@
         .row:hover .ib,.row:focus-within .ib,.grp-h:hover .ib,.grp-h:focus-within .ib,.ib:focus-visible{opacity:1}
         @media(hover:none){.row .ib,.grp-h .ib{opacity:1}}
 
-        /* status por ícone: vazio → meio → cheio */
+        /* status por ícone */
         .dot{width:12px;height:12px;border:2px solid #cbd5e1;background:transparent;margin-top:3px}
         .s-doing .dot{border-color:var(--warn);background:conic-gradient(var(--warn) 0 50%,transparent 0)}
         .s-done .dot{border-color:var(--ok);background:var(--ok)}
 
-        /* ── Quadro: cards compactos, atrasadas em destaque ── */
+        /* ── Quadro: cards */
         .kb{grid-template-columns:repeat(3,minmax(260px,1fr));gap:16px}
         .kb-col{background:#eef0f7;border-radius:14px}
         .kb-card{transition:transform .12s,box-shadow .12s,border-color .12s}
@@ -553,10 +553,127 @@
         .pj-sep{color:#cbd5e1;user-select:none}
         .pj-copy{margin-left:auto}
 
+        /* ── Ferramentas: integrações ── */
+        .int-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+        .int-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--sh);min-width:0}
+        .int-top{display:flex;align-items:center;gap:12px;min-width:0}
+        .int-ic{width:40px;height:40px;border-radius:11px;background:var(--acc-lt);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+        .int-info{min-width:0;display:flex;flex-direction:column;gap:2px}
+        .int-info strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .int-key{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--muted)}
+        .int-perms{display:flex;gap:6px;flex-wrap:wrap}
+        .int-perm{font-size:.72rem;font-weight:600;padding:3px 9px;border-radius:999px;background:#f1f5f9;color:#94a3b8}
+        .int-perm.on{background:var(--acc-lt);color:var(--acc)}
+        .int-meta{font-size:.76rem;color:var(--muted);line-height:1.55}
+        .int-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+        .int-act .int-del{margin-left:auto}
+        .int-act .int-del:hover{border-color:var(--danger);color:var(--danger);background:#fef2f2}
+        .int-chks{display:flex;flex-direction:column;gap:8px}
+        .int-chk{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:background .12s,border-color .12s}
+        .int-chk:has(input:checked){border-color:#a5b4fc;background:var(--acc-lt)}
+        .int-chk input{margin-top:3px;width:16px;height:16px;accent-color:var(--acc);flex-shrink:0}
+        .int-chk span{display:flex;flex-direction:column;gap:1px}
+        .int-chk small{color:var(--muted);font-size:.76rem}
+        #m-int-chave{font-family:'JetBrains Mono',monospace;font-size:.8rem}
+
         /* ── Modais ── */
         .modal-box{border-radius:16px;max-width:480px}
         .m-hdr{padding:18px 22px 14px}
         .m-title{font-size:1rem}
+
+        /* ═══ DRAG & DROP═══ */
+        .grip{display:inline-flex;align-items:center;justify-content:center;width:18px;height:22px;color:#94a3b8;cursor:grab;font-size:.95rem;line-height:1;border-radius:5px;flex-shrink:0;user-select:none;opacity:.35;transition:opacity .12s,background .12s,color .12s}
+        .row:hover .grip,.grp-h:hover .grip,.grip:focus-visible{opacity:1}
+        .grip:hover{background:var(--acc-lt);color:var(--acc)}
+        .grip:active{cursor:grabbing}
+        @media(hover:none){.grip{opacity:1}}
+        .r-name .grip{margin:-1px -4px 0 -6px}
+        .dragging{opacity:.35}
+        .row.drop-before{box-shadow:inset 0 3px 0 var(--acc)}
+        .row.drop-after{box-shadow:inset 0 -3px 0 var(--acc)}
+        .kb-card.drop-before{box-shadow:inset 0 3px 0 var(--acc),var(--sh)}
+        .kb-card.drop-after{box-shadow:inset 0 -3px 0 var(--acc),var(--sh)}
+        .grp{position:relative}
+        .grp.drop-before::after,.grp.drop-after::after{content:'';position:absolute;left:0;right:0;height:4px;background:var(--acc);border-radius:4px;z-index:5;pointer-events:none}
+        .grp.drop-before::after{top:-8px}.grp.drop-after::after{bottom:-8px}
+        .grp.drop-in{outline:2px dashed var(--acc);outline-offset:-2px}
+        .row.flash,.kb-card.flash{animation:flashRow 2.4s ease}
+        @keyframes flashRow{0%,65%{background:#fef9c3;box-shadow:inset 4px 0 0 var(--warn)}100%{background:transparent}}
+
+        /* ═══ MULTI-RESPONSÁVEIS  ═══ */
+        .ms{border:2px solid var(--border);border-radius:12px;padding:6px 8px;background:#fff;cursor:text;transition:.15s}
+        .ms:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px rgba(79,70,229,.12)}
+        .ms-box{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+        .ms-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 4px 3px 3px;border:1px solid #cbd5e1;border-radius:999px;font-size:.82rem;font-weight:500;background:#fff;max-width:100%}
+        .ms-chip .av{width:22px;height:22px;border:none;font-size:.6rem}
+        .ms-chip .ms-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}
+        .ms-x{border:none;background:none;cursor:pointer;color:var(--muted);font-size:1.05rem;line-height:1;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:var(--font)}
+        .ms-x:hover{color:var(--danger);background:#fee2e2}
+        .ms-in{flex:1;min-width:120px;border:none;outline:none;font-family:var(--font);font-size:.88rem;padding:6px 4px;background:transparent;color:var(--text)}
+        .ms-dd{margin-top:6px;border-top:1px solid var(--border);max-height:176px;overflow-y:auto;padding-top:4px}
+        .ms-opt{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:.84rem}
+        .ms-opt:hover,.ms-opt.hl{background:var(--acc-lt)}
+        .ms-opt .av{border:none}
+        .ms-opt small{color:var(--muted);margin-left:auto;font-size:.74rem}
+        .ms-empty{padding:8px;color:var(--muted);font-size:.8rem}
+
+        /* ═══ PROGRESSO (filtros por coluna) ═══ */
+        .prog-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px;margin-bottom:14px}
+        .ps-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;text-align:left;font-family:var(--font);transition:.15s;color:var(--text)}
+        .ps-card:hover{border-color:#c7d2fe;box-shadow:var(--sh-md);transform:translateY(-1px)}
+        .ps-card.on{border-color:var(--acc);background:var(--acc-lt)}
+        .ps-card b{display:block;font-size:1.4rem;font-weight:800;line-height:1.15}
+        .ps-card span{font-size:.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+        .ps-card.late b{color:var(--danger)}
+        .prog-info{display:flex;align-items:center;gap:10px;margin:0 0 4px;font-size:.8rem;color:var(--muted);min-height:32px}
+        .prog-table{table-layout:fixed;min-width:900px}
+        .prog-table th.sortable{cursor:pointer;user-select:none;white-space:nowrap;border-bottom:none}
+        .prog-table th.sortable:hover{color:var(--acc)}
+        .sort-ar{margin-left:4px;color:var(--acc);font-size:.72rem}
+        .prog-table tr.pf th{padding:0 6px 10px;text-transform:none;letter-spacing:0;border-bottom:2px solid var(--border);font-weight:400}
+        .pf-in{width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:8px;font-family:var(--font);font-size:.76rem;background:#fff;color:var(--text);outline:none;min-width:0;margin-bottom:4px}
+        .pf-in:last-child{margin-bottom:0}
+        .pf-in:focus{border-color:var(--acc)}
+        .pf-in.act{border-color:var(--acc);background:var(--acc-lt);font-weight:600}
+        .prog-row{cursor:pointer}
+        .prog-row td{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+        .prog-row td:first-child{border-left:1px solid var(--border)}
+        .prog-row td:last-child{border-right:1px solid var(--border)}
+        .prog-row:hover td{background:#fafbff;border-color:#c7d2fe}
+        .pr-t{font-weight:700;font-size:.87rem;overflow-wrap:anywhere}
+        .pr-s{font-size:.74rem;color:var(--muted);margin-top:2px}
+        .pr-sess{font-size:.8rem;color:var(--muted);overflow-wrap:anywhere}
+        .pr-resp{display:flex;flex-wrap:wrap;gap:4px}
+        .prog-row.s-done .pr-t{color:var(--muted)}
+
+        /* ═══ UPLOAD POR ARRASTAR ═══ */
+        .dz{border:2px dashed #c7d2fe;border-radius:14px;padding:22px 14px;text-align:center;background:#f8f9ff;transition:.15s;cursor:pointer;font-size:.85rem;color:var(--muted);margin-bottom:6px}
+        .dz:hover{border-color:var(--acc)}
+        .dz.over{border-color:var(--acc);background:var(--acc-lt);transform:scale(1.01)}
+        .dz b{color:var(--text)}.dz-ic{font-size:1.7rem;margin-bottom:2px}
+        .dz-link{color:var(--acc);font-weight:600;text-decoration:underline}
+        .up-item{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:5px;font-size:.8rem}
+        .up-item .n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .drop-ov{position:fixed;inset:10px;background:rgba(79,70,229,.1);border:3px dashed var(--acc);border-radius:18px;z-index:900;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:var(--acc);pointer-events:none;backdrop-filter:blur(2px)}
+
+        /* ═══ PROJETOS/PASTAS ARRASTÁVEIS + CATEGORIAS ═══ */
+        .pv-card[draggable=true],.pv-folder-card[draggable=true]{cursor:grab}
+        .pv-card[draggable=true]:active,.pv-folder-card[draggable=true]:active{cursor:grabbing}
+        .pv-card.drop-before,.pv-folder-card.drop-before{box-shadow:inset 5px 0 0 var(--acc)}
+        .pv-card.drop-after,.pv-folder-card.drop-after{box-shadow:inset -5px 0 0 var(--acc)}
+        .pv-cat{margin-bottom:24px;border-radius:14px;transition:.15s}
+        .pv-cat.drop-in{outline:2px dashed var(--acc);outline-offset:8px;background:rgba(79,70,229,.04)}
+        .pv-cat-h{display:flex;align-items:center;gap:8px;font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:2px 2px 10px}
+        .pv-cat-h .badge{text-transform:none;letter-spacing:0}
+        .pv-cats{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+        .cat-chip{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:.78rem;font-weight:600;cursor:pointer;transition:.15s;font-family:var(--font);color:var(--text)}
+        .cat-chip:hover{border-color:var(--acc);color:var(--acc)}
+        .cat-chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+        .pf-top .ib{flex-shrink:0}
+        .dnd-tray{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:800;background:#0f172a;color:#fff;border-radius:16px;padding:10px 12px;display:flex;gap:8px;flex-wrap:wrap;max-width:min(900px,92vw);box-shadow:var(--sh-lg);align-items:center}
+        .dnd-tray small{opacity:.7;font-size:.74rem;margin-right:4px}
+        .dnd-chip{padding:8px 12px;border-radius:10px;background:#1e293b;border:2px dashed #475569;font-size:.8rem;font-weight:600;display:inline-flex;gap:6px;align-items:center;transition:.12s}
+        .dnd-chip.drop-in{border-color:#818cf8;background:#312e81;outline:none}
     </style>
 </head>
 <body>
@@ -686,10 +803,15 @@
 
         <!-- FERRAMENTAS -->
         <div id="tab-ferramentas" class="tab-c">
-            <div class="ph">
-                <div><div class="pt">Ferramentas</div><div class="ps">Apps locais carregados automaticamente</div></div>
+            <div class="ph" style="align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+                <div><div class="pt">Ferramentas</div><div class="ps">Apps locais e integrações com a API do FlowDesk</div></div>
+                <button id="btn-add-ferramenta" class="btn btn-p hidden" onclick="abrirModalFerramenta()">+ Adicionar ferramenta</button>
             </div>
             <div id="ferramentas-container" class="notes-grid"></div>
+            <div id="integracoes-wrap" class="hidden">
+                <div class="pv-section-label" style="margin-top:30px">Integrações (API)</div>
+                <div id="integracoes-container" class="int-grid"></div>
+            </div>
         </div>
 
         <!-- ANOTAÇÕES -->
@@ -759,6 +881,7 @@
 </div>
 
 <!-- MODAL -->
+<div id="drop-ov" class="drop-ov hidden">⬆️ Solte os arquivos para enviar</div>
 <div id="modal-ov" class="modal-ov hidden" onclick="if(event.target.id==='modal-ov')fecharModal()">
     <div class="modal-box" onclick="event.stopPropagation()">
         <div class="m-hdr"><div class="m-title" id="m-title">—</div><button class="m-x" onclick="fecharModal()">✕</button></div>
@@ -819,6 +942,7 @@ let currentUserCanEdit = false;
 let currentUserIsWorkspaceAdmin = false;
 let projetosViewMode = 'list';
 let selectedProjetoId = null;
+let selectedEtapaFoco = null;
 let selectedPastaProjeto = 'folders';
 let abaAtual = 'home';
 let notes = [];
@@ -830,8 +954,8 @@ function setProjetosViewMode(mode) {
     projetosViewMode = (mode === 'board' || mode === 'grid') ? 'board' : 'list';
     renderProjetosView();
 }
-function abrirProjeto(id) { selectedProjetoId = id; syncRota(); renderProjetosView(); window.scrollTo(0, 0); }
-function exitProjFocus() { selectedProjetoId = null; syncRota(); renderProjetosView(); }
+function abrirProjeto(id) { selectedProjetoId = id; selectedEtapaFoco = null; syncRota(); renderProjetosView(); window.scrollTo(0, 0); }
+function exitProjFocus() { selectedProjetoId = null; selectedEtapaFoco = null; syncRota(); renderProjetosView(); }
 // ─── ROTAS: URL própria para cada aba/pasta/projeto + breadcrumb ───
 // Home:      ?codigo=XXX
 // Aba:       ?codigo=XXX&aba=eventos
@@ -842,9 +966,9 @@ const ABAS_VALIDAS = ['home','projetos','progresso','contribuidores','anotacoes'
 
 function montarRotaUrl() {
     const u = new URL(window.location.href);
-    ['aba', 'pasta', 'projeto'].forEach(k => u.searchParams.delete(k));
+    ['aba', 'pasta', 'projeto', 'etapa'].forEach(k => u.searchParams.delete(k));
     if (abaAtual === 'projetos') {
-        if (selectedProjetoId != null) u.searchParams.set('projeto', selectedProjetoId);
+        if (selectedProjetoId != null) { u.searchParams.set('projeto', selectedProjetoId); if (selectedEtapaFoco != null) u.searchParams.set('etapa', selectedEtapaFoco); }
         else if (selectedPastaProjeto.startsWith('folder:')) u.searchParams.set('pasta', selectedPastaProjeto.slice('folder:'.length));
         else if (selectedPastaProjeto === 'none' || selectedPastaProjeto === 'all') u.searchParams.set('pasta', selectedPastaProjeto);
         else u.searchParams.set('aba', 'projetos');
@@ -861,7 +985,7 @@ function syncRota(replace = false) {
 function lerRota() {
     const q = new URLSearchParams(window.location.search);
     const pr = parseInt(q.get('projeto'), 10);
-    return { projeto: Number.isFinite(pr) ? pr : null, pasta: q.get('pasta'), aba: q.get('aba') };
+    return { projeto: Number.isFinite(pr) ? pr : null, pasta: q.get('pasta'), aba: q.get('aba'), etapa: parseInt(q.get('etapa'), 10) || null };
 }
 function aplicarRota(r) {
     let aba = 'home';
@@ -869,10 +993,10 @@ function aplicarRota(r) {
     else if (r.aba && ABAS_VALIDAS.includes(r.aba)) aba = r.aba;
     if (aba === 'logs' && !(currentUserIsWorkspaceAdmin || currentUser?.nivel === 2)) aba = 'home';
     if (aba === 'projetos') {
-        selectedProjetoId = null;
+        selectedProjetoId = null; selectedEtapaFoco = null;
         selectedPastaProjeto = 'folders';
         if (r.projeto != null) {
-            if (wsProjetos.some(p => p.id === r.projeto)) selectedProjetoId = r.projeto;
+            if (wsProjetos.some(p => p.id === r.projeto)) { selectedProjetoId = r.projeto; selectedEtapaFoco = r.etapa; }
             else toast('Projeto não encontrado neste workspace.', 'warning');
         } else if (r.pasta) {
             if (r.pasta === 'all' || r.pasta === 'none') selectedPastaProjeto = r.pasta;
@@ -881,10 +1005,10 @@ function aplicarRota(r) {
         }
     }
     switchTab(aba, true);
-    if (aba === 'projetos') renderProjetosView();
+    if (aba === 'projetos') { renderProjetosView(); if (selectedEtapaFoco != null) focarEtapa(selectedEtapaFoco); }
 }
 function projIr(nav) {
-    selectedProjetoId = null;
+    selectedProjetoId = null; selectedEtapaFoco = null;
     selectedPastaProjeto = nav;
     syncRota();
     renderProjetosView();
@@ -1070,29 +1194,27 @@ const ST_CLS = {'Não iniciado':'s-todo','Em andamento':'s-doing','Concluído':'
 const collapsedSess = new Set();
 
 async function renderizarProjetos() {
+    await probeFeat();
     const c = document.getElementById('projetos-container');
     if (!wsProjetos.length) c.innerHTML = `<div class="loading-c"><div class="spinner"></div><p style="margin-top:10px">Carregando...</p></div>`;
     const [{ data: projs, error: projError }, { data: pastas, error: pastasError }] = await Promise.all([
-        sb.from('projetos')
-        .select(`id, nome, descricao, pasta_id,
-            projeto_usuarios(usuario_id),
-            sessoes(id, nome, descricao,
-                sessao_usuarios(usuario_id),
-                etapas(id, nome, descricao, status, responsavel_id, prioridade, prazo))`)
-        .eq('workspace_id', currentWorkspace.id).order('id'),
-        sb.from('pastas_projetos').select('id, nome').eq('workspace_id', currentWorkspace.id).order('nome')
+        carregarProjetosDb(),
+        sb.from('pastas_projetos').select(FD_FEAT.pasta ? 'id, nome, categoria, ordem' : 'id, nome').eq('workspace_id', currentWorkspace.id).order('nome')
     ]);
     wsProjetos = projs || [];
+    normalizarProjetos();
     if (projError || pastasError) {
         const error = projError || pastasError;
         c.innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><h3>Erro</h3><p>${escH(error.message)}</p></div>`;
         return;
     }
     wsPastasProjetos = pastas || [];
+    ordenarPastas();
     renderProjetosView();
 }
 
 function renderProjetosView() {
+    dndInit();
     const g = id => document.getElementById(id);
     const c = g('projetos-container'); if (!c) return;
     const p = wsProjetos.find(x => x.id === selectedProjetoId);
@@ -1114,7 +1236,7 @@ function projStats(p) {
 }
 function avatar(u) { return `<span class="av" style="background:${userColor(u.nome)}" title="${escH(u.nome)}">${initials(u.nome)}</span>`; }
 
-// ─── PINS (fixar no topo — só para o usuário, salvo neste navegador) ───
+// ─── PINS───
 let pinsCache = null;
 function pinsStorageKey() { return `fd-pins-${currentUser?.id || 'anon'}-${currentWorkspace?.codigo || 'global'}`; }
 function getPins() {
@@ -1158,10 +1280,12 @@ function folderStats(projs) {
 function renderPastaCard(c) {
     const st = folderStats(c.projs), on = isPinned(c.key), n = c.projs.length;
     const cor = c.cor || userColor(c.nome);
-    return `<div class="pv-folder-card${on ? ' pinned' : ''}" role="button" tabindex="0" onclick="selecionarPastaProjeto('${c.nav}')" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();selecionarPastaProjeto('${c.nav}')}">
+    const drag = c.pasta && currentUserCanEdit ? ` draggable="true" data-drag-kind="pasta" data-drag-id="${c.pasta.id}" data-pasta-id="${c.pasta.id}"` : '';
+    return `<div class="pv-folder-card${on ? ' pinned' : ''}"${drag} role="button" tabindex="0" onclick="selecionarPastaProjeto('${c.nav}')" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();selecionarPastaProjeto('${c.nav}')}">
         <div class="pf-top">
             <div class="pf-ic" style="--c:${cor}"><svg viewBox="0 0 24 24" aria-hidden="true">${PASTA_ICONS[c.icon]}</svg></div>
             <div class="pf-info"><strong>${escH(c.nome)}</strong><span>${n} ${n === 1 ? 'projeto' : 'projetos'}</span></div>
+            ${c.pasta && currentUserCanEdit ? `<button type="button" class="ib" title="Editar pasta / categoria" aria-label="Editar pasta ${escH(c.nome)}" onclick="event.stopPropagation();editarPastaProjeto(${c.pasta.id})">✏️</button>` : ''}
             ${pinBtn(c.key)}
         </div>
         ${st.total ? `<div class="pf-prog"><div class="pv-bar"><i style="width:${st.pct}%"></i></div><b>${st.pct}%</b></div>` : ''}
@@ -1174,33 +1298,53 @@ function renderProjOverview() {
         return '<div class="empty-state"><div class="ei">📁</div><h3>Nenhum projeto ou pasta</h3><p>Crie uma pasta para organizar seus projetos ou comece criando um projeto.</p></div>';
     }
     if (selectedPastaProjeto === 'folders') {
-        const cards = wsPastasProjetos.map(pasta => ({
-            key: `f:${pasta.id}`, nav: `folder:${pasta.id}`, nome: pasta.nome, icon: 'folder',
+        const reais = wsPastasProjetos.map(pasta => ({
+            key: `f:${pasta.id}`, nav: `folder:${pasta.id}`, nome: pasta.nome, icon: 'folder', pasta,
             projs: wsProjetos.filter(projeto => String(projeto.pasta_id) === String(pasta.id))
         }));
+        const especiais = [];
         const semPasta = wsProjetos.filter(projeto => !projeto.pasta_id);
-        if (semPasta.length) cards.push({ key: 'f:none', nav: 'none', nome: 'Sem pasta', icon: 'none', cor: '#64748b', projs: semPasta });
-        cards.push({ key: 'f:all', nav: 'all', nome: 'Todos os projetos', icon: 'layers', cor: '#4f46e5', projs: wsProjetos });
-        const fixados = cards.filter(c => isPinned(c.key));
-        const demais = cards.filter(c => !isPinned(c.key));
+        if (semPasta.length) especiais.push({ key: 'f:none', nav: 'none', nome: 'Sem pasta', icon: 'none', cor: '#64748b', projs: semPasta });
+        especiais.push({ key: 'f:all', nav: 'all', nome: 'Todos os projetos', icon: 'layers', cor: '#4f46e5', projs: wsProjetos });
+        const cats = categoriasPastas();
+        if (pastaCatFiltro && pastaCatFiltro !== '__none__' && !cats.includes(pastaCatFiltro)) pastaCatFiltro = '';
+        const f = pastaCatFiltro;
+        const passa = c => !f || (f === '__none__' ? !c.pasta.categoria : c.pasta.categoria === f);
+        const todos = [...reais.filter(passa), ...especiais];
+        const fix = todos.filter(c => isPinned(c.key)), resto = todos.filter(c => !isPinned(c.key));
         const grid = lista => `<div class="pv-grid">${lista.map(renderPastaCard).join('')}</div>`;
-        if (!fixados.length) return grid(cards);
-        return `<div class="pv-section-label">Fixados</div>${grid(fixados)}`
-            + (demais.length ? `<div class="pv-section-label">Pastas</div>${grid(demais)}` : '');
+        const barra = cats.length ? `<div class="pv-cats"><span class="muted" style="font-size:.78rem;font-weight:600">Categorias:</span>
+            ${cats.map(cn => `<button type="button" class="cat-chip ${f === cn ? 'on' : ''}" data-cat="${escH(cn)}" title="${f === cn ? 'Clique para remover o filtro' : 'Filtrar por esta categoria'}" onclick="setPastaCat(this.dataset.cat)">${escH(cn)}</button>`).join('')}
+            <button type="button" class="cat-chip ${f === '__none__' ? 'on' : ''}" data-cat="__none__" title="${f === '__none__' ? 'Clique para remover o filtro' : 'Filtrar pastas sem categoria'}" onclick="setPastaCat(this.dataset.cat)">Sem categoria</button></div>` : '';
+        if (!cats.length) {
+            if (!fix.length) return grid(todos);
+            return `<div class="pv-section-label">Fixados</div>${grid(fix)}` + (resto.length ? `<div class="pv-section-label">Pastas</div>${grid(resto)}` : '');
+        }
+        const sec = (cat, lista, label) => lista.length ? `<div class="pv-cat" data-cat-drop="${escH(cat)}"><div class="pv-cat-h">🏷️ ${escH(label)}<span class="badge b-gray">${lista.length}</span></div>${grid(lista)}</div>` : '';
+        let html = barra;
+        if (fix.length) html += `<div class="pv-section-label">Fixados</div>${grid(fix)}<div style="height:22px"></div>`;
+        cats.forEach(cn => { html += sec(cn, resto.filter(c => c.pasta && c.pasta.categoria === cn), cn); });
+        html += sec('', resto.filter(c => c.pasta && !c.pasta.categoria), 'Sem categoria');
+        const esp = resto.filter(c => !c.pasta);
+        if (esp.length) html += `<div class="pv-section-label">Atalhos</div>${grid(esp)}`;
+        return html;
     }
 
     const pastaId = selectedPastaProjeto.startsWith('folder:') ? selectedPastaProjeto.slice('folder:'.length) : null;
     const pasta = wsPastasProjetos.find(item => String(item.id) === pastaId);
-    const projetos = selectedPastaProjeto === 'all'
-        ? wsProjetos
-        : selectedPastaProjeto === 'none'
-            ? wsProjetos.filter(projeto => !projeto.pasta_id)
-            : wsProjetos.filter(projeto => String(projeto.pasta_id) === pastaId);
+    const projetos = projetosVisiveis(false);
     const titulo = pasta ? `📁 ${escH(pasta.nome)}` : selectedPastaProjeto === 'none' ? '📂 Sem pasta' : '🗂️ Todos os projetos';
     return `<div class="pv-folder-empty" style="margin-bottom:14px">${titulo} · ${projetos.length} ${projetos.length === 1 ? 'projeto' : 'projetos'}</div>
         ${projetos.length ? `<div class="pv-grid">${[...projetos].sort((x, y) => isPinned('p:'+y.id) - isPinned('p:'+x.id)).map(renderProjetoCard).join('')}</div>` : '<div class="pv-folder-empty">Esta pasta ainda não tem projetos.</div>'}`;
 }
 
+function projetosVisiveis(comPins = true) {
+    const pid = selectedPastaProjeto.startsWith('folder:') ? selectedPastaProjeto.slice('folder:'.length) : null;
+    const l = (selectedPastaProjeto === 'all' ? wsProjetos
+        : selectedPastaProjeto === 'none' ? wsProjetos.filter(p => !p.pasta_id)
+        : wsProjetos.filter(p => String(p.pasta_id) === pid)).slice().sort(ordCmp);
+    return comPins ? l.sort((x, y) => isPinned('p:' + y.id) - isPinned('p:' + x.id)) : l;
+}
 function selecionarPastaProjeto(id) {
     selectedPastaProjeto = id;
     syncRota();
@@ -1211,7 +1355,7 @@ function renderProjetoCard(p) {
     const st = projStats(p);
     const ids = [...new Set((p.projeto_usuarios||[]).map(x => x.usuario_id))];
     const people = ids.map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
-    return `<div class="pv-card${isPinned('p:'+p.id) ? ' pinned' : ''}" onclick="abrirProjeto(${p.id})">
+    return `<div class="pv-card${isPinned('p:'+p.id) ? ' pinned' : ''}" data-proj-card="${p.id}"${currentUserCanEdit ? ` draggable="true" data-drag-kind="proj" data-drag-id="${p.id}"` : ''} onclick="abrirProjeto(${p.id})">
         <div class="pv-top"><div class="pv-name">${escH(p.nome)}</div>${st.total && st.done === st.total ? '<span class="badge b-green">Concluído</span>' : ''}
             <div class="pv-card-actions">${pinBtn('p:'+p.id)}${currentUserCanEdit ? `<button class="ib" title="Editar projeto" aria-label="Editar projeto ${escH(p.nome)}" onclick="event.stopPropagation();editarProjeto(${p.id})">✏️</button>` : ''}</div></div>
         <div class="pv-desc">${escH(p.descricao || 'Sem descrição')}</div>
@@ -1222,25 +1366,59 @@ function renderProjetoCard(p) {
     </div>`;
 }
 
+
+function catFieldHtml(v) {
+    if (!FD_FEAT.pasta) return '';
+    return `<div class="fg"><label class="fl" for="m-pasta-cat">Categoria <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+        <input id="m-pasta-cat" class="fi" list="dl-cats" maxlength="40" value="${escH(v || '')}" placeholder="Ex: Pesquisa, Administrativo…"/>
+        <datalist id="dl-cats">${categoriasPastas().map(c => `<option value="${escH(c)}">`).join('')}</datalist>
+        <p class="fhint">Pastas com a mesma categoria ficam agrupadas. Você também pode arrastar a pasta até uma categoria.</p></div>`;
+}
 function abrirModalNovaPastaProjeto() {
     abrirModal('📁 Criar pasta de projetos', `
         <div class="fg"><label class="fl" for="m-pasta-projeto-nome">Nome da pasta</label><input id="m-pasta-projeto-nome" class="fi" maxlength="80" placeholder="Ex: Marketing"/></div>
+        ${catFieldHtml('')}
     `, [
         { label: '+ Criar pasta', cls: 'btn-p', action: 'criarPastaProjeto()' },
         { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
     ]);
 }
+function editarPastaProjeto(id) {
+    const f = pastaById(id); if (!f) return;
+    abrirModal('✏️ Editar pasta', `
+        <div class="fg"><label class="fl" for="m-pasta-projeto-nome">Nome da pasta</label><input id="m-pasta-projeto-nome" class="fi" maxlength="80" value="${escH(f.nome)}"/></div>
+        ${catFieldHtml(f.categoria)}
+    `, [
+        { label: 'Salvar', cls: 'btn-p', action: `salvarPastaProjeto(${f.id})` },
+        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
+    ]);
+}
+async function salvarPastaProjeto(id) {
+    const f = pastaById(id); if (!f) return;
+    const nome = document.getElementById('m-pasta-projeto-nome')?.value?.trim();
+    const cat = document.getElementById('m-pasta-cat')?.value?.trim() || null;
+    if (!nome) { toast('Informe o nome da pasta.', 'warning'); return; }
+    const patch = { nome }; if (FD_FEAT.pasta) patch.categoria = cat;
+    const { error } = await sb.from('pastas_projetos').update(patch).eq('id', id);
+    if (error) { toast('Erro ao salvar pasta: ' + error.message, 'error'); return; }
+    Object.assign(f, patch); ordenarPastas();
+    fecharModal(); renderProjetosView(); toast('Pasta atualizada.');
+}
+
 
 async function criarPastaProjeto() {
     const nome = document.getElementById('m-pasta-projeto-nome')?.value?.trim();
+    const cat = document.getElementById('m-pasta-cat')?.value?.trim() || null;
     if (!nome) { toast('Informe o nome da pasta.', 'warning'); return; }
+    const novo = { workspace_id: currentWorkspace.id, nome };
+    if (FD_FEAT.pasta) { novo.categoria = cat; novo.ordem = proxOrdem(wsPastasProjetos); }
     const { data, error } = await sb.from('pastas_projetos')
-        .insert({ workspace_id: currentWorkspace.id, nome })
-        .select('id, nome')
+        .insert(novo)
+        .select(FD_FEAT.pasta ? 'id, nome, categoria, ordem' : 'id, nome')
         .single();
     if (error) { toast('Erro ao criar pasta: ' + error.message, 'error'); return; }
     wsPastasProjetos.push(data);
-    wsPastasProjetos.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    ordenarPastas();
     selectedPastaProjeto = 'folder:' + data.id;
     syncRota();
     fecharModal();
@@ -1260,28 +1438,30 @@ function renderProjDetail(p) {
     return head + (projetosViewMode === 'board' ? renderBoard(p) : renderListView(p));
 }
 
+
 function renderListView(p) {
     return (p.sessoes||[]).map(s => {
         const et = s.etapas || [], closed = collapsedSess.has(s.id);
         const done = et.filter(e => e.status === 'Concluído').length;
         const colabs = (s.sessao_usuarios||[]).map(su => wsMembers.find(u => u.id === su.usuario_id)).filter(Boolean);
-        return `<section class="grp">
+        return `<section class="grp" data-sessao-id="${s.id}">
             <div class="grp-h" onclick="toggleGrp(${s.id})">
+                ${currentUserCanEdit ? `<span class="grip" draggable="true" data-drag-kind="sessao" data-drag-id="${s.id}" title="Arraste para reordenar a atividade" onclick="event.stopPropagation()">⠿</span>` : ''}
                 <span class="chev ${closed ? '' : 'open'}">▶</span><b>${escH(s.nome)}</b>
                 <span class="badge b-gray">${done}/${et.length}</span><span class="avs">${colabs.map(avatar).join('')}</span><span class="grp-sp"></span>
                 ${currentUserCanEdit ? `<button class="ib" title="Editar atividade" onclick="event.stopPropagation();editarSessao(${s.id},${p.id})">✏️</button>` : ''}
             </div>
-            ${closed ? '' : `${et.length ? `<div class="row row-h"><span>Etapa</span><span>Responsável</span><span>Prazo</span><span>Prio.</span><span>Status</span></div>${et.map(e => renderEtapa(p.id, s.id, e)).join('')}` : '<div class="row-empty" style="border-top:1px solid var(--border)">Nenhuma etapa ainda.</div>'}
+            ${closed ? '' : `${et.length ? `<div class="row row-h"><span>Etapa</span><span>Responsáveis</span><span>Prazo</span><span>Prio.</span><span>Status</span></div>${et.map(e => renderEtapa(p.id, s.id, e)).join('')}` : '<div class="row-empty" style="border-top:1px solid var(--border)">Nenhuma etapa ainda. Arraste uma etapa para cá.</div>'}
             ${currentUserCanEdit ? `<button class="add-row" onclick="abrirModalEtapa(${p.id},${s.id})">+ Nova etapa</button>` : ''}`}
         </section>`;
     }).join('');
 }
 
+
 function renderEtapa(pId, sId, e) {
-    const u = wsMembers.find(x => x.id === e.responsavel_id);
-    return `<div class="row ${ST_CLS[e.status]||''}">
-        <div class="r-name"><span class="dot"></span><div><div class="r-t">${escH(e.nome)}</div>${e.descricao ? `<div class="r-d">${escH(e.descricao)}</div>` : ''}</div></div>
-        <div class="r-resp">${u ? `${avatar(u)}<span>${escH(u.nome.split(' ')[0])}</span>` : '<span class="muted">—</span>'}</div>
+    return `<div class="row ${ST_CLS[e.status]||''}" data-etapa-id="${e.id}">
+        <div class="r-name">${currentUserCanEdit ? `<span class="grip" draggable="true" data-drag-kind="etapa" data-drag-id="${e.id}" title="Arraste para reordenar ou mover para outra atividade">⠿</span>` : ''}<span class="dot"></span><div><div class="r-t">${escH(e.nome)}</div>${e.descricao ? `<div class="r-d">${escH(e.descricao)}</div>` : ''}</div></div>
+        <div class="r-resp">${respCell(etapaRespIds(e))}</div>
         <div>${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span class="muted">—</span>'}</div>
         <div><select class="mini" title="Prioridade" onchange="updateEtapaPrio(${e.id}, this.value)">${[0,1,2,3,4].map(v => `<option ${e.prioridade==v?'selected':''}>${v}</option>`).join('')}</select></div>
         <div class="r-st"><select class="mini st" onchange="updateEtapaStatus(${e.id}, this.value)">${STATUS.map(s => `<option ${e.status===s?'selected':''}>${s}</option>`).join('')}</select>
@@ -1289,23 +1469,485 @@ function renderEtapa(pId, sId, e) {
     </div>`;
 }
 
+
 function renderBoard(p) {
-    const all = (p.sessoes||[]).flatMap(s => (s.etapas||[]).map(e => ({ e, s })));
+    const all = (p.sessoes||[]).flatMap(s => (s.etapas||[]).map(e => ({ e, s }))).sort((a, b) => ordCmp(a.e, b.e));
     return `<div class="kb">${STATUS.map(st => {
         const items = all.filter(x => x.e.status === st);
-        return `<div class="kb-col ${ST_CLS[st]}" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="dropEtapa(event,'${st}')">
+        return `<div class="kb-col ${ST_CLS[st]}" data-kb-status="${st}">
             <div class="kb-h"><span class="dot"></span>${st}<span class="badge b-gray">${items.length}</span></div>
             ${items.map(({ e, s }) => {
-                const u = wsMembers.find(x => x.id === e.responsavel_id);
-                return `<div class="kb-card ${e.prazo && e.status !== 'Concluído' && prazoClass(e.prazo, e.status) === 'b-rose' ? 'late' : ''}" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','${e.id}')" ${currentUserCanEdit ? `onclick="editarEtapa(${e.id})"` : ''}>
+                const ids = etapaRespIds(e);
+                return `<div class="kb-card ${e.prazo && e.status !== 'Concluído' && prazoClass(e.prazo, e.status) === 'b-rose' ? 'late' : ''}" draggable="true" data-etapa-id="${e.id}" data-drag-kind="etapa" data-drag-id="${e.id}" ${currentUserCanEdit ? `onclick="editarEtapa(${e.id})"` : ''}>
                     <div class="r-t">${escH(e.nome)}</div><div class="r-d">🗂 ${escH(s.nome)}</div>
-                    <div class="kb-f">${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span></span>'}${u ? avatar(u) : ''}</div></div>`;
-            }).join('') || '<div class="row-empty">Vazio</div>'}
+                    <div class="kb-f">${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span></span>'}${avStack(ids)}</div></div>`;
+            }).join('') || '<div class="row-empty">Vazio — solte um card aqui</div>'}
         </div>`;
     }).join('')}</div>`;
 }
 
-function dropEtapa(ev, st) { ev.preventDefault(); const id = +ev.dataTransfer.getData('text/plain'); if (id) updateEtapaStatus(id, st); }
+const FD_FEAT = { multi: true, ordem: true, pord: true, pasta: true };
+const ordV = x => (typeof x.ordem === 'number' ? x.ordem : x.id);
+const ordCmp = (a, b) => (ordV(a) - ordV(b)) || (a.id - b.id);
+const proxOrdem = lista => Math.max(0, ...(lista || []).map(ordV)) + 1;
+function ordemEntre(sib, idx) {
+    const prev = sib[idx - 1], next = sib[idx];
+    if (prev && next) return (ordV(prev) + ordV(next)) / 2;
+    if (prev) return ordV(prev) + 1;
+    if (next) return ordV(next) - 1;
+    return 1;
+}
+
+function etapaRespIds(e) {
+    const ids = (e.etapa_responsaveis || []).map(r => r.usuario_id);
+    if (!ids.length && e.responsavel_id) ids.push(e.responsavel_id);
+    return [...new Set(ids)];
+}
+function aplicarRespLocal(e, ids) {
+    e.responsavel_id = ids[0] || null;
+    if (FD_FEAT.multi) e.etapa_responsaveis = ids.map(usuario_id => ({ usuario_id }));
+}
+async function salvarResponsaveis(eId, ids) {
+    if (!FD_FEAT.multi) return { error: null };
+    const del = await sb.from('etapa_responsaveis').delete().eq('etapa_id', eId);
+    if (del.error) return del;
+    if (!ids.length) return { error: null };
+    return await sb.from('etapa_responsaveis').insert(ids.map(uid => ({ etapa_id: eId, usuario_id: uid })));
+}
+function etapasFlatSelect() {
+    return 'id, nome, status, prazo, prioridade, responsavel_id' + (FD_FEAT.multi ? ', etapa_responsaveis(usuario_id)' : '')
+        + ', sessoes!inner(id, nome, projeto_id, projetos!inner(id, nome, workspace_id))';
+}
+function projSelectStr(c) {
+    return `id, nome, descricao, pasta_id${FD_FEAT.pord ? ', ordem' : ''},
+        projeto_usuarios(usuario_id),
+        sessoes(id, nome, descricao${c.ordem ? ', ordem' : ''},
+            sessao_usuarios(usuario_id),
+            etapas(id, nome, descricao, status, responsavel_id, prioridade, prazo${c.ordem ? ', ordem' : ''}${c.multi ? ', etapa_responsaveis(usuario_id)' : ''}))`;
+}
+async function carregarProjetosDb() {
+    const combos = [{ multi: true, ordem: true }, { multi: false, ordem: true }, { multi: true, ordem: false }, { multi: false, ordem: false }]
+        .filter(c => (!c.multi || FD_FEAT.multi) && (!c.ordem || FD_FEAT.ordem));
+    let ultimo = null;
+    for (const c of combos) {
+        const r = await sb.from('projetos').select(projSelectStr(c)).eq('workspace_id', currentWorkspace.id).order('id');
+        if (!r.error) {
+            FD_FEAT.multi = c.multi; FD_FEAT.ordem = c.ordem;
+            if ((!c.multi || !c.ordem) && !window.__fdAvisoMig) {
+                window.__fdAvisoMig = true;
+                console.warn('FlowDesk: rode o SQL de migração para habilitar', !c.multi ? 'vários responsáveis' : '', !c.ordem ? 'ordem salva ao arrastar' : '');
+                toast('Para salvar a ordem / vários responsáveis, rode o SQL de migração no Supabase.', 'warning');
+            }
+            return r;
+        }
+        ultimo = r;
+    }
+    return ultimo;
+}
+async function probeFeat() {
+    if (probeFeat.feito) return; probeFeat.feito = true;
+    const [a, b] = await Promise.all([
+        sb.from('projetos').select('ordem').limit(1),
+        sb.from('pastas_projetos').select('categoria, ordem').limit(1)
+    ]);
+    FD_FEAT.pord = !a.error; FD_FEAT.pasta = !b.error;
+    if ((a.error || b.error) && !window.__fdAvisoMig2) {
+        window.__fdAvisoMig2 = true;
+        toast('Para salvar a ordem de projetos/pastas e usar categorias, rode o SQL de migração atualizado.', 'warning');
+    }
+}
+const pastaById = id => wsPastasProjetos.find(x => String(x.id) === String(id));
+const categoriasPastas = () => [...new Set(wsPastasProjetos.map(p => p.categoria).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+function ordenarPastas() { wsPastasProjetos.sort((a, b) => FD_FEAT.pasta ? ordCmp(a, b) : a.nome.localeCompare(b.nome, 'pt-BR')); }
+let pastaCatFiltro = '';
+function setPastaCat(c) { pastaCatFiltro = pastaCatFiltro === c ? '' : c; renderProjetosView(); }
+function normalizarProjetos() {
+    wsProjetos.sort(ordCmp);
+    wsProjetos.forEach(p => {
+        (p.sessoes || []).sort(ordCmp);
+        (p.sessoes || []).forEach(s => (s.etapas || []).sort(ordCmp));
+    });
+}
+
+function avStack(ids) {
+    const us = ids.map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
+    if (!us.length) return '';
+    return `<span class="avs">${us.slice(0, 3).map(avatar).join('')}${us.length > 3 ? `<span class="av av-more">+${us.length - 3}</span>` : ''}</span>`;
+}
+function respCell(ids) {
+    const us = ids.map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
+    if (!us.length) return '<span class="muted">—</span>';
+    const nome = us.length === 1 ? escH(us[0].nome.split(' ')[0]) : `${us.length} pessoas`;
+    return `${avStack(ids)}<span title="${escH(us.map(u => u.nome).join(', '))}">${nome}</span>`;
+}
+
+const msState = {};
+function msHtml(id) {
+    return `<div class="ms" id="ms-${id}" onclick="document.getElementById('ms-${id}-in').focus()">
+        <div class="ms-box"><span id="ms-${id}-chips" style="display:contents"></span>
+            <input id="ms-${id}-in" class="ms-in" autocomplete="off" placeholder="Adicionar responsável…"
+                oninput="msList('${id}',true)" onfocus="msList('${id}')" onkeydown="msKey(event,'${id}')"></div>
+        <div id="ms-${id}-dd" class="ms-dd hidden" onmousedown="event.preventDefault()"></div>
+    </div>`;
+}
+function msInit(id, sel = []) { msState[id] = { sel: [...sel], hl: 0 }; msChips(id); }
+function msGet(id) { return [...(msState[id]?.sel || [])]; }
+function msChips(id) {
+    const el = document.getElementById(`ms-${id}-chips`); if (!el) return;
+    el.innerHTML = msState[id].sel.map(uid => {
+        const u = wsMembers.find(x => x.id === uid); if (!u) return '';
+        return `<span class="ms-chip">${avatar(u)}<span class="ms-n">${escH(u.nome)}</span>
+            <button type="button" class="ms-x" aria-label="Remover ${escH(u.nome)}" onclick="event.stopPropagation();msDel('${id}',${uid})">×</button></span>`;
+    }).join('');
+}
+function msOpcoes(id) {
+    const q = (document.getElementById(`ms-${id}-in`)?.value || '').trim().toLowerCase();
+    return wsMembers.filter(u => !msState[id].sel.includes(u.id) && (!q || u.nome.toLowerCase().includes(q) || (u.username || '').toLowerCase().includes(q)));
+}
+function msList(id, reset) {
+    const dd = document.getElementById(`ms-${id}-dd`); if (!dd || !msState[id]) return;
+    if (reset) msState[id].hl = 0;
+    const ops = msOpcoes(id);
+    msState[id].hl = Math.min(msState[id].hl, Math.max(0, ops.length - 1));
+    dd.innerHTML = ops.length
+        ? ops.map((u, i) => `<div class="ms-opt ${i === msState[id].hl ? 'hl' : ''}" onclick="event.stopPropagation();msAdd('${id}',${u.id})">${avatar(u)}<span>${escH(u.nome)}</span><small>@${escH(u.username || '')}</small></div>`).join('')
+        : `<div class="ms-empty">${wsMembers.length === msState[id].sel.length ? 'Todos os membros já foram adicionados.' : 'Ninguém encontrado.'}</div>`;
+    dd.classList.remove('hidden');
+}
+function msAdd(id, uid) {
+    const s = msState[id]; if (!s || s.sel.includes(uid)) return;
+    s.sel.push(uid);
+    const inp = document.getElementById(`ms-${id}-in`); inp.value = '';
+    msChips(id); msList(id, true); inp.focus();
+}
+function msDel(id, uid) {
+    const s = msState[id]; if (!s) return;
+    s.sel = s.sel.filter(x => x !== uid);
+    msChips(id);
+    if (!document.getElementById(`ms-${id}-dd`).classList.contains('hidden')) msList(id);
+}
+function msKey(ev, id) {
+    const s = msState[id], inp = ev.target, dd = document.getElementById(`ms-${id}-dd`);
+    const ops = msOpcoes(id);
+    if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+        ev.preventDefault();
+        s.hl = (s.hl + (ev.key === 'ArrowDown' ? 1 : -1) + ops.length) % (ops.length || 1);
+        msList(id);
+        dd.querySelector('.hl')?.scrollIntoView({ block: 'nearest' });
+    } else if (ev.key === 'Enter' || ev.key === ',') {
+        ev.preventDefault();
+        if (ops[s.hl]) msAdd(id, ops[s.hl].id);
+    } else if (ev.key === 'Backspace' && !inp.value && s.sel.length) {
+        msDel(id, s.sel[s.sel.length - 1]);
+    } else if (ev.key === 'Escape' && !dd.classList.contains('hidden')) {
+        ev.stopPropagation(); dd.classList.add('hidden');
+    }
+}
+document.addEventListener('click', ev => {
+    document.querySelectorAll('.ms-dd:not(.hidden)').forEach(dd => { if (!dd.closest('.ms').contains(ev.target)) dd.classList.add('hidden'); });
+});
+
+// ─── CACHES / EVENTOS DE STATUS ───
+function etapaPatchCaches(eId, patch) {
+    if (typeof dashDados !== 'undefined' && dashDados?.etapas) {
+        const x = dashDados.etapas.find(et => et.id === eId); if (x) Object.assign(x, patch);
+    }
+    const pg = progData.find(et => et.id === eId); if (pg) Object.assign(pg, patch);
+    if (document.getElementById('tab-progresso')?.classList.contains('active') && progData.length) progAtualizar();
+    if (patch.status !== undefined) window.dispatchEvent(new CustomEvent('flowdesk:etapa-status', { detail: { id: eId, status: patch.status } }));
+}
+async function alternarConcluida(eId) {
+    const e = findEtapa(eId); if (!e) return null;
+    const novo = e.status === 'Concluído' ? 'Não iniciado' : 'Concluído';
+    const ok = await updateEtapaStatus(eId, novo);
+    return ok ? novo : e.status;
+}
+function findEtapaCtx(id) {
+    for (const p of wsProjetos) for (const s of p.sessoes || []) { const e = (s.etapas || []).find(x => x.id === id); if (e) return { p, s, e }; }
+    return null;
+}
+function focarEtapa(eId) {
+    requestAnimationFrame(() => {
+        const el = document.querySelector(`#projetos-container [data-etapa-id="${eId}"]`); if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2500);
+    });
+}
+function irParaEtapa(eId) {
+    eId = +eId;
+    const ctx = findEtapaCtx(eId);
+    if (!ctx) { toast('Etapa não encontrada (pode ter sido excluída).', 'warning'); return; }
+    selectedProjetoId = ctx.p.id; selectedEtapaFoco = eId; projetosViewMode = 'list';
+    collapsedSess.delete(ctx.s.id);
+    switchTab('projetos', true);
+    syncRota();
+    renderProjetosView();
+    window.scrollTo(0, 0);
+    focarEtapa(eId);
+}
+window.FlowDesk = { irParaEtapa, alternarConcluida, setEtapaStatus: (id, st) => updateEtapaStatus(+id, st) };
+document.addEventListener('click', async ev => {
+    const t = ev.target.closest?.('[data-etapa-toggle]');
+    if (t) {
+        ev.stopPropagation();
+        const id = +t.dataset.etapaToggle, antes = t.checked;
+        const novo = await alternarConcluida(id);
+        if (t.type === 'checkbox' && novo) t.checked = novo === 'Concluído'; else if (t.type === 'checkbox') t.checked = !antes;
+        return;
+    }
+    const g = ev.target.closest?.('[data-etapa-goto]');
+    if (g) { ev.preventDefault(); ev.stopPropagation(); irParaEtapa(g.dataset.etapaGoto); }
+}, true);
+
+// ─── DRAG & DROP───
+let dnd = null;
+function dndUnmark() {
+    document.querySelectorAll('.drop-before,.drop-after,.drop-in,.kb-col.over').forEach(el => el.classList.remove('drop-before', 'drop-after', 'drop-in', 'over'));
+}
+
+function dndClear() {
+    dnd = null; dndUnmark();
+    document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+    document.querySelectorAll('.dnd-tray').forEach(el => el.remove());
+}
+function dndPosX(ev, el) { const r = el.getBoundingClientRect(); return (ev.clientX - r.left) < r.width / 2 ? 'before' : 'after'; }
+function dndTray(kind) {
+    const c = document.getElementById('projetos-container'); if (!c || !dnd || dnd.kind !== kind) return;
+    const chips = kind === 'proj'
+        ? wsPastasProjetos.map(p => `<span class="dnd-chip" data-pasta-drop="folder:${p.id}">📁 ${escH(p.nome)}</span>`).join('') + '<span class="dnd-chip" data-pasta-drop="none">📂 Sem pasta</span>'
+        : categoriasPastas().map(cn => `<span class="dnd-chip" data-cat-drop="${escH(cn)}">🏷️ ${escH(cn)}</span>`).join('') + '<span class="dnd-chip" data-cat-drop="">Sem categoria</span><span class="dnd-chip" data-cat-drop="__new__">➕ Nova categoria</span>';
+    const d = document.createElement('div'); d.className = 'dnd-tray';
+    d.innerHTML = `<small>${kind === 'proj' ? 'Solte em uma pasta:' : 'Solte em uma categoria:'}</small>${chips}`;
+    c.appendChild(d);
+}
+function dndPos(ev, el) { const r = el.getBoundingClientRect(); return (ev.clientY - r.top) < r.height / 2 ? 'before' : 'after'; }
+
+function dndTarget(ev) {
+    if (!dnd || !ev.target.closest) return null;
+    const t = ev.target;
+    if (dnd.kind === 'etapa') {
+        const row = t.closest('[data-etapa-id]');
+        if (row) {
+            if (+row.dataset.etapaId === dnd.id) return null;
+            return { type: 'etapa', el: row, id: +row.dataset.etapaId, pos: dndPos(ev, row), status: row.closest('[data-kb-status]')?.dataset.kbStatus ?? null };
+        }
+        const col = t.closest('[data-kb-status]');
+        if (col) return { type: 'kbcol', el: col, status: col.dataset.kbStatus };
+        const sec = t.closest('[data-sessao-id]');
+        if (sec) return { type: t.closest('.grp-h') ? 'sstart' : 'send', el: sec, sid: +sec.dataset.sessaoId };
+    } else if (dnd.kind === 'sessao') {
+        const sec = t.closest('[data-sessao-id]');
+        if (sec && +sec.dataset.sessaoId !== dnd.id) return { type: 'sessao', el: sec, id: +sec.dataset.sessaoId, pos: dndPos(ev, sec) };
+    } else if (dnd.kind === 'proj') {
+        const card = t.closest('[data-proj-card]');
+        if (card) return +card.dataset.projCard === dnd.id ? null : { type: 'projcard', el: card, id: +card.dataset.projCard, pos: dndPosX(ev, card) };
+        const pd = t.closest('[data-pasta-drop]');
+        if (pd) return { type: 'pastadrop', el: pd, nav: pd.dataset.pastaDrop };
+    } else if (dnd.kind === 'pasta') {
+        const card = t.closest('[data-pasta-id]');
+        if (card) return String(card.dataset.pastaId) === String(dnd.id) ? null : { type: 'pastacard', el: card, id: card.dataset.pastaId, pos: dndPosX(ev, card) };
+        const cd = t.closest('[data-cat-drop]');
+        if (cd) return { type: 'cat', el: cd, cat: cd.dataset.catDrop };
+    }
+    return null;
+}
+
+function dndMark(t) {
+    dndUnmark();
+    if (['etapa', 'sessao', 'projcard', 'pastacard'].includes(t.type)) t.el.classList.add(t.pos === 'before' ? 'drop-before' : 'drop-after');
+    else if (t.type === 'kbcol') t.el.classList.add('over');
+    else t.el.classList.add('drop-in');
+}
+function dndInit() {
+    const c = document.getElementById('projetos-container');
+    if (!c || c._dnd) return; c._dnd = true;
+    c.addEventListener('dragstart', ev => {
+        const src = ev.target.closest?.('[data-drag-kind]'); if (!src) return;
+        dnd = { kind: src.dataset.dragKind, id: +src.dataset.dragId };
+        ev.dataTransfer.effectAllowed = 'move';
+        ev.dataTransfer.setData('text/plain', String(dnd.id));
+        const host = src.closest('[data-etapa-id],[data-sessao-id]') || src;
+        const img = dnd.kind === 'sessao' ? (src.closest('.grp-h') || host) : host;
+        if (img !== src) { try { ev.dataTransfer.setDragImage(img, 24, 20); } catch (e) { /* ok */ } }
+        setTimeout(() => host.classList.add('dragging'), 0);
+        if (dnd.kind === 'proj' || dnd.kind === 'pasta') { const k = dnd.kind; setTimeout(() => dndTray(k), 0); }
+    });
+    c.addEventListener('dragover', ev => {
+        const t = dndTarget(ev); if (!t) return;
+        ev.preventDefault(); ev.dataTransfer.dropEffect = 'move'; dndMark(t);
+    });
+    c.addEventListener('dragleave', ev => { if (!c.contains(ev.relatedTarget)) dndUnmark(); });
+    c.addEventListener('drop', ev => {
+        const t = dndTarget(ev); if (!t) return;
+        ev.preventDefault();
+        const d = dnd; dndClear(); dndDrop(d, t);
+    });
+    c.addEventListener('dragend', dndClear);
+}
+function dndDrop(d, t) {
+    if (d.kind === 'proj') {
+        if (t.type === 'projcard') return moverProjeto(d.id, t.id, t.pos);
+        if (t.type === 'pastadrop') return moverProjetoPasta(d.id, t.nav);
+        return;
+    }
+    if (d.kind === 'pasta') {
+        if (t.type === 'pastacard') return moverPasta(d.id, t.id, t.pos);
+        if (t.type === 'cat') return moverPastaCat(d.id, t.cat);
+        return;
+    }
+    if (d.kind === 'etapa') {
+        if (t.type === 'etapa') return moverEtapa(d.id, { beforeId: t.pos === 'before' ? t.id : null, afterId: t.pos === 'after' ? t.id : null, status: t.status });
+        if (t.type === 'kbcol') return moverEtapa(d.id, { status: t.status, end: true });
+        if (t.type === 'sstart') return moverEtapa(d.id, { sessaoId: t.sid, start: true });
+        if (t.type === 'send') return moverEtapa(d.id, { sessaoId: t.sid, end: true });
+    } else if (d.kind === 'sessao' && t.type === 'sessao') return moverSessao(d.id, t.id, t.pos);
+}
+async function moverEtapa(id, o) {
+    const ctx = findEtapaCtx(id); if (!ctx) return;
+    const { p, s: sOld, e } = ctx;
+    const board = typeof o.status === 'string';
+    const alvoId = o.beforeId ?? o.afterId ?? null;
+    let sNew = sOld, sib;
+    if (board) {
+        sib = p.sessoes.flatMap(s => s.etapas || []).filter(x => x.status === o.status && x.id !== id).sort(ordCmp);
+    } else {
+        if (alvoId != null) { const c2 = findEtapaCtx(alvoId); if (!c2) return; sNew = c2.s; }
+        else if (o.sessaoId != null) sNew = p.sessoes.find(s => s.id === o.sessaoId) || sOld;
+        sib = (sNew.etapas || []).filter(x => x.id !== id).sort(ordCmp);
+    }
+    let idx = sib.length;
+    if (o.start) idx = 0;
+    else if (alvoId != null) { const i = sib.findIndex(x => x.id === alvoId); idx = i < 0 ? sib.length : (o.beforeId != null ? i : i + 1); }
+    const ordem = ordemEntre(sib, idx);
+
+    const statusMudou = board && o.status !== e.status;
+    const soStatus = board && !currentUserCanEdit;    
+    const trocouSessao = !soStatus && sNew !== sOld;
+    const patch = {};
+    if (statusMudou) patch.status = o.status;
+    if (!soStatus) { if (FD_FEAT.ordem) patch.ordem = ordem; if (trocouSessao) patch.sessao_id = sNew.id; }
+
+    if (statusMudou) { e.status = o.status; etapaPatchCaches(id, { status: o.status }); }
+    if (!soStatus) {
+        e.ordem = ordem;
+        if (trocouSessao) { sOld.etapas = (sOld.etapas || []).filter(x => x.id !== id); (sNew.etapas = sNew.etapas || []).push(e); }
+        sNew.etapas.sort(ordCmp);
+    }
+    renderProjetosView();
+    if (!Object.keys(patch).length) return;
+    const { error } = await sb.from('etapas').update(patch).eq('id', id);
+    if (error) { toast('Erro ao mover etapa: ' + error.message, 'error'); await renderizarProjetos(); return; }
+    if (trocouSessao) addLog('update', 'etapa', id, { nome: `"${e.nome}" movida para "${sNew.nome}"` });
+}
+async function moverProjeto(id, alvoId, pos) {
+    const p = wsProjetos.find(x => x.id === id); if (!p) return;
+    const sib = projetosVisiveis().filter(x => x.id !== id);
+    const i = sib.findIndex(x => x.id === alvoId); if (i < 0) return;
+    p.ordem = ordemEntre(sib, pos === 'before' ? i : i + 1);
+    wsProjetos.sort(ordCmp); renderProjetosView();
+    if (!FD_FEAT.pord) return;
+    const { error } = await sb.from('projetos').update({ ordem: p.ordem }).eq('id', id);
+    if (error) { toast('Erro ao reordenar projeto: ' + error.message, 'error'); await renderizarProjetos(); }
+}
+async function moverProjetoPasta(id, nav) {
+    const p = wsProjetos.find(x => x.id === id); if (!p) return;
+    const pasta = nav === 'none' ? null : pastaById(nav.slice('folder:'.length));
+    if (nav !== 'none' && !pasta) return;
+    const nova = pasta ? pasta.id : null;
+    if ((p.pasta_id ?? null) === nova) return;
+    p.pasta_id = nova;
+    const patch = { pasta_id: nova };
+    if (FD_FEAT.pord) { p.ordem = proxOrdem(wsProjetos); patch.ordem = p.ordem; }
+    wsProjetos.sort(ordCmp); renderProjetosView();
+    const { error } = await sb.from('projetos').update(patch).eq('id', id);
+    if (error) { toast('Erro ao mover projeto: ' + error.message, 'error'); await renderizarProjetos(); return; }
+    toast(`"${p.nome}" movido para ${pasta ? `a pasta "${pasta.nome}"` : '"Sem pasta"'}. 📁`);
+    addLog('update', 'projeto', id, { nome: `"${p.nome}" movido para ${pasta ? pasta.nome : 'Sem pasta'}` });
+}
+async function moverPasta(id, alvoId, pos) {
+    if (!FD_FEAT.pasta) { toast('Rode o SQL de migração para poder reordenar pastas.', 'warning'); return; }
+    const f = pastaById(id), alvo = pastaById(alvoId); if (!f || !alvo) return;
+    const sib = wsPastasProjetos.filter(x => String(x.id) !== String(id)).sort(ordCmp);
+    const i = sib.findIndex(x => String(x.id) === String(alvoId)); if (i < 0) return;
+    f.ordem = ordemEntre(sib, pos === 'before' ? i : i + 1);
+    f.categoria = alvo.categoria || null;
+    ordenarPastas(); renderProjetosView();
+    const { error } = await sb.from('pastas_projetos').update({ ordem: f.ordem, categoria: f.categoria }).eq('id', id);
+    if (error) { toast('Erro ao mover pasta: ' + error.message, 'error'); await renderizarProjetos(); }
+}
+async function moverPastaCat(id, cat) {
+    if (!FD_FEAT.pasta) { toast('Rode o SQL de migração para usar categorias.', 'warning'); return; }
+    const f = pastaById(id); if (!f) return;
+    if (cat === '__new__') { cat = (prompt('Nome da nova categoria:') || '').trim(); if (!cat) return; }
+    const nova = cat || null;
+    if ((f.categoria || null) === nova) return;
+    f.categoria = nova; f.ordem = proxOrdem(wsPastasProjetos);
+    ordenarPastas(); renderProjetosView();
+    const { error } = await sb.from('pastas_projetos').update({ categoria: nova, ordem: f.ordem }).eq('id', id);
+    if (error) { toast('Erro ao mudar categoria: ' + error.message, 'error'); await renderizarProjetos(); }
+}
+async function moverSessao(id, alvoId, pos) {
+    const p = wsProjetos.find(x => x.id === selectedProjetoId); if (!p) return;
+    const s = p.sessoes.find(x => x.id === id); if (!s) return;
+    const sib = p.sessoes.filter(x => x.id !== id).sort(ordCmp);
+    const i = sib.findIndex(x => x.id === alvoId); if (i < 0) return;
+    s.ordem = ordemEntre(sib, pos === 'before' ? i : i + 1);
+    p.sessoes.sort(ordCmp);
+    renderProjetosView();
+    if (!FD_FEAT.ordem) return;
+    const { error } = await sb.from('sessoes').update({ ordem: s.ordem }).eq('id', id);
+    if (error) { toast('Erro ao reordenar atividade: ' + error.message, 'error'); await renderizarProjetos(); }
+}
+
+// ─── UPLOAD POR ARRASTAR ───
+let upQueue = [];
+const upKey = f => `${f.name}|${f.size}|${f.lastModified}`;
+function dtFiles(dt) {
+    const out = [];
+    if (dt?.items?.length) {
+        for (const it of dt.items) {
+            if (it.kind !== 'file') continue;
+            if (it.webkitGetAsEntry?.()?.isDirectory) continue;      // ignora pastas
+            const f = it.getAsFile(); if (f) out.push(f);
+        }
+        return out;
+    }
+    return Array.from(dt?.files || []);
+}
+function upAdd(list) {
+    Array.from(list || []).forEach(f => { if (f && !upQueue.some(x => upKey(x) === upKey(f))) upQueue.push(f); });
+    upRender();
+}
+function upRemove(i) { upQueue.splice(i, 1); upRender(); }
+function upRender() {
+    const el = document.getElementById('up-list'); if (!el) return;
+    el.innerHTML = upQueue.map((f, i) => `<div class="up-item"><span>${fileIcon(f.name)}</span><span class="n" title="${escH(f.name)}">${escH(f.name)}</span>
+        <small class="muted">${fmtBytes(f.size)}</small><button type="button" class="ms-x" aria-label="Remover" onclick="upRemove(${i})">×</button></div>`).join('');
+}
+function upDrop(ev) {
+    ev.preventDefault();
+    document.getElementById('up-dz')?.classList.remove('over');
+    upAdd(dtFiles(ev.dataTransfer));
+}
+(function dropGlobal() {
+    let depth = 0;
+    const temArquivos = ev => Array.from(ev.dataTransfer?.types || []).includes('Files');
+    const ov = () => document.getElementById('drop-ov');
+    const modalAberto = () => !document.getElementById('modal-ov').classList.contains('hidden');
+    const esconder = () => { depth = 0; ov()?.classList.add('hidden'); };
+    document.addEventListener('dragenter', ev => { if (!temArquivos(ev)) return; depth++; if (currentUser && !modalAberto()) ov()?.classList.remove('hidden'); });
+    document.addEventListener('dragleave', ev => { if (!temArquivos(ev)) return; depth = Math.max(0, depth - 1); if (!depth) esconder(); });
+    document.addEventListener('dragover', ev => { if (temArquivos(ev)) ev.preventDefault(); });
+    document.addEventListener('drop', ev => {
+        if (!temArquivos(ev)) return;
+        ev.preventDefault(); esconder();
+        if (!currentUser || modalAberto()) return;
+        const files = dtFiles(ev.dataTransfer); if (!files.length) return;
+        abrirModalUpload(abaAtual === 'projetos' && selectedProjetoId != null ? `proj_${selectedProjetoId}` : null);
+        upAdd(files);
+    });
+    window.addEventListener('dragend', esconder);
+})();
 
 // ─── CRUD PROJETOS ────────────────────────────────
 function abrirModalProjeto() {
@@ -1387,7 +2029,7 @@ async function criarSessao(pId) {
     const desc = document.getElementById('m-sdesc')?.value?.trim() || '';
     const sel  = Array.from(document.getElementById('m-susers')?.selectedOptions||[]).map(o=>+o.value);
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
-    const { data, error } = await sb.from('sessoes').insert({ projeto_id: pId, nome, descricao: desc }).select().single();
+    const { data, error } = await sb.from('sessoes').insert({ projeto_id: pId, nome, descricao: desc, ...(FD_FEAT.ordem ? { ordem: proxOrdem(wsProjetos.find(x => x.id === pId)?.sessoes) } : {}) }).select().single();
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     const users = [...new Set([currentUser.id, ...sel])];
     await sb.from('sessao_usuarios').insert(users.map(uid => ({ sessao_id: data.id, usuario_id: uid })));
@@ -1444,13 +2086,15 @@ function uSelect(id, selId=null) {
     return `<select id="${id}" class="fsel"><option value="">— Sem responsável —</option>${opts}</select>`;
 }
 
+
 function abrirModalEtapa(pId, sId, e=null) {
-    const nome = e?.nome || '', desc = e?.descricao || '', resp = e?.responsavel_id || '';
+    const nome = e?.nome || '', desc = e?.descricao || '';
     const status = e?.status || 'Não iniciado', prio = e?.prioridade || 0, prazo = e?.prazo || '';
     abrirModal(e ? '✏️ Editar Etapa' : '✅ Nova Etapa', `
         <div class="fg"><label class="fl">Nome</label><input id="m-enome" class="fi" value="${escH(nome)}" placeholder="Ex: Implementar tela..."/></div>
         <div class="fg"><label class="fl">Descrição</label><input id="m-edesc" class="fi" value="${escH(desc)}" placeholder="Critérios de aceite..."/></div>
-        <div class="fg"><label class="fl">Responsável</label>${uSelect('m-eresp', resp)}</div>
+        <div class="fg"><label class="fl">Responsáveis</label>${msHtml('eresp')}
+            <p class="fhint">Digite para buscar e tecle Enter (ou clique no nome). Dá para adicionar várias pessoas.</p></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div class="fg"><label class="fl">Status</label><select id="m-estatus" class="fsel">
                 <option value="Não iniciado" ${status==='Não iniciado'?'selected':''}>Não iniciado</option>
@@ -1471,19 +2115,26 @@ function abrirModalEtapa(pId, sId, e=null) {
         { label: '+ Criar', cls: 'btn-p', action: `criarEtapa(${pId}, ${sId})` },
         { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
     ]);
+    msInit('eresp', e ? etapaRespIds(e) : []);
 }
+
 
 async function criarEtapa(pId, sId) {
     const nome = document.getElementById('m-enome')?.value?.trim();
     const desc = document.getElementById('m-edesc')?.value?.trim() || '';
-    const resp = document.getElementById('m-eresp')?.value || null;
+    const resps = msGet('eresp');
     const status = document.getElementById('m-estatus')?.value || 'Não iniciado';
     const prio = +document.getElementById('m-eprio')?.value || 0;
     const prazo = document.getElementById('m-eprazo')?.value || null;
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
-    const { error } = await sb.from('etapas').insert({ sessao_id: sId, nome, descricao: desc, responsavel_id: resp, status, prioridade: prio, prazo });
+    const sess = wsProjetos.flatMap(p => p.sessoes || []).find(x => x.id === sId);
+    const novo = { sessao_id: sId, nome, descricao: desc, responsavel_id: resps[0] || null, status, prioridade: prio, prazo };
+    if (FD_FEAT.ordem) novo.ordem = proxOrdem(sess?.etapas);
+    const { data, error } = await sb.from('etapas').insert(novo).select().single();
     if (error) { toast('Erro: '+error.message, 'error'); return; }
-    await addLog('create','etapa',null,{nome}); fecharModal(); toast(`Atividade "${nome}" criada!`); await renderizarProjetos();
+    const r = await salvarResponsaveis(data.id, resps);
+    if (r.error) toast('Etapa criada, mas os responsáveis não foram salvos: ' + r.error.message, 'warning');
+    await addLog('create','etapa',null,{nome}); fecharModal(); toast(`Etapa "${nome}" criada!`); await renderizarProjetos();
 }
 
 function editarEtapa(eId) {
@@ -1496,22 +2147,25 @@ function editarEtapa(eId) {
     abrirModalEtapa(null, null, etapa);
 }
 
+
 async function editarEtapaSave(eId) {
     const nome = document.getElementById('m-enome')?.value?.trim();
     const desc = document.getElementById('m-edesc')?.value?.trim() || '';
-    const resp = document.getElementById('m-eresp')?.value || null;
+    const resps = msGet('eresp');
     const status = document.getElementById('m-estatus')?.value || 'Não iniciado';
     const prio = +document.getElementById('m-eprio')?.value || 0;
     const prazo = document.getElementById('m-eprazo')?.value || null;
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
-    const atualizacao = { nome, descricao: desc, responsavel_id: resp, status, prioridade: prio, prazo };
+    const atualizacao = { nome, descricao: desc, responsavel_id: resps[0] || null, status, prioridade: prio, prazo };
     const { error } = await sb.from('etapas').update(atualizacao).eq('id', eId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
+    const r = await salvarResponsaveis(eId, resps);
+    if (r.error) toast('Etapa salva, mas os responsáveis não: ' + r.error.message, 'warning');
     if (typeof dashDados !== 'undefined' && dashDados) {
         const etapaDashboard = dashDados.etapas.find(etapa => etapa.id === eId);
         if (etapaDashboard) Object.assign(etapaDashboard, atualizacao);
     }
-    await addLog('update','etapa',null,{nome}); fecharModal(); toast('Atividade atualizada!'); await renderizarProjetos();
+    await addLog('update','etapa',null,{nome}); fecharModal(); toast('Etapa atualizada!'); await renderizarProjetos();
     if (typeof dashDados !== 'undefined' && dashDados && document.getElementById('tab-home')?.classList.contains('active')) dashRender();
 }
 
@@ -1524,11 +2178,14 @@ async function updateEtapaPrio(eId, prio) {
     const { error } = await sb.from('etapas').update({ prioridade: +prio }).eq('id', eId);
     if (error) toast('Erro ao atualizar prioridade.', 'error');
 }
+
 async function updateEtapaStatus(eId, status) {
-    const e = findEtapa(eId); if (!e || e.status === status) return;
-    const old = e.status; e.status = status; renderProjetosView();
+    const e = findEtapa(eId); if (!e) return false;
+    if (e.status === status) return true;
+    const old = e.status; e.status = status; renderProjetosView(); etapaPatchCaches(eId, { status });
     const { error } = await sb.from('etapas').update({ status }).eq('id', eId);
-    if (error) { e.status = old; renderProjetosView(); toast('Erro ao atualizar status.', 'error'); }
+    if (error) { e.status = old; renderProjetosView(); etapaPatchCaches(eId, { status: old }); toast('Erro ao atualizar status.', 'error'); return false; }
+    return true;
 }
 // ─── DELETAR ETAPA (direto,PIMP  sem aprovação) ────────────────────────
 async function deletarEtapa(eId) {
@@ -1561,66 +2218,137 @@ async function responderAcesso(notifId, pedidoId, usuarioId, aceitar) {
 
 let progressoFiltro = 'todos';
 
+
 async function carregarProgresso() {
     const c = document.getElementById('progresso-container');
-    c.innerHTML = '<div class="loading-c"><div class="spinner"></div></div>';
-
-    // Busca TODAS etapas do workspace com prazo e sem prazo, ordenadas por prazo ASC (nulls last)
-    const { data: etapas, error } = await sb.from('etapas')
-        .select('id, nome, status, prazo, prioridade, responsavel_id, sessoes!inner(id, nome, projeto_id, projetos!inner(id, nome, workspace_id))')
+    if (!progData.length) c.innerHTML = '<div class="loading-c"><div class="spinner"></div></div>';
+    const { data: etapas, error } = await sb.from('etapas').select(etapasFlatSelect())
         .eq('sessoes.projetos.workspace_id', currentWorkspace.id);
-
     if (error) { c.innerHTML = `<div class="empty-state"><div class="ei">⚠️</div><h3>Erro</h3><p>${escH(error.message)}</p></div>`; return; }
-
-    renderProgresso(etapas || []);
+    progData = etapas || [];
+    renderProgresso();
 }
 
+let progData = [];
+let progF = { q: '', proj: '', sess: '', resp: '', prazo: '', status: '', prio: '' };
+let progSort = { col: 'prazo', dir: 1 };
+let progQuickSets = [];
+const PROG_COLS = [['etapa','Etapa'],['sess','Atividade'],['resp','Responsável'],['prazo','Prazo'],['status','Status'],['prio','Prio.']];
+const PROG_W = ['27%','17%','19%','13%','15%','9%'];
+
+function progSet(k, v) {
+    progF[k] = v;
+    if (k === 'proj') { progF.sess = ''; renderProgresso(); } else progAtualizar();
+}
+function progLimpar() { progF = { q: '', proj: '', sess: '', resp: '', prazo: '', status: '', prio: '' }; renderProgresso(); }
+function progSortBy(col) {
+    progSort = progSort.col === col ? { col, dir: -progSort.dir } : { col, dir: 1 };
+    progAtualizar();
+}
+
+let progQuickOn = [];
+function progQuick(i) {
+    const set = progQuickSets[i];
+    if (i > 0 && progQuickOn[i]) Object.keys(set).forEach(k => { progF[k] = ''; });   // já ativo: desativa
+    else Object.assign(progF, set);
+    progAtualizar();
+}
+function progFiltrar() {
+    const hoje = dataLocalHojeISO(), f = progF, q = f.q.trim().toLowerCase();
+    const d7 = new Date(); d7.setDate(d7.getDate() + 7);
+    const fim7 = `${d7.getFullYear()}-${String(d7.getMonth()+1).padStart(2,'0')}-${String(d7.getDate()).padStart(2,'0')}`;
+    return progData.filter(e => {
+        const proj = e.sessoes?.projetos, sess = e.sessoes, ids = etapaRespIds(e);
+        if (q && !(e.nome.toLowerCase().includes(q) || (proj?.nome || '').toLowerCase().includes(q))) return false;
+        if (f.proj && String(proj?.id) !== f.proj) return false;
+        if (f.sess && String(sess?.id) !== f.sess) return false;
+        if (f.resp === 'none') { if (ids.length) return false; }
+        else if (f.resp && !ids.includes(+f.resp)) return false;
+        if (f.status && e.status !== f.status) return false;
+        if (f.prio !== '' && String(e.prioridade ?? 0) !== f.prio) return false;
+        switch (f.prazo) {
+            case 'atrasada': if (!(e.prazo && e.prazo < hoje && e.status !== 'Concluído')) return false; break;
+            case 'hoje': if (e.prazo !== hoje) return false; break;
+            case '7d': if (!(e.prazo && e.prazo >= hoje && e.prazo <= fim7)) return false; break;
+            case 'mes': if (!(e.prazo && e.prazo.slice(0, 7) === hoje.slice(0, 7))) return false; break;
+            case 'sem': if (e.prazo) return false; break;
+            case 'com': if (!e.prazo) return false; break;
+        }
+        return true;
+    });
+}
+function progOrdenar(lista) {
+    const { col, dir } = progSort;
+    const nomeResp = e => etapaRespIds(e).map(id => wsMembers.find(u => u.id === id)?.nome || '').sort()[0]?.toLowerCase() || '\uffff';
+    const key = {
+        etapa: e => e.nome.toLowerCase(), sess: e => (e.sessoes?.nome || '').toLowerCase(), resp: nomeResp,
+        prazo: e => e.prazo || '9999-99-99', status: e => STATUS.indexOf(e.status), prio: e => e.prioridade ?? 0
+    }[col];
+    return [...lista].sort((a, b) => { const x = key(a), y = key(b); return ((x < y ? -1 : x > y ? 1 : 0) * dir) || a.nome.localeCompare(b.nome); });
+}
+function progRow(e, i) {
+    const us = etapaRespIds(e).map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
+    return `<tr class="prog-row anim-item ${ST_CLS[e.status] || ''}" style="animation-delay:${Math.min(i, 20) * 0.02}s" onclick="irParaEtapa(${e.id})" title="Abrir esta etapa no projeto">
+        <td><div class="pr-t">${escH(e.nome)}</div><div class="pr-s">📁 ${escH(e.sessoes?.projetos?.nome || '—')}</div></td>
+        <td class="pr-sess">${escH(e.sessoes?.nome || '—')}</td>
+        <td>${us.length ? `<div class="pr-resp">${us.map(u => `<span class="badge b-purple">${escH(u.nome)}</span>`).join('')}</div>` : '<span class="muted" style="font-size:.78rem">—</span>'}</td>
+        <td>${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span class="badge b-gray">Sem prazo</span>'}</td>
+        <td><span class="badge ${e.status==='Concluído'?'b-green':e.status==='Em andamento'?'b-amber':'b-gray'}">${e.status}</span></td>
+        <td><span class="badge b-gray">${e.prioridade ?? 0}</span></td>
+    </tr>`;
+}
+function progAtualizar() {
+    const body = document.getElementById('prog-body'); if (!body) return;
+    const hoje = dataLocalHojeISO();
+    const lista = progOrdenar(progFiltrar());
+    body.innerHTML = lista.map(progRow).join('');
+    document.getElementById('prog-empty').innerHTML = lista.length ? '' :
+        '<div class="empty-state"><div class="ei">🔍</div><h3>Nenhuma etapa com esses filtros</h3><p>Ajuste ou limpe os filtros para ver mais resultados.</p></div>';
+    const temFiltro = Object.values(progF).some(v => v !== '');
+    document.getElementById('prog-count').textContent = `Mostrando ${lista.length} de ${progData.length} etapas`;
+    document.getElementById('prog-clear').classList.toggle('hidden', !temFiltro);
+    document.querySelectorAll('[data-pf]').forEach(el => {
+        const v = progF[el.dataset.pf];
+        if (el.value !== v) el.value = v;
+        el.classList.toggle('act', v !== '');
+    });
+    document.querySelectorAll('.sort-ar').forEach(el => { el.textContent = el.dataset.k === progSort.col ? (progSort.dir === 1 ? '▲' : '▼') : ''; });
+    const n = fn => progData.filter(fn).length;
+    const defs = [
+        { l: 'Todas', n: progData.length, set: { status: '', prazo: '', resp: '' }, on: !progF.status && !progF.prazo && !progF.resp },
+        { l: 'Não iniciado', n: n(e => e.status === 'Não iniciado'), set: { status: 'Não iniciado' }, on: progF.status === 'Não iniciado' },
+        { l: 'Em andamento', n: n(e => e.status === 'Em andamento'), set: { status: 'Em andamento' }, on: progF.status === 'Em andamento' },
+        { l: 'Concluído', n: n(e => e.status === 'Concluído'), set: { status: 'Concluído' }, on: progF.status === 'Concluído' },
+        { l: 'Atrasadas', n: n(e => e.prazo && e.prazo < hoje && e.status !== 'Concluído'), set: { prazo: 'atrasada', status: '' }, on: progF.prazo === 'atrasada', late: true },
+        { l: 'Sem responsável', n: n(e => !etapaRespIds(e).length), set: { resp: 'none' }, on: progF.resp === 'none' }
+    ];
+    progQuickSets = defs.map(d => d.set); progQuickOn = defs.map(d => d.on);
+    document.getElementById('prog-sum').innerHTML = defs.map((d, i) =>
+        `<button type="button" class="ps-card ${d.on ? 'on' : ''} ${d.late && d.n ? 'late' : ''}" title="${d.on && i ? 'Clique de novo para remover este filtro' : 'Filtrar'}" onclick="progQuick(${i})"><b>${d.n}</b><span>${d.l}</span></button>`).join('');
+}
 function renderProgresso(etapas) {
+    if (etapas) progData = etapas;
     const c = document.getElementById('progresso-container');
-    if (!etapas.length) {
-        c.innerHTML = `<div class="empty-state"><div class="ei">📊</div><h3>Nenhuma atividade ainda</h3><p>Crie atividades nos projetos para ver o progresso aqui.</p></div>`;
+    if (!progData.length) {
+        c.innerHTML = `<div class="empty-state"><div class="ei">📊</div><h3>Nenhuma etapa ainda</h3><p>Crie etapas nos projetos para ver o progresso aqui.</p></div>`;
         return;
     }
-
-    // Ordenar: com prazo primeiro por data ASC, depois sem prazo
-    const comPrazo = etapas.filter(e => e.prazo).sort((a,b) => a.prazo.localeCompare(b.prazo));
-    const semPrazo = etapas.filter(e => !e.prazo).sort((a,b) => a.nome.localeCompare(b.nome));
-    const todas = [...comPrazo, ...semPrazo];
-
-    // Filtro ativo
-    const filtradas = progressoFiltro === 'todos' ? todas
-        : progressoFiltro === 'pendente' ? todas.filter(e => e.status === 'Não iniciado')
-        : progressoFiltro === 'andamento' ? todas.filter(e => e.status === 'Em andamento')
-        : progressoFiltro === 'concluido' ? todas.filter(e => e.status === 'Concluído')
-        : todas.filter(e => !e.responsavel_id);
-
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const total = etapas.length;
-    const concluidas = etapas.filter(e => e.status === 'Concluído').length;
-    const pct = total ? Math.round(concluidas/total*100) : 0;
-
-    function renderRow(e, idx) {
-        const resp = wsMembers.find(u => u.id === e.responsavel_id);
-        const proj = e.sessoes?.projetos?.nome || '—';
-        const sess = e.sessoes?.nome || '—';
-        return `<tr class="prog-row anim-item" style="animation-delay:${idx*0.03}s">
-            <td style="max-width:200px">
-                <div style="font-weight:600;font-size:.86rem">${escH(e.nome)}</div>
-                <div style="font-size:.74rem;color:var(--muted);margin-top:1px">📁 ${escH(proj)}</div>
-            </td>
-            <td style="font-size:.8rem;color:var(--muted)">${escH(sess)}</td>
-            <td>${resp ? `<span class="badge b-purple">${escH(resp.nome)}</span>` : '<span style="color:var(--muted);font-size:.78rem">—</span>'}</td>
-            <td>${e.prazo
-                ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>`
-                : `<span class="badge b-gray">Sem prazo</span>`}</td>
-            <td><span class="badge ${e.status==='Concluído'?'b-green':e.status==='Em andamento'?'b-amber':'b-gray'}">${e.status}</span></td>
-            <td><span class="badge b-gray">${e.prioridade ?? 0}</span></td>
-        </tr>`;
-    }
-
+    const total = progData.length, concl = progData.filter(e => e.status === 'Concluído').length, pct = Math.round(concl / total * 100);
+    const projs = new Map(), sessPorProj = new Map(), respUsados = new Set();
+    progData.forEach(e => {
+        const p = e.sessoes?.projetos, s = e.sessoes; if (!p || !s) return;
+        projs.set(p.id, p.nome);
+        if (!sessPorProj.has(p.id)) sessPorProj.set(p.id, new Map());
+        sessPorProj.get(p.id).set(s.id, s.nome);
+        etapaRespIds(e).forEach(id => respUsados.add(id));
+    });
+    const opt = (v, l) => `<option value="${v}">${escH(l)}</option>`;
+    const optsProj = [...projs].sort((a, b) => a[1].localeCompare(b[1])).map(([id, n]) => opt(id, n)).join('');
+    const optsSess = [...sessPorProj].filter(([pid]) => !progF.proj || String(pid) === progF.proj)
+        .map(([pid, m]) => `<optgroup label="${escH(projs.get(pid))}">${[...m].map(([id, n]) => opt(id, n)).join('')}</optgroup>`).join('');
+    const optsResp = wsMembers.filter(u => respUsados.has(u.id)).sort((a, b) => a.nome.localeCompare(b.nome)).map(u => opt(u.id, u.nome)).join('');
     c.innerHTML = `
-        <!-- Barra de progresso geral -->
-        <div class="anim-item" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:18px;box-shadow:var(--sh)">
+        <div class="anim-item" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:14px;box-shadow:var(--sh)">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
                 <div style="font-weight:700;font-size:.9rem">Progresso geral do workspace</div>
                 <div style="font-weight:800;font-size:1.1rem;color:var(--acc)">${pct}%</div>
@@ -1628,44 +2356,34 @@ function renderProgresso(etapas) {
             <div style="height:10px;background:var(--border);border-radius:10px;overflow:hidden">
                 <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--acc),#10b981);border-radius:10px;transition:width .6s ease"></div>
             </div>
-            <div style="font-size:.75rem;color:var(--muted);margin-top:7px">${concluidas} de ${total} etapas concluídas</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:7px">${concl} de ${total} etapas concluídas</div>
         </div>
-
-        <!-- Filtros -->
-        <div class="prog-filters">
-            <span style="font-size:.78rem;font-weight:600;color:var(--muted)">Filtrar:</span>
-            ${['todos','pendente','andamento','concluido','sem-resp'].map(f => `
-                <button class="prog-filter-btn ${progressoFiltro===f?'active':''}"
-                    onclick="progressoFiltro='${f}'; carregarProgresso()">
-                    ${f==='todos'?'Todos':f==='pendente'?'Não iniciado':f==='andamento'?'Em andamento':f==='concluido'?'Concluído':'👤 Sem responsável'}
-                    <span style="margin-left:4px;opacity:.7">(${
-                        f==='todos'?total:
-                        f==='pendente'?etapas.filter(e=>e.status==='Não iniciado').length:
-                        f==='andamento'?etapas.filter(e=>e.status==='Em andamento').length:
-                        f==='concluido'?concluidas:
-                        etapas.filter(e=>!e.responsavel_id).length
-                    })</span>
-                </button>`).join('')}
-        </div>
-
-        <!-- Tabela -->
-        ${filtradas.length ? `
+        <div class="prog-sum" id="prog-sum"></div>
+        <div class="prog-info"><span id="prog-count"></span><button type="button" id="prog-clear" class="btn btn-s btn-sm hidden" onclick="progLimpar()">✕ Limpar filtros</button></div>
         <div style="overflow-x:auto">
-            <table class="prog-table">
-                <thead>
-                    <tr>
-                        <th>Etapa</th>
-                        <th>Atividade</th>
-                        <th>Responsável</th>
-                        <th>Prazo</th>
-                        <th>Status</th>
-                        <th>Prio.</th>
-                    </tr>
-                </thead>
-                <tbody>${filtradas.map((e,i) => renderRow(e,i)).join('')}</tbody>
-            </table>
-        </div>` : `<div class="empty-state"><div class="ei">🔍</div><h3>Nenhuma Atividade neste filtro</h3></div>`}`;
+        <table class="prog-table">
+            <colgroup>${PROG_W.map(w => `<col style="width:${w}">`).join('')}</colgroup>
+            <thead>
+                <tr>${PROG_COLS.map(([k, l]) => `<th class="sortable" onclick="progSortBy('${k}')">${l}<span class="sort-ar" data-k="${k}"></span></th>`).join('')}</tr>
+                <tr class="pf">
+                    <th><input class="pf-in" data-pf="q" type="search" placeholder="🔍 Buscar etapa ou projeto" value="${escH(progF.q)}" oninput="progSet('q', this.value)">
+                        <select class="pf-in" data-pf="proj" onchange="progSet('proj', this.value)"><option value="">Todos os projetos</option>${optsProj}</select></th>
+                    <th><select class="pf-in" data-pf="sess" onchange="progSet('sess', this.value)"><option value="">Todas</option>${optsSess}</select></th>
+                    <th><select class="pf-in" data-pf="resp" onchange="progSet('resp', this.value)"><option value="">Todos</option><option value="none">👤 Sem responsável</option>${optsResp}</select></th>
+                    <th><select class="pf-in" data-pf="prazo" onchange="progSet('prazo', this.value)">
+                        <option value="">Todos</option><option value="atrasada">⚠️ Atrasadas</option><option value="hoje">Vence hoje</option>
+                        <option value="7d">Próximos 7 dias</option><option value="mes">Este mês</option><option value="com">Com prazo</option><option value="sem">Sem prazo</option></select></th>
+                    <th><select class="pf-in" data-pf="status" onchange="progSet('status', this.value)"><option value="">Todos</option>${STATUS.map(x => opt(x, x)).join('')}</select></th>
+                    <th><select class="pf-in" data-pf="prio" onchange="progSet('prio', this.value)"><option value="">Todas</option>${[0,1,2,3,4].map(v => opt(v, v)).join('')}</select></th>
+                </tr>
+            </thead>
+            <tbody id="prog-body"></tbody>
+        </table></div>
+        <div id="prog-empty"></div>`;
+    progAtualizar();
 }
+
+
 
 // ─── ARQUIVO MANAGER ──────────────────────────────
 let arkPastas = [];        // pastas criadas pelo usuário
@@ -2016,13 +2734,16 @@ function menuPasta(pastaId) {
 }
 
 // ─── MODAL: UPLOAD ────────────────────────────────
-function abrirModalUpload() {
-    const isProjAtual = typeof arkPastaAtual === 'string' && arkPastaAtual.startsWith('proj_');
-    const projAtualId = isProjAtual ? parseInt(arkPastaAtual.replace('proj_','')) : null;
+
+function abrirModalUpload(destinoForcado = null) {
+    upQueue = [];
+    const alvo = destinoForcado ?? arkPastaAtual;
+    const isProjAtual = typeof alvo === 'string' && alvo.startsWith('proj_');
+    const projAtualId = isProjAtual ? parseInt(alvo.replace('proj_','')) : null;
 
     const pastasOpts = arkPastas
         .filter(p => p.visibilidade === 'publico' || p.criado_por === currentUser.id)
-        .map(p => `<option value="pasta_${p.id}" ${(!isProjAtual && arkPastaAtual===p.id)?'selected':''}>${escH(p.nome)} ${p.visibilidade==='privado'?'🔒':''}</option>`)
+        .map(p => `<option value="pasta_${p.id}" ${(!isProjAtual && alvo===p.id)?'selected':''}>${escH(p.nome)} ${p.visibilidade==='privado'?'🔒':''}</option>`)
         .join('');
 
     const projOpts = wsProjetos
@@ -2030,9 +2751,15 @@ function abrirModalUpload() {
         .join('');
 
     abrirModal('⬆️ Upload de Arquivos', `
-        <div class="fg"><label class="fl">Arquivos</label>
-            <input id="m-upload-files" type="file" class="fi" multiple/></div>
-        <div class="fg"><label class="fl">Destino</label>
+        <div class="dz" id="up-dz" onclick="document.getElementById('m-upload-files').click()"
+            ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="upDrop(event)">
+            <div class="dz-ic">⬆️</div>
+            <div><b>Arraste os arquivos aqui</b></div>
+            <div style="margin-top:2px">ou <span class="dz-link">clique para escolher</span></div>
+            <input id="m-upload-files" type="file" multiple hidden onclick="event.stopPropagation()" onchange="upAdd(this.files);this.value=''"/>
+        </div>
+        <div id="up-list"></div>
+        <div class="fg" style="margin-top:12px"><label class="fl">Destino</label>
             <select id="m-upload-destino" class="fsel">
                 <option value="">📂 Sem pasta (raiz)</option>
                 <optgroup label="🔗 Anexos de Projeto">${projOpts}</optgroup>
@@ -2060,8 +2787,8 @@ async function executarUpload() {
     const input   = document.getElementById('m-upload-files');
     const destino = document.getElementById('m-upload-destino')?.value || '';
     const vis     = document.getElementById('m-upload-vis')?.value || 'publico';
-    const files   = Array.from(input?.files || []);
-    if (!files.length) { toast('Selecione ao menos um arquivo.', 'warning'); return; }
+    const files   = upQueue.slice();
+    if (!files.length) { toast('Arraste ou selecione ao menos um arquivo.', 'warning'); return; }
 
     // Parsear destino: '' = raiz, 'proj_N' = projeto, 'pasta_N' = pasta
     let pastaId   = null;
@@ -2137,6 +2864,7 @@ async function executarUpload() {
     const projIdOriginal  = destinoOriginal.startsWith('proj_')  ? parseInt(destinoOriginal.replace('proj_',''))  : null;
 
     setTimeout(async () => {
+        upQueue = [];
         fecharModal();
         toast(sucesso ? `${sucesso} arquivo(s) enviado(s)! 🔗` : 'Nenhum arquivo enviado.', sucesso ? 'success' : 'warning');
         await carregarArquivosWorkspace();
@@ -2442,7 +3170,7 @@ async function verContribuidor(userId) {
     document.getElementById('cpop-ov').classList.remove('hidden');
     const [rEt, rPr] = await Promise.all([
         sb.from('etapas')
-            .select('id, nome, status, prazo, prioridade, responsavel_id, sessoes!inner(id, nome, projeto_id, projetos!inner(id, nome, workspace_id))')
+            .select(etapasFlatSelect())
             .eq('sessoes.projetos.workspace_id', currentWorkspace.id),
         sb.from('projeto_usuarios')
             .select('projetos!inner(id, nome, workspace_id)')
@@ -2459,7 +3187,7 @@ async function verContribuidor(userId) {
 }
 
 function cpopDesenharStats() {
-    const minhas = cpopEtapas.filter(e => e.responsavel_id === cpopUserId);
+    const minhas = cpopEtapas.filter(e => etapaRespIds(e).includes(cpopUserId));
     const el = document.getElementById('cpop-stats');
     const cel = (v, l, cor) => `<div class="cpop-st"><b style="color:${cor}">${v}</b><span>${l}</span></div>`;
     el.innerHTML = cel(minhas.length, 'Etapas', 'var(--text)')
@@ -2484,7 +3212,7 @@ function cpopLinhaMinha(e) {
 
 function renderCpopLista() {
     const u = wsMembers.find(x => x.id === cpopUserId);
-    const minhas = cpopEtapas.filter(e => e.responsavel_id === cpopUserId).sort(cpopOrdenar);
+    const minhas = cpopEtapas.filter(e => etapaRespIds(e).includes(cpopUserId)).sort(cpopOrdenar);
     const grupos = new Map();
     minhas.forEach(e => {
         const p = e.sessoes.projetos;
@@ -2561,12 +3289,12 @@ function cpopDesenharCandidatas() {
     const el = document.getElementById('cpop-pick-list');
     if (!el) return;
     const termo = cpopFiltro.busca.trim().toLowerCase();
-    const todas = cpopEtapas.filter(e => e.responsavel_id !== cpopUserId && e.status !== 'Concluído');
+    const todas = cpopEtapas.filter(e => !etapaRespIds(e).includes(cpopUserId) && e.status !== 'Concluído');
     const lista = todas.filter(e =>
         (!cpopFiltro.projeto || String(e.sessoes.projetos.id) === cpopFiltro.projeto) &&
         (!termo || e.nome.toLowerCase().includes(termo) || e.sessoes.nome.toLowerCase().includes(termo))
     ).sort((a, b) => {
-        if (!a.responsavel_id !== !b.responsavel_id) return a.responsavel_id ? 1 : -1;
+        if (!etapaRespIds(a).length !== !etapaRespIds(b).length) return etapaRespIds(a).length ? 1 : -1;
         return cpopOrdenar(a, b);
     });
     if (!lista.length) {
@@ -2575,7 +3303,7 @@ function cpopDesenharCandidatas() {
     }
     const LIMITE = 80;
     el.innerHTML = lista.slice(0, LIMITE).map(e => {
-        const atual = wsMembers.find(x => x.id === e.responsavel_id);
+        const atual = etapaRespIds(e).map(id => wsMembers.find(x => x.id === id)).filter(Boolean);
         const cls = e.status === 'Em andamento' ? 's-an' : '';
         return `<div class="cpop-et ${cls}">
             <div class="cpop-et-i">
@@ -2583,7 +3311,7 @@ function cpopDesenharCandidatas() {
                 <div class="cpop-et-s">📁 ${escH(e.sessoes.projetos.nome)} › 🗂 ${escH(e.sessoes.nome)}</div>
             </div>
             <div class="cpop-et-b">
-                ${atual ? `<span class="badge b-purple" title="Responsável atual">${escH(atual.nome)}</span>` : '<span class="badge b-amber">Sem responsável</span>'}
+                ${atual.length ? `<span class="badge b-purple" title="Responsáveis atuais">${escH(atual.map(u => u.nome).join(', '))}</span>` : '<span class="badge b-amber">Sem responsável</span>'}
                 ${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : ''}
                 <button class="btn btn-p btn-sm" onclick="cpopAtribuir(${e.id})">Atribuir</button>
             </div>
@@ -2591,21 +3319,29 @@ function cpopDesenharCandidatas() {
     }).join('') + (lista.length > LIMITE ? `<div class="cpop-vazio">Mostrando ${LIMITE} de ${lista.length}. Refine a busca para ver as demais.</div>` : '');
 }
 
+
 async function cpopAtribuir(eId) {
     if (cpopBusy || !currentUserCanEdit) return;
     const uid = cpopUserId;
     const e = cpopEtapas.find(x => x.id === eId);
     const u = wsMembers.find(x => x.id === uid);
     if (!e || !u) return;
-    const atual = wsMembers.find(x => x.id === e.responsavel_id);
-    if (atual && !confirm(`"${e.nome}" já está com ${atual.nome}. Reatribuir para ${u.nome}?`)) return;
+    const atuais = etapaRespIds(e);
+    let novos;
+    if (FD_FEAT.multi) novos = [...new Set([...atuais, uid])];          // com vários responsáveis: adiciona
+    else {
+        const atual = wsMembers.find(x => x.id === atuais[0]);
+        if (atual && !confirm(`"${e.nome}" já está com ${atual.nome}. Reatribuir para ${u.nome}?`)) return;
+        novos = [uid];
+    }
     cpopBusy = true;
-    const { error } = await sb.from('etapas').update({ responsavel_id: uid }).eq('id', eId);
+    const r1 = await sb.from('etapas').update({ responsavel_id: novos[0] }).eq('id', eId);
+    const r2 = r1.error ? r1 : await salvarResponsaveis(eId, novos);
     cpopBusy = false;
-    if (error) { toast('Erro ao atribuir: ' + error.message, 'error'); return; }
-    e.responsavel_id = uid;
+    if (r2.error) { toast('Erro ao atribuir: ' + r2.error.message, 'error'); return; }
+    aplicarRespLocal(e, novos);
     const local = findEtapa(eId);
-    if (local) local.responsavel_id = uid;
+    if (local) aplicarRespLocal(local, novos);
     await addLog('update', 'etapa', eId, { nome: `"${e.nome}" atribuída a ${u.nome}` });
     await pushNotificacao('👤', `${currentUser.nome} atribuiu a etapa "${e.nome}" a ${u.nome}.`, 'geral', `projeto:${e.sessoes.projetos.id}`);
     toast(`Etapa atribuída a ${u.nome}. ✅`);
@@ -2685,7 +3421,7 @@ const LOG_ACOES = {
 const LOG_ENTIDADES = {
     'usuario':'Usuário', 'workspace':'Workspace', 'projeto':'Projeto',
     'sessao':'Seção', 'etapa':'Etapa', 'arquivo':'Arquivo',
-    'pasta':'Pasta', 'evento':'Evento', 'aviso':'Recado', 'nota':'Nota'
+    'pasta':'Pasta', 'evento':'Evento', 'aviso':'Recado', 'nota':'Nota', 'api_key':'Chave de API'
 };
 
 async function addLog(acao, entidade=null, entidadeId=null, payload=null) {
@@ -2882,6 +3618,7 @@ function deletarNota(id) {
 
 // ─── FERRAMENTAS ──────────────────────────────────
 async function carregarFerramentas() {
+    carregarIntegracoes();
     const container = document.getElementById('ferramentas-container');
     container.innerHTML = '<div class="loading-c"><div class="spinner"></div></div>';
     try {
@@ -2898,7 +3635,174 @@ async function carregarFerramentas() {
     }
 }
 
-function abrirFerramenta(path) { window.open(path, '_blank'); }
+function abrirFerramenta(path) { window.open(path, '_blank'); } 
+const API_PERMS = [
+    { k: 'ver',    rot: 'Visualizar', dica: 'Ler projetos, etapas e progresso' },
+    { k: 'editar', rot: 'Editar',     dica: 'Criar etapas e alterar status, prioridade, prazo e responsável' },
+    { k: 'apagar', rot: 'Apagar',     dica: 'Excluir etapas' }
+];
+let integracoes = [];
+let apiOcupada = false;
+const podeGerenciarApi = () => currentUserIsWorkspaceAdmin || currentUser?.nivel === 2;
+const apiArgs = (extra = {}) => ({ p_workspace: currentWorkspace.id, p_usuario: currentUser.id, ...extra });
+const intData = iso => new Date(iso).toLocaleDateString('pt-BR');
+const intDataHora = iso => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+function msgErroApi(error) {
+    if (error?.code === 'PGRST202' || /could not find the function/i.test(error?.message || ''))
+        return 'As funções da API ainda não existem no banco. Rode o arquivo supabase/001_api_keys.sql no Supabase.';
+    return error?.message || 'Erro desconhecido.';
+}
+async function comTravaApi(fn) {            // evita criar duas chaves num duplo clique
+    if (apiOcupada) return;
+    apiOcupada = true;
+    try { await fn(); } finally { apiOcupada = false; }
+}
+
+async function carregarIntegracoes() {
+    const pode = podeGerenciarApi();
+    document.getElementById('integracoes-wrap').classList.toggle('hidden', !pode);
+    document.getElementById('btn-add-ferramenta').classList.toggle('hidden', !pode);
+    if (!pode) return;
+    const box = document.getElementById('integracoes-container');
+    if (!integracoes.length) box.innerHTML = '<div class="loading-c"><div class="spinner"></div></div>';
+    const { data, error } = await sb.rpc('api_key_listar', apiArgs());
+    if (error) { box.innerHTML = `<div class="empty-state"><div class="ei">⚠️</div><p>${escH(msgErroApi(error))}</p></div>`; return; }
+    integracoes = data || [];
+    renderIntegracoes();
+}
+
+function renderIntegracoes() {
+    const box = document.getElementById('integracoes-container');
+    if (!integracoes.length) {
+        box.innerHTML = '<div class="empty-state"><div class="ei">🔌</div><h3>Nenhuma ferramenta conectada</h3><p>Clique em “Adicionar ferramenta” para gerar uma chave de API.</p></div>';
+        return;
+    }
+    box.innerHTML = integracoes.map(k => `
+        <div class="int-card">
+            <div class="int-top">
+                <div class="int-ic">🔌</div>
+                <div class="int-info"><strong title="${escH(k.nome)}">${escH(k.nome)}</strong><code class="int-key">${escH(k.key_prefix)}…</code></div>
+            </div>
+            <div class="int-perms">${API_PERMS.map(p => {
+                const on = k.permissoes.includes(p.k);
+                return `<span class="int-perm${on ? ' on' : ''}" title="${escH(p.dica)}">${on ? '✓' : '✕'} ${p.rot}</span>`;
+            }).join('')}</div>
+            <div class="int-meta">Criada em ${intData(k.criado_em)}${k.rotacionada_em ? ` · chave renovada em ${intData(k.rotacionada_em)}` : ''}<br>Último uso: ${k.ultimo_uso ? intDataHora(k.ultimo_uso) : 'nunca usada'}</div>
+            <div class="int-act">
+                <button class="btn btn-s btn-sm" onclick="abrirModalFerramenta(${k.id})">✏️ Editar</button>
+                <button class="btn btn-s btn-sm" onclick="confirmarRegenerarChave(${k.id})">🔄 Nova chave</button>
+                <button class="btn btn-s btn-sm int-del" title="Excluir ferramenta" aria-label="Excluir ${escH(k.nome)}" onclick="confirmarExcluirFerramenta(${k.id})">🗑</button>
+            </div>
+        </div>`).join('');
+}
+
+function abrirModalFerramenta(id = null) {
+    if (!podeGerenciarApi()) return;
+    const k = id ? integracoes.find(x => x.id === id) : null;
+    if (id && !k) return;
+    const perms = k ? k.permissoes : ['ver'];
+    abrirModal(k ? '✏️ Editar ferramenta' : '🔌 Adicionar ferramenta', `
+        <div class="fg"><label class="fl" for="m-int-nome">Nome da ferramenta</label>
+            <input id="m-int-nome" class="fi" maxlength="80" placeholder="Nome da ferramenta    " value="${escH(k?.nome || '')}"/></div>
+        <div class="fg"><label class="fl">Permissões da API</label>
+            <div class="int-chks">${API_PERMS.map(p => `
+                <label class="int-chk"><input type="checkbox" id="m-int-${p.k}" ${perms.includes(p.k) ? 'checked' : ''}/>
+                    <span><b>${p.rot}</b><small>${p.dica}</small></span></label>`).join('')}</div></div>
+        ${k ? '' : '<p class="fhint">Ao criar, a chave aparece <b>uma única vez</b>. Guarde-a em local seguro.</p>'}
+    `, [
+        { label: k ? '💾 Salvar' : '+ Criar e gerar chave', cls: 'btn-p', action: `salvarFerramenta(${id ?? 'null'})` },
+        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
+    ]);
+    setTimeout(() => document.getElementById('m-int-nome')?.focus(), 50);
+}
+
+function lerFormFerramenta() {
+    const nome = document.getElementById('m-int-nome').value.trim();
+    const permissoes = API_PERMS.filter(p => document.getElementById(`m-int-${p.k}`).checked).map(p => p.k);
+    if (!nome) { toast('Dê um nome para a ferramenta.', 'warning'); return null; }
+    if (!permissoes.length) { toast('Marque pelo menos uma permissão.', 'warning'); return null; }
+    return { nome, permissoes };
+}
+
+function salvarFerramenta(id) {
+    return comTravaApi(async () => {
+        if (!podeGerenciarApi()) return;
+        const f = lerFormFerramenta(); if (!f) return;
+        if (id) {
+            const { error } = await sb.rpc('api_key_atualizar', apiArgs({ p_key_id: id, p_nome: f.nome, p_permissoes: f.permissoes }));
+            if (error) return toast(msgErroApi(error), 'error');
+            addLog('update', 'api_key', id, { nome: f.nome });
+            fecharModal(); toast('Ferramenta atualizada!');
+        } else {
+            const { data, error } = await sb.rpc('api_key_criar', apiArgs({ p_nome: f.nome, p_permissoes: f.permissoes }));
+            if (error) return toast(msgErroApi(error), 'error');
+            addLog('create', 'api_key', data[0].key_id, { nome: f.nome });
+            mostrarChaveApi(f.nome, data[0].chave);
+        }
+        carregarIntegracoes();
+    });
+}
+
+function mostrarChaveApi(nome, chave) {
+    abrirModal('🔑 Chave de API', `
+        <p class="fhint" style="margin-bottom:10px">Ferramenta: <b>${escH(nome)}</b></p>
+        <input id="m-int-chave" class="fi" readonly value="${escH(chave)}" onfocus="this.select()"/>
+        <div class="n-hint" style="margin-top:12px">⚠ Esta é a <b>única vez</b> que a chave aparece. Copie e guarde agora. Se perder ou vazar, gere uma nova: a antiga deixa de funcionar na hora.</div>
+        <p class="fhint" style="margin-top:12px">Envie em cada requisição o cabeçalho <code>Authorization: Bearer &lt;chave&gt;</code>.</p>
+    `, [
+        { label: '📋 Copiar chave', cls: 'btn-p', action: 'copiarChaveApi()' },
+        { label: 'Já guardei', cls: 'btn-s', action: 'fecharModal()' }
+    ]);
+    document.getElementById('m-int-chave').select();
+}
+async function copiarChaveApi() {
+    const el = document.getElementById('m-int-chave'); if (!el) return;
+    el.select();
+    try { await navigator.clipboard.writeText(el.value); toast('Chave copiada! 📋'); }
+    catch { toast('Chave selecionada: copie com Ctrl+C.', 'warning'); }
+}
+
+function confirmarRegenerarChave(id) {
+    const k = integracoes.find(x => x.id === id); if (!k) return;
+    abrirModal('🔄 Gerar nova chave', `
+        <p>Vamos criar uma nova chave para <b>${escH(k.nome)}</b>.</p>
+        <div class="n-hint" style="margin-top:12px">⚠ A chave atual <b>deixa de funcionar imediatamente</b>. Depois, atualize a ferramenta (ex.: o bot) com a nova chave.</div>
+    `, [
+        { label: '🔄 Gerar nova chave', cls: 'btn-p', action: `regenerarChave(${id})` },
+        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
+    ]);
+}
+function regenerarChave(id) {
+    return comTravaApi(async () => {
+        const k = integracoes.find(x => x.id === id); if (!k || !podeGerenciarApi()) return;
+        const { data, error } = await sb.rpc('api_key_regenerar', apiArgs({ p_key_id: id }));
+        if (error) return toast(msgErroApi(error), 'error');
+        addLog('update', 'api_key', id, { nome: `${k.nome} (nova chave)` });
+        mostrarChaveApi(k.nome, data[0].chave);
+        carregarIntegracoes();
+    });
+}
+
+function confirmarExcluirFerramenta(id) {
+    const k = integracoes.find(x => x.id === id); if (!k) return;
+    abrirModal('🗑 Excluir ferramenta', `
+        <p>Excluir <b>${escH(k.nome)}</b>?</p>
+        <div class="n-hint" style="margin-top:12px">⚠ A chave é revogada na hora e qualquer integração que a use para de funcionar. Isso não pode ser desfeito.</div>
+    `, [
+        { label: '🗑 Excluir', cls: 'btn-s', style: 'border-color:var(--danger);color:var(--danger)', action: `excluirFerramenta(${id})` },
+        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
+    ]);
+}
+function excluirFerramenta(id) {
+    return comTravaApi(async () => {
+        const k = integracoes.find(x => x.id === id); if (!k || !podeGerenciarApi()) return;
+        const { error } = await sb.rpc('api_key_excluir', apiArgs({ p_key_id: id }));
+        if (error) return toast(msgErroApi(error), 'error');
+        addLog('delete', 'api_key', id, { nome: k.nome });
+        fecharModal(); toast('Ferramenta excluída.');
+        carregarIntegracoes();
+    });
+}
 
 // ─── NOTIFICAÇÕES (admin only) ────────────────────
 let notifInterval = null;
@@ -3123,7 +4027,10 @@ function abrirModal(title, body, buttons=[]) {
     document.getElementById('modal-ov').classList.remove('hidden');
 }
 
-function fecharModal() { document.getElementById('modal-ov').classList.add('hidden'); }
+function fecharModal() {
+    const chave = document.getElementById('m-int-chave'); if (chave) chave.value = '';   // não deixa a chave de API no DOM
+    document.getElementById('modal-ov').classList.add('hidden');
+}
 document.addEventListener('keydown', ev => {
     if (ev.key === 'Escape' && !document.getElementById('modal-ov').classList.contains('hidden')) fecharModal();
 });
