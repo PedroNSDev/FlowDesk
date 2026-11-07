@@ -97,7 +97,6 @@
 .ag-conc input{width:16px;height:16px;accent-color:var(--ok);cursor:pointer;flex-shrink:0}
 .ag-pzc-c[onclick],.ag-user{cursor:pointer}
 .ag-user{display:inline-flex;align-items:center;gap:6px}
-/* adiar prazo: três atalhos lado a lado + data e botão na mesma linha */
 .ag-adiar .ag-adiar-b{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}
 .ag-adiar .ag-adiar-b .ag-mini{width:100%;padding:7px 4px;font-size:.74rem;border-radius:8px;white-space:nowrap}
 .ag-adiar .ag-adiar-d{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center}

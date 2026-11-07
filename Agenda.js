@@ -39,7 +39,7 @@ function agIndexar(comConcluidos) {
     }
     Object.entries(mapa).forEach(([dia, x]) => {
         x.eventos.sort((a, b) => (a.hora || '99').localeCompare(b.hora || '99'));
-        // depois de marcar/desmarcar "concluída", o card fica onde estava (não pula para o fim da lista)
+      
         const fx = agOrdemFix && agOrdemFix.dia === dia ? agOrdemFix.ids : null;
         const chave = e => fx && fx.includes(e.id) ? fx.indexOf(e.id) : 1000 + agRank(e);
         x.prazos.sort((a, b) => chave(a) - chave(b));
@@ -379,8 +379,6 @@ async function agToggleConcl(id, el) {
     else toast(novo === 'Concluído' ? 'Etapa concluída ✅' : 'Etapa reaberta.');
     agRender();
 }
-
-// status alterado em qualquer lugar (projetos, quadro, progresso, agenda) mantém a agenda em dia
 window.addEventListener('flowdesk:etapa-status', ev => {
     const x = agDados.etapas.find(e => e.id === ev.detail.id);
     if (x) x.status = ev.detail.status;

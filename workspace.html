@@ -424,9 +424,7 @@
     <link rel="stylesheet" href="Agenda.css">
 
     <style id="ui-refresh">
-        /* ═══════════ UI REFRESH ═══════════
-           Calm design: menos bordas/sombras, sidebar discreta, status por ícone,
-           listas com cabeçalho fixo e ações no hover. Bloco isolado: remover este <style> volta ao visual anterior. */
+        /* ═══════════ UI REFRESH ═══════════ */
         :root{
             --bg:#f5f6fb; --border:#e5e8f0; --r:12px; --rsm:8px;
             --sh:0 1px 2px rgba(16,24,40,.05);
@@ -440,7 +438,7 @@
         :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
         input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 
-        /* ── Botões e campos: mais leves ── */
+        /* ── Botões e camposs ── */
         .btn{padding:9px 16px;border-radius:10px}
         .btn::before{display:none}
         .btn-p{background:var(--acc);box-shadow:0 1px 2px rgba(79,70,229,.35)}
@@ -451,7 +449,7 @@
         .fi,.fta,.fsel{border:1px solid var(--border);border-radius:10px;padding:10px 12px}
         .fi:focus,.fta:focus,.fsel:focus{box-shadow:0 0 0 3px rgba(79,70,229,.12)}
 
-        /* ── Sidebar calma (ícones SVG, ativo sutil) ── */
+        /* ── Sidebar calma ── */
         .nav-btn{color:#8b93a7;font-size:.85rem;padding:8px 10px;border-radius:8px;gap:10px;position:relative}
         .nav-btn:hover{background:rgba(255,255,255,.06);color:#e5e7f0}
         .nav-btn.active{background:rgba(129,140,248,.16);color:#fff}
@@ -462,7 +460,6 @@
         .ni svg{width:17px;height:17px}
         .ws-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--acc),#818cf8);display:flex;align-items:center;justify-content:center;color:#fff}
         .ws-icon svg{width:16px;height:16px}
-        /* contraste: estes textos estavam quase invisíveis no fundo escuro */
         .sb-sec{color:#64748b}
         .ws-code{color:#7c8aa5}
         .sb-user .ur{color:#8592a8}
@@ -486,18 +483,18 @@
         .home-greeting{font-size:1.7rem;letter-spacing:-.02em}
         @media(max-width:860px){.main{padding:16px 14px 40px}}
 
-        /* ── Dashboard (Dashboard.js injeta o CSS depois, por isso #app) ── */
+        /* ── Dashboard ── */
         #app .dash-card{border-radius:16px}
         #app .dash-kpi{border-radius:16px}
         #app .dash-ct{letter-spacing:.07em}
 
-        /* ── Projetos: cards de visão geral ── */
+        /* ── Projetos: cards ── */
         .pv-card,.pv-folder-card{position:relative;overflow:hidden}
         .pv-card::before,.pv-folder-card::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--acc),#818cf8);opacity:0;transition:opacity .15s}
         .pv-card:hover::before,.pv-folder-card:hover::before{opacity:1}
         .pv-folder-card strong{font-size:1rem}
 
-        /* ── Lista: cabeçalho fixo, ações no hover, concluídas recuam ── */
+        /* ── Lista── */
         .grp{overflow:visible;border-radius:12px}
         .grp-h{position:sticky;top:var(--stick-top);z-index:3;background:var(--surface);border-radius:12px 12px 0 0}
         .grp>:last-child{border-radius:0 0 12px 12px}
@@ -510,12 +507,12 @@
         .row:hover .ib,.row:focus-within .ib,.grp-h:hover .ib,.grp-h:focus-within .ib,.ib:focus-visible{opacity:1}
         @media(hover:none){.row .ib,.grp-h .ib{opacity:1}}
 
-        /* status por ícone: vazio → meio → cheio */
+    
         .dot{width:12px;height:12px;border:2px solid #cbd5e1;background:transparent;margin-top:3px}
         .s-doing .dot{border-color:var(--warn);background:conic-gradient(var(--warn) 0 50%,transparent 0)}
         .s-done .dot{border-color:var(--ok);background:var(--ok)}
 
-        /* ── Quadro: cards compactos, atrasadas em destaque ── */
+        /* ── Quadro: cards*/
         .kb{grid-template-columns:repeat(3,minmax(260px,1fr));gap:16px}
         .kb-col{background:#eef0f7;border-radius:14px}
         .kb-card{transition:transform .12s,box-shadow .12s,border-color .12s}
@@ -524,7 +521,7 @@
         .kb-card.late{border-left:3px solid var(--danger)}
         .kb-col.s-done .kb-card{opacity:.7}
 
-        /* ── Pastas/projetos: cards de destaque + pin ── */
+        /* ── Pastas/projetos─ */
         .pv-section-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:2px 2px 10px}
         .pv-grid+.pv-section-label{margin-top:26px}
         .pv-folder-card{gap:14px;padding:18px;border-radius:16px;cursor:pointer}
@@ -546,7 +543,7 @@
         .pv-card.pinned,.pv-folder-card.pinned{border-color:#a5b4fc;background:linear-gradient(180deg,var(--acc-lt),var(--surface) 65%)}
         .pv-card.pinned::before,.pv-folder-card.pinned::before{opacity:1}
 
-        /* ── Projetos: breadcrumb ── */
+        /* ── Projetos── */
         .pj-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
         .pj-crumbs{display:flex;align-items:center;gap:2px;min-width:0;flex-wrap:wrap;font-size:.86rem}
         .pj-crumb{display:inline-block;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 9px;border-radius:8px;border:none;background:none;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;transition:background .12s,color .12s}
@@ -555,7 +552,7 @@
         .pj-sep{color:#cbd5e1;user-select:none}
         .pj-copy{margin-left:auto}
 
-        /* ── Ferramentas: integrações (API) ── */
+        /* ── Ferramentas  ── */
         .int-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
         .int-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--sh);min-width:0}
         .int-top{display:flex;align-items:center;gap:12px;min-width:0}
@@ -583,7 +580,7 @@
         .m-hdr{padding:18px 22px 14px}
         .m-title{font-size:1rem}
 
-        /* ═══ DRAG & DROP (etapas, atividades, quadro) ═══ */
+        /* ═══ DRAG & DROP ═══ */
         .grip{display:inline-flex;align-items:center;justify-content:center;width:18px;height:22px;color:#94a3b8;cursor:grab;font-size:.95rem;line-height:1;border-radius:5px;flex-shrink:0;user-select:none;opacity:.35;transition:opacity .12s,background .12s,color .12s}
         .row:hover .grip,.grp-h:hover .grip,.grip:focus-visible{opacity:1}
         .grip:hover{background:var(--acc-lt);color:var(--acc)}
@@ -602,7 +599,7 @@
         .row.flash,.kb-card.flash{animation:flashRow 2.4s ease}
         @keyframes flashRow{0%,65%{background:#fef9c3;box-shadow:inset 4px 0 0 var(--warn)}100%{background:transparent}}
 
-        /* ═══ MULTI-RESPONSÁVEIS (combobox com chips) ═══ */
+        /* ═══ MULTI-RESPONSÁVEIS  ═══ */
         .ms{border:2px solid var(--border);border-radius:12px;padding:6px 8px;background:#fff;cursor:text;transition:.15s}
         .ms:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px rgba(79,70,229,.12)}
         .ms-box{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -619,7 +616,7 @@
         .ms-opt small{color:var(--muted);margin-left:auto;font-size:.74rem}
         .ms-empty{padding:8px;color:var(--muted);font-size:.8rem}
 
-        /* ═══ PROGRESSO (filtros por coluna) ═══ */
+        /* ═══ PROGRESSO  ═══ */
         .prog-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px;margin-bottom:14px}
         .ps-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;text-align:left;font-family:var(--font);transition:.15s;color:var(--text)}
         .ps-card:hover{border-color:#c7d2fe;box-shadow:var(--sh-md);transform:translateY(-1px)}
@@ -676,7 +673,6 @@
         .dnd-tray small{opacity:.7;font-size:.74rem;margin-right:4px}
         .dnd-chip{padding:8px 12px;border-radius:10px;background:#1e293b;border:2px dashed #475569;font-size:.8rem;font-weight:600;display:inline-flex;gap:6px;align-items:center;transition:.12s}
         .dnd-chip.drop-in{border-color:#818cf8;background:#312e81;outline:none}
-        /* usuários clicáveis (abrem o resumo do membro) */
         .av-click{cursor:pointer}
         .avs .av-click{display:inline-flex;margin-left:-6px}.avs .av-click:first-child{margin-left:0}.avs .av-click .av{margin-left:0}
         .av-click:hover .av,.badge.av-click:hover{filter:brightness(.93)}
@@ -3948,9 +3944,9 @@ async function carregarNotificacoes() {
     list.innerHTML = data.map(n => {
         const tipo = NOTIF_TIPO[n.tipo] || { label: n.tipo||'Geral', cls:'background:#f1f5f9;color:#64748b' };
 
-        // Card especial: solicitação de acesso (ainda não respondida)
+        // Card especial
         if (n.tipo === 'acesso' && !n.lida) {
-            // icone guarda "usuario_id:pedido_id" quando vem do homepage
+  
             const parts = (n.icone||'').split(':');
             const usuarioId = parts[1] || null;
             const pedidoId  = parts[2] || null;
