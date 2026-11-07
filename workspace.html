@@ -424,7 +424,9 @@
     <link rel="stylesheet" href="Agenda.css">
 
     <style id="ui-refresh">
-        /* ═══════════ UI REFRESH ═══════════*/
+        /* ═══════════ UI REFRESH ═══════════
+           Calm design: menos bordas/sombras, sidebar discreta, status por ícone,
+           listas com cabeçalho fixo e ações no hover. Bloco isolado: remover este <style> volta ao visual anterior. */
         :root{
             --bg:#f5f6fb; --border:#e5e8f0; --r:12px; --rsm:8px;
             --sh:0 1px 2px rgba(16,24,40,.05);
@@ -438,7 +440,7 @@
         :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
         input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 
-        /* ── Botões ── */
+        /* ── Botões e campos: mais leves ── */
         .btn{padding:9px 16px;border-radius:10px}
         .btn::before{display:none}
         .btn-p{background:var(--acc);box-shadow:0 1px 2px rgba(79,70,229,.35)}
@@ -449,7 +451,7 @@
         .fi,.fta,.fsel{border:1px solid var(--border);border-radius:10px;padding:10px 12px}
         .fi:focus,.fta:focus,.fsel:focus{box-shadow:0 0 0 3px rgba(79,70,229,.12)}
 
-        /* ── Sidebar ── */
+        /* ── Sidebar calma (ícones SVG, ativo sutil) ── */
         .nav-btn{color:#8b93a7;font-size:.85rem;padding:8px 10px;border-radius:8px;gap:10px;position:relative}
         .nav-btn:hover{background:rgba(255,255,255,.06);color:#e5e7f0}
         .nav-btn.active{background:rgba(129,140,248,.16);color:#fff}
@@ -460,7 +462,7 @@
         .ni svg{width:17px;height:17px}
         .ws-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--acc),#818cf8);display:flex;align-items:center;justify-content:center;color:#fff}
         .ws-icon svg{width:16px;height:16px}
-        
+        /* contraste: estes textos estavam quase invisíveis no fundo escuro */
         .sb-sec{color:#64748b}
         .ws-code{color:#7c8aa5}
         .sb-user .ur{color:#8592a8}
@@ -484,18 +486,18 @@
         .home-greeting{font-size:1.7rem;letter-spacing:-.02em}
         @media(max-width:860px){.main{padding:16px 14px 40px}}
 
-        /* ── Dashboard ── */
+        /* ── Dashboard (Dashboard.js injeta o CSS depois, por isso #app) ── */
         #app .dash-card{border-radius:16px}
         #app .dash-kpi{border-radius:16px}
         #app .dash-ct{letter-spacing:.07em}
 
-        /* ── Projetos: cards ── */
+        /* ── Projetos: cards de visão geral ── */
         .pv-card,.pv-folder-card{position:relative;overflow:hidden}
         .pv-card::before,.pv-folder-card::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--acc),#818cf8);opacity:0;transition:opacity .15s}
         .pv-card:hover::before,.pv-folder-card:hover::before{opacity:1}
         .pv-folder-card strong{font-size:1rem}
 
-        /* ── Lista: ── */
+        /* ── Lista: cabeçalho fixo, ações no hover, concluídas recuam ── */
         .grp{overflow:visible;border-radius:12px}
         .grp-h{position:sticky;top:var(--stick-top);z-index:3;background:var(--surface);border-radius:12px 12px 0 0}
         .grp>:last-child{border-radius:0 0 12px 12px}
@@ -508,12 +510,12 @@
         .row:hover .ib,.row:focus-within .ib,.grp-h:hover .ib,.grp-h:focus-within .ib,.ib:focus-visible{opacity:1}
         @media(hover:none){.row .ib,.grp-h .ib{opacity:1}}
 
-        /* status por ícone */
+        /* status por ícone: vazio → meio → cheio */
         .dot{width:12px;height:12px;border:2px solid #cbd5e1;background:transparent;margin-top:3px}
         .s-doing .dot{border-color:var(--warn);background:conic-gradient(var(--warn) 0 50%,transparent 0)}
         .s-done .dot{border-color:var(--ok);background:var(--ok)}
 
-        /* ── Quadro: cards */
+        /* ── Quadro: cards compactos, atrasadas em destaque ── */
         .kb{grid-template-columns:repeat(3,minmax(260px,1fr));gap:16px}
         .kb-col{background:#eef0f7;border-radius:14px}
         .kb-card{transition:transform .12s,box-shadow .12s,border-color .12s}
@@ -553,7 +555,7 @@
         .pj-sep{color:#cbd5e1;user-select:none}
         .pj-copy{margin-left:auto}
 
-        /* ── Ferramentas: integrações ── */
+        /* ── Ferramentas: integrações (API) ── */
         .int-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
         .int-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--sh);min-width:0}
         .int-top{display:flex;align-items:center;gap:12px;min-width:0}
@@ -581,7 +583,7 @@
         .m-hdr{padding:18px 22px 14px}
         .m-title{font-size:1rem}
 
-        /* ═══ DRAG & DROP═══ */
+        /* ═══ DRAG & DROP (etapas, atividades, quadro) ═══ */
         .grip{display:inline-flex;align-items:center;justify-content:center;width:18px;height:22px;color:#94a3b8;cursor:grab;font-size:.95rem;line-height:1;border-radius:5px;flex-shrink:0;user-select:none;opacity:.35;transition:opacity .12s,background .12s,color .12s}
         .row:hover .grip,.grp-h:hover .grip,.grip:focus-visible{opacity:1}
         .grip:hover{background:var(--acc-lt);color:var(--acc)}
@@ -600,7 +602,7 @@
         .row.flash,.kb-card.flash{animation:flashRow 2.4s ease}
         @keyframes flashRow{0%,65%{background:#fef9c3;box-shadow:inset 4px 0 0 var(--warn)}100%{background:transparent}}
 
-        /* ═══ MULTI-RESPONSÁVEIS  ═══ */
+        /* ═══ MULTI-RESPONSÁVEIS (combobox com chips) ═══ */
         .ms{border:2px solid var(--border);border-radius:12px;padding:6px 8px;background:#fff;cursor:text;transition:.15s}
         .ms:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px rgba(79,70,229,.12)}
         .ms-box{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -674,6 +676,10 @@
         .dnd-tray small{opacity:.7;font-size:.74rem;margin-right:4px}
         .dnd-chip{padding:8px 12px;border-radius:10px;background:#1e293b;border:2px dashed #475569;font-size:.8rem;font-weight:600;display:inline-flex;gap:6px;align-items:center;transition:.12s}
         .dnd-chip.drop-in{border-color:#818cf8;background:#312e81;outline:none}
+        /* usuários clicáveis (abrem o resumo do membro) */
+        .av-click{cursor:pointer}
+        .avs .av-click{display:inline-flex;margin-left:-6px}.avs .av-click:first-child{margin-left:0}.avs .av-click .av{margin-left:0}
+        .av-click:hover .av,.badge.av-click:hover{filter:brightness(.93)}
     </style>
 </head>
 <body>
@@ -1236,7 +1242,7 @@ function projStats(p) {
 }
 function avatar(u) { return `<span class="av" style="background:${userColor(u.nome)}" title="${escH(u.nome)}">${initials(u.nome)}</span>`; }
 
-// ─── PINS───
+// ─── PINS (fixar no topo — só para o usuário, salvo neste navegador) ───
 let pinsCache = null;
 function pinsStorageKey() { return `fd-pins-${currentUser?.id || 'anon'}-${currentWorkspace?.codigo || 'global'}`; }
 function getPins() {
@@ -1362,7 +1368,7 @@ function renderProjetoCard(p) {
         ${p.pasta_id ? `<span class="badge b-acc" style="align-self:flex-start">📁 ${escH(wsPastasProjetos.find(pasta => String(pasta.id) === String(p.pasta_id))?.nome || '')}</span>` : ''}
         <div style="display:flex;align-items:center;gap:10px"><div class="pv-bar"><i style="width:${st.pct}%"></i></div><b style="font-size:.78rem">${st.pct}%</b></div>
         <div class="pv-meta"><span>${(p.sessoes||[]).length} atividades · ${st.done}/${st.total} etapas</span>
-            <span class="avs">${people.slice(0,4).map(avatar).join('')}${people.length > 4 ? `<span class="av av-more">+${people.length-4}</span>` : ''}</span></div>
+            <span class="avs">${people.slice(0,4).map(avClick).join('')}${people.length > 4 ? `<span class="av av-more">+${people.length-4}</span>` : ''}</span></div>
     </div>`;
 }
 
@@ -1448,7 +1454,7 @@ function renderListView(p) {
             <div class="grp-h" onclick="toggleGrp(${s.id})">
                 ${currentUserCanEdit ? `<span class="grip" draggable="true" data-drag-kind="sessao" data-drag-id="${s.id}" title="Arraste para reordenar a atividade" onclick="event.stopPropagation()">⠿</span>` : ''}
                 <span class="chev ${closed ? '' : 'open'}">▶</span><b>${escH(s.nome)}</b>
-                <span class="badge b-gray">${done}/${et.length}</span><span class="avs">${colabs.map(avatar).join('')}</span><span class="grp-sp"></span>
+                <span class="badge b-gray">${done}/${et.length}</span><span class="avs">${colabs.map(avClick).join('')}</span><span class="grp-sp"></span>
                 ${currentUserCanEdit ? `<button class="ib" title="Editar atividade" onclick="event.stopPropagation();editarSessao(${s.id},${p.id})">✏️</button>` : ''}
             </div>
             ${closed ? '' : `${et.length ? `<div class="row row-h"><span>Etapa</span><span>Responsáveis</span><span>Prazo</span><span>Prio.</span><span>Status</span></div>${et.map(e => renderEtapa(p.id, s.id, e)).join('')}` : '<div class="row-empty" style="border-top:1px solid var(--border)">Nenhuma etapa ainda. Arraste uma etapa para cá.</div>'}
@@ -1486,6 +1492,12 @@ function renderBoard(p) {
     }).join('')}</div>`;
 }
 
+// (o drop de etapas/cards agora é tratado por dndInit)
+
+// ═══════════════════════════════════════════════════
+//   RECURSOS NOVOS: ordem, vários responsáveis, DnD, etapa-link, upload por arrastar
+//   (precisam do SQL de migração; sem ele o app continua funcionando como antes)
+// ═══════════════════════════════════════════════════
 const FD_FEAT = { multi: true, ordem: true, pord: true, pasta: true };
 const ordV = x => (typeof x.ordem === 'number' ? x.ordem : x.id);
 const ordCmp = (a, b) => (ordV(a) - ordV(b)) || (a.id - b.id);
@@ -1569,18 +1581,22 @@ function normalizarProjetos() {
     });
 }
 
+function avClick(u) {
+    return `<span class="av-click" role="button" tabindex="0" title="Ver ${escH(u.nome)}" onclick="event.stopPropagation();verUsuario(${u.id})" onkeydown="if(event.key==='Enter'){event.stopPropagation();verUsuario(${u.id})}">${avatar(u)}</span>`;
+}
 function avStack(ids) {
     const us = ids.map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
     if (!us.length) return '';
-    return `<span class="avs">${us.slice(0, 3).map(avatar).join('')}${us.length > 3 ? `<span class="av av-more">+${us.length - 3}</span>` : ''}</span>`;
+    return `<span class="avs">${us.slice(0, 3).map(avClick).join('')}${us.length > 3 ? `<span class="av av-more">+${us.length - 3}</span>` : ''}</span>`;
 }
 function respCell(ids) {
     const us = ids.map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
     if (!us.length) return '<span class="muted">—</span>';
     const nome = us.length === 1 ? escH(us[0].nome.split(' ')[0]) : `${us.length} pessoas`;
-    return `${avStack(ids)}<span title="${escH(us.map(u => u.nome).join(', '))}">${nome}</span>`;
+    return `${avStack(ids)}<span ${us.length === 1 ? `class="av-click" role="button" tabindex="0" onclick="event.stopPropagation();verUsuario(${us[0].id})"` : ''} title="${escH(us.map(u => u.nome).join(', '))}">${nome}</span>`;
 }
 
+// ─── COMBOBOX DE VÁRIOS RESPONSÁVEIS (estilo "Para:" do Gmail) ───
 const msState = {};
 function msHtml(id) {
     return `<div class="ms" id="ms-${id}" onclick="document.getElementById('ms-${id}-in').focus()">
@@ -1647,7 +1663,7 @@ document.addEventListener('click', ev => {
     document.querySelectorAll('.ms-dd:not(.hidden)').forEach(dd => { if (!dd.closest('.ms').contains(ev.target)) dd.classList.add('hidden'); });
 });
 
-// ─── CACHES / EVENTOS DE STATUS ───
+// ─── CACHES / EVENTOS DE STATUS (Agenda, Home e Progresso escutam isto) ───
 function etapaPatchCaches(eId, patch) {
     if (typeof dashDados !== 'undefined' && dashDados?.etapas) {
         const x = dashDados.etapas.find(et => et.id === eId); if (x) Object.assign(x, patch);
@@ -1685,6 +1701,10 @@ function irParaEtapa(eId) {
     window.scrollTo(0, 0);
     focarEtapa(eId);
 }
+// API para a Agenda (Agenda.js): use atributos no HTML ou chame as funções direto
+//   <button data-etapa-goto="ID">   → abre a etapa no projeto
+//   <input type=checkbox data-etapa-toggle="ID"> → alterna concluída/não concluída
+//   window.addEventListener('flowdesk:etapa-status', e => e.detail = {id, status})
 window.FlowDesk = { irParaEtapa, alternarConcluida, setEtapaStatus: (id, st) => updateEtapaStatus(+id, st) };
 document.addEventListener('click', async ev => {
     const t = ev.target.closest?.('[data-etapa-toggle]');
@@ -1699,7 +1719,7 @@ document.addEventListener('click', async ev => {
     if (g) { ev.preventDefault(); ev.stopPropagation(); irParaEtapa(g.dataset.etapaGoto); }
 }, true);
 
-// ─── DRAG & DROP───
+// ─── DRAG & DROP: etapas, atividades e cards do quadro ───
 let dnd = null;
 function dndUnmark() {
     document.querySelectorAll('.drop-before,.drop-after,.drop-in,.kb-col.over').forEach(el => el.classList.remove('drop-before', 'drop-after', 'drop-in', 'over'));
@@ -1821,7 +1841,7 @@ async function moverEtapa(id, o) {
     const ordem = ordemEntre(sib, idx);
 
     const statusMudou = board && o.status !== e.status;
-    const soStatus = board && !currentUserCanEdit;    
+    const soStatus = board && !currentUserCanEdit;       // quem não edita só muda o status
     const trocouSessao = !soStatus && sNew !== sOld;
     const patch = {};
     if (statusMudou) patch.status = o.status;
@@ -1948,6 +1968,40 @@ function upDrop(ev) {
     });
     window.addEventListener('dragend', esconder);
 })();
+
+
+// ─── PERFIL RÁPIDO DO MEMBRO (clicar no responsável) ───
+function verUsuario(uid) {
+    const u = wsMembers.find(x => x.id === uid); if (!u) return;
+    const hoje = dataLocalHojeISO(), minhas = [];
+    wsProjetos.forEach(p => (p.sessoes || []).forEach(se => (se.etapas || []).forEach(e => {
+        if (etapaRespIds(e).includes(uid)) minhas.push({ e, p, se });
+    })));
+    const abertas = minhas.filter(x => x.e.status !== 'Concluído')
+        .sort((a, b) => (a.e.prazo || '9999').localeCompare(b.e.prazo || '9999'));
+    const feitas = minhas.length - abertas.length;
+    const atras = abertas.filter(x => x.e.prazo && x.e.prazo < hoje).length;
+    const lista = abertas.slice(0, 8).map(({ e, p, se }) => `
+        <div class="ag-prox-i" onclick="fecharModal();irParaEtapa(${e.id})" title="Abrir esta etapa no projeto">
+            <span class="ag-dot"></span><div style="min-width:0"><div style="font-weight:600;overflow-wrap:anywhere">${escH(e.nome)}</div>
+            <div class="muted" style="font-size:.72rem">📁 ${escH(p.nome)} › ${escH(se.nome)}</div></div>
+            <small>${e.prazo ? prazoLabel(e.prazo, e.status) : 'Sem prazo'}</small></div>`).join('');
+    abrirModal('👤 ' + u.nome, `
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+            <span class="av" style="background:${userColor(u.nome)};width:52px;height:52px;font-size:1.1rem">${initials(u.nome)}</span>
+            <div><div style="font-weight:700;font-size:1rem">${escH(u.nome)}</div>
+            <div class="muted" style="font-size:.8rem">@${escH(u.username || '')} · ${u.wsAdmin ? 'Administrador' : 'Membro'}</div></div>
+        </div>
+        <div class="ag-resumo">
+            <div class="ag-rs"><b>${abertas.length}</b><span>Etapas em aberto</span></div>
+            <div class="ag-rs"><b style="${atras ? 'color:var(--danger)' : ''}">${atras}</b><span>Atrasadas</span></div>
+            <div class="ag-rs"><b>${feitas}</b><span>Concluídas</span></div>
+            <div class="ag-rs"><b>${minhas.length}</b><span>Total atribuídas</span></div>
+        </div>
+        <div class="ag-sec">Em aberto${abertas.length > 8 ? ` (mostrando 8 de ${abertas.length})` : ''}</div>
+        ${lista || '<div class="ag-vazio">Nenhuma etapa em aberto. 🎉</div>'}
+    `, [{ label: 'Fechar', cls: 'btn-s', action: 'fecharModal()' }]);
+}
 
 // ─── CRUD PROJETOS ────────────────────────────────
 function abrirModalProjeto() {
@@ -2291,7 +2345,7 @@ function progRow(e, i) {
     return `<tr class="prog-row anim-item ${ST_CLS[e.status] || ''}" style="animation-delay:${Math.min(i, 20) * 0.02}s" onclick="irParaEtapa(${e.id})" title="Abrir esta etapa no projeto">
         <td><div class="pr-t">${escH(e.nome)}</div><div class="pr-s">📁 ${escH(e.sessoes?.projetos?.nome || '—')}</div></td>
         <td class="pr-sess">${escH(e.sessoes?.nome || '—')}</td>
-        <td>${us.length ? `<div class="pr-resp">${us.map(u => `<span class="badge b-purple">${escH(u.nome)}</span>`).join('')}</div>` : '<span class="muted" style="font-size:.78rem">—</span>'}</td>
+        <td>${us.length ? `<div class="pr-resp">${us.map(u => `<span class="badge b-purple av-click" role="button" tabindex="0" title="Ver ${escH(u.nome)}" onclick="event.stopPropagation();verUsuario(${u.id})">${escH(u.nome)}</span>`).join('')}</div>` : '<span class="muted" style="font-size:.78rem">—</span>'}</td>
         <td>${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span class="badge b-gray">Sem prazo</span>'}</td>
         <td><span class="badge ${e.status==='Concluído'?'b-green':e.status==='Em andamento'?'b-amber':'b-gray'}">${e.status}</span></td>
         <td><span class="badge b-gray">${e.prioridade ?? 0}</span></td>
@@ -3434,16 +3488,18 @@ async function addLog(acao, entidade=null, entidadeId=null, payload=null) {
         else if (eLabel)     mensagem += ` de ${eLabel}`;
         if (payload?.status) mensagem += ` → ${payload.status}`;
 
-        await sb.from('logs').insert({
-            usuario_id:   currentUser.id,
-            usuario_nome: currentUser.nome,
-            mensagem,
-            workspace_id: currentWorkspace.id,
+        const base = { usuario_id: currentUser.id, usuario_nome: currentUser.nome, mensagem, workspace_id: currentWorkspace.id };
+        let { error } = await sb.from('logs').insert({
+            ...base,
             acao,
             entidade:     entidade   || null,
             entidade_id:  entidadeId || null,
             payload:      payload    || null
         });
+        // tabela ainda sem as colunas novas (rode o SQL de migração): grava só o básico, sem erro no console
+        if (error && error.code === 'PGRST204') ({ error } = await sb.from('logs').insert(base));
+        // o log nunca deve atrapalhar a ação do usuário; mostramos o motivo real no console para diagnóstico
+        if (error) console.warn('addLog: o Supabase recusou o registro de log →', error.message, '|', error.details || '', '|', error.hint || '', '| código', error.code);
     } catch(e) { console.warn('addLog falhou:', e?.message); }
 }
 
@@ -3635,7 +3691,11 @@ async function carregarFerramentas() {
     }
 }
 
-function abrirFerramenta(path) { window.open(path, '_blank'); } 
+function abrirFerramenta(path) { window.open(path, '_blank'); }
+
+// ─── INTEGRAÇÕES (API) — só administradores ───────
+// As chaves são geradas e guardadas (só o hash) no banco. O site nunca lê a tabela:
+// tudo passa pelas funções api_key_* (supabase/001_api_keys.sql).
 const API_PERMS = [
     { k: 'ver',    rot: 'Visualizar', dica: 'Ler projetos, etapas e progresso' },
     { k: 'editar', rot: 'Editar',     dica: 'Criar etapas e alterar status, prioridade, prazo e responsável' },

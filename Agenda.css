@@ -93,3 +93,13 @@
     .ag-add{display:none}
     .ag-dn{width:22px;height:22px;font-size:.7rem}
 }
+.ag-conc{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:.78rem;font-weight:600;cursor:pointer;user-select:none}
+.ag-conc input{width:16px;height:16px;accent-color:var(--ok);cursor:pointer;flex-shrink:0}
+.ag-pzc-c[onclick],.ag-user{cursor:pointer}
+.ag-user{display:inline-flex;align-items:center;gap:6px}
+/* adiar prazo: três atalhos lado a lado + data e botão na mesma linha */
+.ag-adiar .ag-adiar-b{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}
+.ag-adiar .ag-adiar-b .ag-mini{width:100%;padding:7px 4px;font-size:.74rem;border-radius:8px;white-space:nowrap}
+.ag-adiar .ag-adiar-d{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center}
+.ag-adiar .ag-adiar-d .fi{width:100%;min-width:0;padding:7px 8px;font-size:.78rem;border-radius:8px}
+.ag-adiar .ag-adiar-d .ag-mini{padding:7px 14px;font-size:.78rem;border-radius:8px}

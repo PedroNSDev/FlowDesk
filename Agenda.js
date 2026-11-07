@@ -4,6 +4,7 @@ const AG_VISIVEIS = 3;
 let agAno = new Date().getFullYear();
 let agMesIdx = new Date().getMonth();
 let agSelecionado = agFmt(new Date());
+let agOrdemFix = null;
 let agDados = { eventos: [], etapas: [], carregado: false };
 let agFiltros = { eventos: true, prazos: true, concluidos: false, meus: false };
 let agArrastando = null;
@@ -32,13 +33,16 @@ function agIndexar(comConcluidos) {
         agDados.etapas.forEach(e => {
             if (!e.prazo) return;
             if (e.status === 'Concluído' && !comConcluidos && !agFiltros.concluidos) return;
-            if (agFiltros.meus && e.responsavel_id !== currentUser.id) return;
+            if (agFiltros.meus && !etapaRespIds(e).includes(currentUser.id)) return;
             get(e.prazo).prazos.push(e);
         });
     }
-    Object.values(mapa).forEach(x => {
+    Object.entries(mapa).forEach(([dia, x]) => {
         x.eventos.sort((a, b) => (a.hora || '99').localeCompare(b.hora || '99'));
-        x.prazos.sort((a, b) => agRank(a) - agRank(b));
+        // depois de marcar/desmarcar "concluída", o card fica onde estava (não pula para o fim da lista)
+        const fx = agOrdemFix && agOrdemFix.dia === dia ? agOrdemFix.ids : null;
+        const chave = e => fx && fx.includes(e.id) ? fx.indexOf(e.id) : 1000 + agRank(e);
+        x.prazos.sort((a, b) => chave(a) - chave(b));
     });
     return mapa;
 }
@@ -49,7 +53,7 @@ async function carregarEventos() {
     const [rEv, rEt] = await Promise.all([
         sb.from('eventos').select('*').eq('workspace_id', currentWorkspace.id).order('data', { ascending: true }),
         sb.from('etapas')
-            .select('id, nome, status, prazo, prioridade, responsavel_id, sessoes!inner(id, nome, projeto_id, projetos!inner(id, nome, workspace_id))')
+            .select(etapasFlatSelect())
             .not('prazo', 'is', null)
             .eq('sessoes.projetos.workspace_id', currentWorkspace.id)
             .order('prazo', { ascending: true })
@@ -106,12 +110,12 @@ function agIrParaData(d) {
     const dt = agParse(d);
     agAno = dt.getFullYear();
     agMesIdx = dt.getMonth();
-    agSelecionado = d;
+    agSelecionado = d; agOrdemFix = null;
     switchTab('eventos');
 }
 
 function agSelecionar(d) {
-    agSelecionado = d;
+    agSelecionado = d; agOrdemFix = null;
     agRender();
 }
 
@@ -173,16 +177,18 @@ function agPainelDia(d) {
             </div>
         </div>`).join('');
     const prazos = dia.prazos.map(e => {
-        const resp = wsMembers.find(u => u.id === e.responsavel_id);
+        const ids = etapaRespIds(e);
+        const nomesResp = ids.map(i => (wsMembers.find(u => u.id === i) || {}).nome).filter(Boolean).join(', ');
         const proj = e.sessoes && e.sessoes.projetos ? e.sessoes.projetos.nome : '—';
         const sess = e.sessoes ? e.sessoes.nome : '—';
         const pode = agPode() && e.status !== 'Concluído';
         return `<div class="ag-pzc ag-${agClasse(e)}">
             <div class="ag-pzc-top">
-                <div style="min-width:0"><div class="ag-pzc-n">${escH(e.nome)}</div><div class="ag-pzc-c">📁 ${escH(proj)} › ${escH(sess)}</div></div>
+                <div style="min-width:0"><div class="ag-pzc-n">${escH(e.nome)}</div><div class="ag-pzc-c" role="button" tabindex="0" title="Abrir esta etapa no projeto" onclick="irParaEtapa(${e.id})" onkeydown="if(event.key==='Enter')irParaEtapa(${e.id})">📁 ${escH(proj)} › ${escH(sess)}</div></div>
                 <span class="badge ${e.status === 'Concluído' ? 'b-green' : e.status === 'Em andamento' ? 'b-amber' : 'b-gray'}">${e.status}</span>
             </div>
-            <div class="ag-pzc-m">${resp ? `${avatar(resp)} ${escH(resp.nome)}` : 'Sem responsável'}<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span></div>
+            <div class="ag-pzc-m">${ids.length ? ids.map(i => wsMembers.find(u => u.id === i)).filter(Boolean).map(u => `<span class="ag-user" role="button" tabindex="0" title="Ver ${escH(u.nome)}" onclick="verUsuario(${u.id})" onkeydown="if(event.key==='Enter')verUsuario(${u.id})">${avatar(u)} ${escH(u.nome)}</span>`).join('') : 'Sem responsável'}<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span></div>
+            <label class="ag-conc"><input type="checkbox" ${e.status === 'Concluído' ? 'checked' : ''} onchange="agToggleConcl(${e.id}, this)"> ${e.status === 'Concluído' ? 'Concluída (desmarque para reabrir)' : 'Marcar como concluída'}</label>
             ${pode ? `<div class="ag-adiar">
                 <div class="ag-adiar-l">Adiar prazo</div>
                 <div class="ag-adiar-b">
@@ -363,3 +369,20 @@ async function agMoverEvento(id, nova) {
     toast(`Evento movido para ${agCurta(nova)}. 📅`);
     agRender();
 }
+
+async function agToggleConcl(id, el) {
+    if (el) el.disabled = true;
+    const et = agDados.etapas.find(x => x.id === id);
+    if (et && et.prazo) agOrdemFix = { dia: et.prazo, ids: ((agIndexar(true)[et.prazo] || {}).prazos || []).map(x => x.id) };
+    const novo = await alternarConcluida(id);
+    if (novo === null) toast('Etapa não encontrada.', 'warning');
+    else toast(novo === 'Concluído' ? 'Etapa concluída ✅' : 'Etapa reaberta.');
+    agRender();
+}
+
+// status alterado em qualquer lugar (projetos, quadro, progresso, agenda) mantém a agenda em dia
+window.addEventListener('flowdesk:etapa-status', ev => {
+    const x = agDados.etapas.find(e => e.id === ev.detail.id);
+    if (x) x.status = ev.detail.status;
+    if (typeof abaAtual !== 'undefined' && abaAtual === 'eventos' && agDados.carregado) agRender();
+});
