@@ -424,9 +424,7 @@
     <link rel="stylesheet" href="Agenda.css">
 
     <style id="ui-refresh">
-        /* ═══════════ UI REFRESH ═══════════
-          */
-        :root{
+     :root{
             --bg:#f5f6fb; --border:#e5e8f0; --r:12px; --rsm:8px;
             --sh:0 1px 2px rgba(16,24,40,.05);
             --sh-md:0 8px 20px -6px rgba(16,24,40,.12);
@@ -439,7 +437,7 @@
         :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
         input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 
-        /* ── Botões e campos:── */
+        /* ── Botões e campos ── */
         .btn{padding:9px 16px;border-radius:10px}
         .btn::before{display:none}
         .btn-p{background:var(--acc);box-shadow:0 1px 2px rgba(79,70,229,.35)}
@@ -461,7 +459,6 @@
         .ni svg{width:17px;height:17px}
         .ws-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--acc),#818cf8);display:flex;align-items:center;justify-content:center;color:#fff}
         .ws-icon svg{width:16px;height:16px}
-
         .sb-sec{color:#64748b}
         .ws-code{color:#7c8aa5}
         .sb-user .ur{color:#8592a8}
@@ -485,18 +482,18 @@
         .home-greeting{font-size:1.7rem;letter-spacing:-.02em}
         @media(max-width:860px){.main{padding:16px 14px 40px}}
 
-        /* ── Dashboard ── */
+        /* ── Dashboard  ── */
         #app .dash-card{border-radius:16px}
         #app .dash-kpi{border-radius:16px}
         #app .dash-ct{letter-spacing:.07em}
 
-        /* ── Projetos: cards  ── */
+        /* ── Projetos ── */
         .pv-card,.pv-folder-card{position:relative;overflow:hidden}
         .pv-card::before,.pv-folder-card::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--acc),#818cf8);opacity:0;transition:opacity .15s}
         .pv-card:hover::before,.pv-folder-card:hover::before{opacity:1}
         .pv-folder-card strong{font-size:1rem}
 
-        /* ── Lista:── */
+       
         .grp{overflow:visible;border-radius:12px}
         .grp-h{position:sticky;top:var(--stick-top);z-index:3;background:var(--surface);border-radius:12px 12px 0 0}
         .grp>:last-child{border-radius:0 0 12px 12px}
@@ -509,7 +506,7 @@
         .row:hover .ib,.row:focus-within .ib,.grp-h:hover .ib,.grp-h:focus-within .ib,.ib:focus-visible{opacity:1}
         @media(hover:none){.row .ib,.grp-h .ib{opacity:1}}
 
-        /* status por ícone*/
+        /* status por  */
         .dot{width:12px;height:12px;border:2px solid #cbd5e1;background:transparent;margin-top:3px}
         .s-doing .dot{border-color:var(--warn);background:conic-gradient(var(--warn) 0 50%,transparent 0)}
         .s-done .dot{border-color:var(--ok);background:var(--ok)}
@@ -523,7 +520,7 @@
         .kb-card.late{border-left:3px solid var(--danger)}
         .kb-col.s-done .kb-card{opacity:.7}
 
-        /* ── Pastas/projetos */
+        /* ── Pastas/projetos ── */
         .pv-section-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:2px 2px 10px}
         .pv-grid+.pv-section-label{margin-top:26px}
         .pv-folder-card{gap:14px;padding:18px;border-radius:16px;cursor:pointer}
@@ -554,7 +551,7 @@
         .pj-sep{color:#cbd5e1;user-select:none}
         .pj-copy{margin-left:auto}
 
-        /* ── Ferramentas ── */
+        /* ── Ferramentas: integrações ── */
         .int-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
         .int-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--sh);min-width:0}
         .int-top{display:flex;align-items:center;gap:12px;min-width:0}
@@ -1421,7 +1418,7 @@ async function salvarPastaProjeto(id) {
     const cat = document.getElementById('m-pasta-cat')?.value?.trim() || null;
     if (!nome) { toast('Informe o nome da pasta.', 'warning'); return; }
     const patch = { nome }; if (FD_FEAT.pasta) patch.categoria = cat;
-    const { error } = await sb.from('pastas_projetos').update(patch).eq('id', id);
+    const { error } = await updateChecado('pastas_projetos', patch, id);
     if (error) { toast('Erro ao salvar pasta: ' + error.message, 'error'); return; }
     Object.assign(f, patch); ordenarPastas();
     fecharModal(); renderProjetosView(); toast('Pasta atualizada.');
@@ -1611,10 +1608,10 @@ function respCell(ids) {
 }
 
 const msState = {};
-function msHtml(id) {
+function msHtml(id, ph = 'Adicionar responsável…') {
     return `<div class="ms" id="ms-${id}" onclick="document.getElementById('ms-${id}-in').focus()">
         <div class="ms-box"><span id="ms-${id}-chips" style="display:contents"></span>
-            <input id="ms-${id}-in" class="ms-in" autocomplete="off" placeholder="Adicionar responsável…"
+            <input id="ms-${id}-in" class="ms-in" autocomplete="off" placeholder="${ph}"
                 oninput="msList('${id}',true)" onfocus="msList('${id}')" onkeydown="msKey(event,'${id}')"></div>
         <div id="ms-${id}-dd" class="ms-dd hidden" onmousedown="event.preventDefault()"></div>
     </div>`;
@@ -1829,6 +1826,12 @@ function dndDrop(d, t) {
         if (t.type === 'send') return moverEtapa(d.id, { sessaoId: t.sid, end: true });
     } else if (d.kind === 'sessao' && t.type === 'sessao') return moverSessao(d.id, t.id, t.pos);
 }
+async function updateChecado(tabela, patch, id) {
+    const { data, error } = await sb.from(tabela).update(patch).eq('id', id).select('id');
+    if (error) return { error };
+    if (!data || !data.length) return { error: { message: `o banco não aplicou a alteração (sem permissão de edição na tabela ${tabela}). Rode o SQL de permissões.` } };
+    return { error: null };
+}
 async function moverEtapa(id, o) {
     const ctx = findEtapaCtx(id); if (!ctx) return;
     const { p, s: sOld, e } = ctx;
@@ -1862,7 +1865,7 @@ async function moverEtapa(id, o) {
     }
     renderProjetosView();
     if (!Object.keys(patch).length) return;
-    const { error } = await sb.from('etapas').update(patch).eq('id', id);
+    const { error } = await updateChecado('etapas', patch, id);
     if (error) { toast('Erro ao mover etapa: ' + error.message, 'error'); await renderizarProjetos(); return; }
     if (trocouSessao) addLog('update', 'etapa', id, { nome: `"${e.nome}" movida para "${sNew.nome}"` });
 }
@@ -1873,7 +1876,7 @@ async function moverProjeto(id, alvoId, pos) {
     p.ordem = ordemEntre(sib, pos === 'before' ? i : i + 1);
     wsProjetos.sort(ordCmp); renderProjetosView();
     if (!FD_FEAT.pord) return;
-    const { error } = await sb.from('projetos').update({ ordem: p.ordem }).eq('id', id);
+    const { error } = await updateChecado('projetos', { ordem: p.ordem }, id);
     if (error) { toast('Erro ao reordenar projeto: ' + error.message, 'error'); await renderizarProjetos(); }
 }
 async function moverProjetoPasta(id, nav) {
@@ -1886,7 +1889,7 @@ async function moverProjetoPasta(id, nav) {
     const patch = { pasta_id: nova };
     if (FD_FEAT.pord) { p.ordem = proxOrdem(wsProjetos); patch.ordem = p.ordem; }
     wsProjetos.sort(ordCmp); renderProjetosView();
-    const { error } = await sb.from('projetos').update(patch).eq('id', id);
+    const { error } = await updateChecado('projetos', patch, id);
     if (error) { toast('Erro ao mover projeto: ' + error.message, 'error'); await renderizarProjetos(); return; }
     toast(`"${p.nome}" movido para ${pasta ? `a pasta "${pasta.nome}"` : '"Sem pasta"'}. 📁`);
     addLog('update', 'projeto', id, { nome: `"${p.nome}" movido para ${pasta ? pasta.nome : 'Sem pasta'}` });
@@ -1899,7 +1902,7 @@ async function moverPasta(id, alvoId, pos) {
     f.ordem = ordemEntre(sib, pos === 'before' ? i : i + 1);
     f.categoria = alvo.categoria || null;
     ordenarPastas(); renderProjetosView();
-    const { error } = await sb.from('pastas_projetos').update({ ordem: f.ordem, categoria: f.categoria }).eq('id', id);
+    const { error } = await updateChecado('pastas_projetos', { ordem: f.ordem, categoria: f.categoria }, id);
     if (error) { toast('Erro ao mover pasta: ' + error.message, 'error'); await renderizarProjetos(); }
 }
 async function moverPastaCat(id, cat) {
@@ -1910,7 +1913,7 @@ async function moverPastaCat(id, cat) {
     if ((f.categoria || null) === nova) return;
     f.categoria = nova; f.ordem = proxOrdem(wsPastasProjetos);
     ordenarPastas(); renderProjetosView();
-    const { error } = await sb.from('pastas_projetos').update({ categoria: nova, ordem: f.ordem }).eq('id', id);
+    const { error } = await updateChecado('pastas_projetos', { categoria: nova, ordem: f.ordem }, id);
     if (error) { toast('Erro ao mudar categoria: ' + error.message, 'error'); await renderizarProjetos(); }
 }
 async function moverSessao(id, alvoId, pos) {
@@ -1922,7 +1925,7 @@ async function moverSessao(id, alvoId, pos) {
     p.sessoes.sort(ordCmp);
     renderProjetosView();
     if (!FD_FEAT.ordem) return;
-    const { error } = await sb.from('sessoes').update({ ordem: s.ordem }).eq('id', id);
+    const { error } = await updateChecado('sessoes', { ordem: s.ordem }, id);
     if (error) { toast('Erro ao reordenar atividade: ' + error.message, 'error'); await renderizarProjetos(); }
 }
 
@@ -1993,7 +1996,10 @@ async function criarProjeto() {
     const nome = document.getElementById('m-pnome')?.value?.trim();
     const desc = document.getElementById('m-pdesc')?.value?.trim() || '';
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
-    const { data, error } = await sb.from('projetos').insert({ nome, descricao: desc, workspace_id: currentWorkspace.id }).select().single();
+    const pastaAtual = selectedPastaProjeto.startsWith('folder:') ? selectedPastaProjeto.slice('folder:'.length) : null;
+    const novoProj = { nome, descricao: desc, workspace_id: currentWorkspace.id };
+    if (pastaAtual) novoProj.pasta_id = pastaAtual;
+    const { data, error } = await sb.from('projetos').insert(novoProj).select().single();
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     await sb.from('projeto_usuarios').insert({ projeto_id: data.id, usuario_id: currentUser.id });
     await addLog('create','projeto',null,{nome});
@@ -2039,24 +2045,24 @@ async function deletarProjetoConfirm(projId) {
 }
 
 // ─── CRUD Atividade ──────────────────────────────────
+
 function abrirModalSessao(pId) {
-    const opts = wsMembers.map(u => `<option value="${u.id}">${escH(u.nome)} (${u.username})</option>`).join('');
     abrirModal('🗂 Nova Atividade', `
         <div class="fg"><label class="fl">Nome</label><input id="m-snome" class="fi" placeholder="Ex: Frontend..."/></div>
         <div class="fg"><label class="fl">Descrição</label><input id="m-sdesc" class="fi" placeholder="Breve descrição..."/></div>
-        <div class="fg"><label class="fl">Colaboradores</label>
-            <select id="m-susers" class="fsel" multiple>${opts}</select>
-            <p class="fhint">Ctrl/Cmd para múltiplos.</p></div>
+        <div class="fg"><label class="fl">Colaboradores</label>${msHtml('scol', 'Adicionar colaborador…')}
+            <p class="fhint">Digite para buscar e tecle Enter (ou clique no nome). Dá para adicionar várias pessoas.</p></div>
     `, [
         { label: '+ Criar', cls: 'btn-p', action: `criarSessao(${pId})` },
         { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
     ]);
+    msInit('scol', [currentUser.id]);
 }
 
 async function criarSessao(pId) {
     const nome = document.getElementById('m-snome')?.value?.trim();
     const desc = document.getElementById('m-sdesc')?.value?.trim() || '';
-    const sel  = Array.from(document.getElementById('m-susers')?.selectedOptions||[]).map(o=>+o.value);
+    const sel  = msGet('scol');
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
     const { data, error } = await sb.from('sessoes').insert({ projeto_id: pId, nome, descricao: desc, ...(FD_FEAT.ordem ? { ordem: proxOrdem(wsProjetos.find(x => x.id === pId)?.sessoes) } : {}) }).select().single();
     if (error) { toast('Erro: '+error.message, 'error'); return; }
@@ -2065,10 +2071,10 @@ async function criarSessao(pId) {
     await addLog('create','sessao',null,{nome}); fecharModal(); toast(`Atividade "${nome}" criada!`); await renderizarProjetos();
 }
 
+
 async function editarSessao(sessId, projId) {
     const proj = wsProjetos.find(p => p.id === projId); if (!proj) return;
     const sess = proj.sessoes?.find(s => s.id === sessId); if (!sess) return;
-    const opts = wsMembers.map(u => `<option value="${u.id}">${escH(u.nome)} (${u.username})</option>`).join('');
     const selIds = (sess.sessao_usuarios||[]).map(su => su.usuario_id);
     const buttons = [
         { label: '💾 Salvar', cls: 'btn-p', action: `salvarEdicaoSessao(${sessId})` },
@@ -2078,20 +2084,16 @@ async function editarSessao(sessId, projId) {
     abrirModal('✏️ Editar Atividade', `
         <div class="fg"><label class="fl">Nome</label><input id="m-snome-edit" class="fi" value="${escH(sess.nome)}"/></div>
         <div class="fg"><label class="fl">Descrição</label><input id="m-sdesc-edit" class="fi" value="${escH(sess.descricao||'')}"/></div>
-        <div class="fg"><label class="fl">Colaborador</label>
-            <select id="m-susers-edit" class="fsel" multiple>${opts}</select>
-            <p class="fhint">Ctrl/Cmd para múltiplos.</p></div>
+        <div class="fg"><label class="fl">Colaboradores</label>${msHtml('scol', 'Adicionar colaborador…')}
+            <p class="fhint">Digite para buscar e tecle Enter (ou clique no nome). Dá para adicionar várias pessoas.</p></div>
     `, buttons);
-    setTimeout(() => {
-        const sel = document.getElementById('m-susers-edit');
-        if (sel) Array.from(sel.options).forEach(opt => { opt.selected = selIds.includes(+opt.value); });
-    }, 0);
+    msInit('scol', selIds);
 }
 
 async function salvarEdicaoSessao(sessId) {
     const nome = document.getElementById('m-snome-edit')?.value?.trim();
     const desc = document.getElementById('m-sdesc-edit')?.value?.trim() || '';
-    const sel  = Array.from(document.getElementById('m-susers-edit')?.selectedOptions||[]).map(o=>+o.value);
+    const sel  = msGet('scol');
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
     const { error } = await sb.from('sessoes').update({ nome, descricao: desc }).eq('id', sessId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
@@ -3717,8 +3719,7 @@ async function carregarFerramentas() {
 
 function abrirFerramenta(path) { window.open(path, '_blank'); }
 
-// ─── INTEGRAÇÕES (API)  ───────
-
+// ─── INTEGRAÇÕES 
 const API_PERMS = [
     { k: 'ver',    rot: 'Visualizar', dica: 'Ler projetos, etapas e progresso' },
     { k: 'editar', rot: 'Editar',     dica: 'Criar etapas e alterar status, prioridade, prazo e responsável' },
