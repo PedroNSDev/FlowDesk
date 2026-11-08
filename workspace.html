@@ -424,7 +424,8 @@
     <link rel="stylesheet" href="Agenda.css">
 
     <style id="ui-refresh">
-        /* ═══════════ UI REFRESH ═══════════ */
+        /* ═══════════ UI REFRESH ═══════════
+          */
         :root{
             --bg:#f5f6fb; --border:#e5e8f0; --r:12px; --rsm:8px;
             --sh:0 1px 2px rgba(16,24,40,.05);
@@ -438,7 +439,7 @@
         :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
         input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 
-        /* ── Botões e camposs ── */
+        /* ── Botões e campos:── */
         .btn{padding:9px 16px;border-radius:10px}
         .btn::before{display:none}
         .btn-p{background:var(--acc);box-shadow:0 1px 2px rgba(79,70,229,.35)}
@@ -449,7 +450,7 @@
         .fi,.fta,.fsel{border:1px solid var(--border);border-radius:10px;padding:10px 12px}
         .fi:focus,.fta:focus,.fsel:focus{box-shadow:0 0 0 3px rgba(79,70,229,.12)}
 
-        /* ── Sidebar calma ── */
+        /* ── Sidebar calma  ── */
         .nav-btn{color:#8b93a7;font-size:.85rem;padding:8px 10px;border-radius:8px;gap:10px;position:relative}
         .nav-btn:hover{background:rgba(255,255,255,.06);color:#e5e7f0}
         .nav-btn.active{background:rgba(129,140,248,.16);color:#fff}
@@ -460,6 +461,7 @@
         .ni svg{width:17px;height:17px}
         .ws-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--acc),#818cf8);display:flex;align-items:center;justify-content:center;color:#fff}
         .ws-icon svg{width:16px;height:16px}
+
         .sb-sec{color:#64748b}
         .ws-code{color:#7c8aa5}
         .sb-user .ur{color:#8592a8}
@@ -488,13 +490,13 @@
         #app .dash-kpi{border-radius:16px}
         #app .dash-ct{letter-spacing:.07em}
 
-        /* ── Projetos: cards ── */
+        /* ── Projetos: cards  ── */
         .pv-card,.pv-folder-card{position:relative;overflow:hidden}
         .pv-card::before,.pv-folder-card::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--acc),#818cf8);opacity:0;transition:opacity .15s}
         .pv-card:hover::before,.pv-folder-card:hover::before{opacity:1}
         .pv-folder-card strong{font-size:1rem}
 
-        /* ── Lista── */
+        /* ── Lista:── */
         .grp{overflow:visible;border-radius:12px}
         .grp-h{position:sticky;top:var(--stick-top);z-index:3;background:var(--surface);border-radius:12px 12px 0 0}
         .grp>:last-child{border-radius:0 0 12px 12px}
@@ -507,12 +509,12 @@
         .row:hover .ib,.row:focus-within .ib,.grp-h:hover .ib,.grp-h:focus-within .ib,.ib:focus-visible{opacity:1}
         @media(hover:none){.row .ib,.grp-h .ib{opacity:1}}
 
-    
+        /* status por ícone*/
         .dot{width:12px;height:12px;border:2px solid #cbd5e1;background:transparent;margin-top:3px}
         .s-doing .dot{border-color:var(--warn);background:conic-gradient(var(--warn) 0 50%,transparent 0)}
         .s-done .dot{border-color:var(--ok);background:var(--ok)}
 
-        /* ── Quadro: cards*/
+        /* ── Quadro: cards */
         .kb{grid-template-columns:repeat(3,minmax(260px,1fr));gap:16px}
         .kb-col{background:#eef0f7;border-radius:14px}
         .kb-card{transition:transform .12s,box-shadow .12s,border-color .12s}
@@ -521,7 +523,7 @@
         .kb-card.late{border-left:3px solid var(--danger)}
         .kb-col.s-done .kb-card{opacity:.7}
 
-        /* ── Pastas/projetos─ */
+        /* ── Pastas/projetos */
         .pv-section-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:2px 2px 10px}
         .pv-grid+.pv-section-label{margin-top:26px}
         .pv-folder-card{gap:14px;padding:18px;border-radius:16px;cursor:pointer}
@@ -543,7 +545,7 @@
         .pv-card.pinned,.pv-folder-card.pinned{border-color:#a5b4fc;background:linear-gradient(180deg,var(--acc-lt),var(--surface) 65%)}
         .pv-card.pinned::before,.pv-folder-card.pinned::before{opacity:1}
 
-        /* ── Projetos── */
+        /* ── Projetos: breadcrumb ── */
         .pj-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
         .pj-crumbs{display:flex;align-items:center;gap:2px;min-width:0;flex-wrap:wrap;font-size:.86rem}
         .pj-crumb{display:inline-block;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 9px;border-radius:8px;border:none;background:none;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;transition:background .12s,color .12s}
@@ -552,7 +554,7 @@
         .pj-sep{color:#cbd5e1;user-select:none}
         .pj-copy{margin-left:auto}
 
-        /* ── Ferramentas  ── */
+        /* ── Ferramentas ── */
         .int-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
         .int-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--sh);min-width:0}
         .int-top{display:flex;align-items:center;gap:12px;min-width:0}
@@ -580,7 +582,7 @@
         .m-hdr{padding:18px 22px 14px}
         .m-title{font-size:1rem}
 
-        /* ═══ DRAG & DROP ═══ */
+
         .grip{display:inline-flex;align-items:center;justify-content:center;width:18px;height:22px;color:#94a3b8;cursor:grab;font-size:.95rem;line-height:1;border-radius:5px;flex-shrink:0;user-select:none;opacity:.35;transition:opacity .12s,background .12s,color .12s}
         .row:hover .grip,.grp-h:hover .grip,.grip:focus-visible{opacity:1}
         .grip:hover{background:var(--acc-lt);color:var(--acc)}
@@ -599,7 +601,7 @@
         .row.flash,.kb-card.flash{animation:flashRow 2.4s ease}
         @keyframes flashRow{0%,65%{background:#fef9c3;box-shadow:inset 4px 0 0 var(--warn)}100%{background:transparent}}
 
-        /* ═══ MULTI-RESPONSÁVEIS  ═══ */
+
         .ms{border:2px solid var(--border);border-radius:12px;padding:6px 8px;background:#fff;cursor:text;transition:.15s}
         .ms:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px rgba(79,70,229,.12)}
         .ms-box{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -616,7 +618,7 @@
         .ms-opt small{color:var(--muted);margin-left:auto;font-size:.74rem}
         .ms-empty{padding:8px;color:var(--muted);font-size:.8rem}
 
-        /* ═══ PROGRESSO  ═══ */
+
         .prog-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px;margin-bottom:14px}
         .ps-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;text-align:left;font-family:var(--font);transition:.15s;color:var(--text)}
         .ps-card:hover{border-color:#c7d2fe;box-shadow:var(--sh-md);transform:translateY(-1px)}
@@ -645,7 +647,7 @@
         .pr-resp{display:flex;flex-wrap:wrap;gap:4px}
         .prog-row.s-done .pr-t{color:var(--muted)}
 
-        /* ═══ UPLOAD POR ARRASTAR ═══ */
+
         .dz{border:2px dashed #c7d2fe;border-radius:14px;padding:22px 14px;text-align:center;background:#f8f9ff;transition:.15s;cursor:pointer;font-size:.85rem;color:var(--muted);margin-bottom:6px}
         .dz:hover{border-color:var(--acc)}
         .dz.over{border-color:var(--acc);background:var(--acc-lt);transform:scale(1.01)}
@@ -655,7 +657,7 @@
         .up-item .n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         .drop-ov{position:fixed;inset:10px;background:rgba(79,70,229,.1);border:3px dashed var(--acc);border-radius:18px;z-index:900;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:var(--acc);pointer-events:none;backdrop-filter:blur(2px)}
 
-        /* ═══ PROJETOS/PASTAS ARRASTÁVEIS + CATEGORIAS ═══ */
+
         .pv-card[draggable=true],.pv-folder-card[draggable=true]{cursor:grab}
         .pv-card[draggable=true]:active,.pv-folder-card[draggable=true]:active{cursor:grabbing}
         .pv-card.drop-before,.pv-folder-card.drop-before{box-shadow:inset 5px 0 0 var(--acc)}
@@ -673,9 +675,27 @@
         .dnd-tray small{opacity:.7;font-size:.74rem;margin-right:4px}
         .dnd-chip{padding:8px 12px;border-radius:10px;background:#1e293b;border:2px dashed #475569;font-size:.8rem;font-weight:600;display:inline-flex;gap:6px;align-items:center;transition:.12s}
         .dnd-chip.drop-in{border-color:#818cf8;background:#312e81;outline:none}
+
         .av-click{cursor:pointer}
         .avs .av-click{display:inline-flex;margin-left:-6px}.avs .av-click:first-child{margin-left:0}.avs .av-click .av{margin-left:0}
         .av-click:hover .av,.badge.av-click:hover{filter:brightness(.93)}
+        .row.s-done:not(.row-h){background:#f0fdf4;opacity:.9}
+        .row.t-warn:not(.row-h){background:#fffbeb}
+        .row.t-warn:not(.row-h):hover{background:#fef3c7}
+        .prog-row.s-done td{background:#f0fdf4;border-color:#bbf7d0}
+        .prog-row.t-warn td{background:#fffbeb;border-color:#fde68a}
+        .prog-row.s-done:hover td{background:#dcfce7}
+        .prog-row.t-warn:hover td{background:#fef3c7}
+        .kb-col.s-done .kb-card{background:#f0fdf4;border-color:#bbf7d0}
+        .kb-card.t-warn{background:#fffbeb;border-color:#fde68a}
+        .cpop-et[onclick]{cursor:pointer}
+        .cpop-et[onclick]:hover{background:#fafbff}
+        .cpop-et-i[onclick]{cursor:pointer}
+        .row.t-orange:not(.row-h){background:#ffedd5}
+        .row.t-orange:not(.row-h):hover{background:#fed7aa}
+        .prog-row.t-orange td{background:#ffedd5;border-color:#fdba74}
+        .prog-row.t-orange:hover td{background:#fed7aa}
+        .kb-card.t-orange{background:#ffedd5;border-color:#fdba74}
     </style>
 </head>
 <body>
@@ -1287,7 +1307,7 @@ function renderPastaCard(c) {
         <div class="pf-top">
             <div class="pf-ic" style="--c:${cor}"><svg viewBox="0 0 24 24" aria-hidden="true">${PASTA_ICONS[c.icon]}</svg></div>
             <div class="pf-info"><strong>${escH(c.nome)}</strong><span>${n} ${n === 1 ? 'projeto' : 'projetos'}</span></div>
-            ${c.pasta && currentUserCanEdit ? `<button type="button" class="ib" title="Editar pasta / categoria" aria-label="Editar pasta ${escH(c.nome)}" onclick="event.stopPropagation();editarPastaProjeto(${c.pasta.id})">✏️</button>` : ''}
+            ${c.pasta && currentUserCanEdit ? `<button type="button" class="ib" title="Editar pasta / categoria" aria-label="Editar pasta ${escH(c.nome)}" onclick="event.stopPropagation();editarPastaProjeto('${c.pasta.id}')">✏️</button>` : ''}
             ${pinBtn(c.key)}
         </div>
         ${st.total ? `<div class="pf-prog"><div class="pv-bar"><i style="width:${st.pct}%"></i></div><b>${st.pct}%</b></div>` : ''}
@@ -1391,7 +1411,7 @@ function editarPastaProjeto(id) {
         <div class="fg"><label class="fl" for="m-pasta-projeto-nome">Nome da pasta</label><input id="m-pasta-projeto-nome" class="fi" maxlength="80" value="${escH(f.nome)}"/></div>
         ${catFieldHtml(f.categoria)}
     `, [
-        { label: 'Salvar', cls: 'btn-p', action: `salvarPastaProjeto(${f.id})` },
+        { label: 'Salvar', cls: 'btn-p', action: `salvarPastaProjeto('${f.id}')` },
         { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
     ]);
 }
@@ -1461,7 +1481,8 @@ function renderListView(p) {
 
 
 function renderEtapa(pId, sId, e) {
-    return `<div class="row ${ST_CLS[e.status]||''}" data-etapa-id="${e.id}">
+    const perto = e.prazo && prazoClass(e.prazo, e.status) === 'b-amber';
+    return `<div class="row ${ST_CLS[e.status]||''}${perto ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}" data-etapa-id="${e.id}">
         <div class="r-name">${currentUserCanEdit ? `<span class="grip" draggable="true" data-drag-kind="etapa" data-drag-id="${e.id}" title="Arraste para reordenar ou mover para outra atividade">⠿</span>` : ''}<span class="dot"></span><div><div class="r-t">${escH(e.nome)}</div>${e.descricao ? `<div class="r-d">${escH(e.descricao)}</div>` : ''}</div></div>
         <div class="r-resp">${respCell(etapaRespIds(e))}</div>
         <div>${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span class="muted">—</span>'}</div>
@@ -1480,7 +1501,7 @@ function renderBoard(p) {
             <div class="kb-h"><span class="dot"></span>${st}<span class="badge b-gray">${items.length}</span></div>
             ${items.map(({ e, s }) => {
                 const ids = etapaRespIds(e);
-                return `<div class="kb-card ${e.prazo && e.status !== 'Concluído' && prazoClass(e.prazo, e.status) === 'b-rose' ? 'late' : ''}" draggable="true" data-etapa-id="${e.id}" data-drag-kind="etapa" data-drag-id="${e.id}" ${currentUserCanEdit ? `onclick="editarEtapa(${e.id})"` : ''}>
+                return `<div class="kb-card ${e.prazo && e.status !== 'Concluído' && prazoClass(e.prazo, e.status) === 'b-rose' ? 'late' : ''}${e.prazo && prazoClass(e.prazo, e.status) === 'b-amber' ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}" draggable="true" data-etapa-id="${e.id}" data-drag-kind="etapa" data-drag-id="${e.id}" ${currentUserCanEdit ? `onclick="editarEtapa(${e.id})"` : ''}>
                     <div class="r-t">${escH(e.nome)}</div><div class="r-d">🗂 ${escH(s.nome)}</div>
                     <div class="kb-f">${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span></span>'}${avStack(ids)}</div></div>`;
             }).join('') || '<div class="row-empty">Vazio — solte um card aqui</div>'}
@@ -1488,15 +1509,12 @@ function renderBoard(p) {
     }).join('')}</div>`;
 }
 
-// (o drop de etapas/cards agora é tratado por dndInit)
 
 // ═══════════════════════════════════════════════════
-//   RECURSOS NOVOS: ordem, vários responsáveis, DnD, etapa-link, upload por arrastar
-//   (precisam do SQL de migração; sem ele o app continua funcionando como antes)
 // ═══════════════════════════════════════════════════
 const FD_FEAT = { multi: true, ordem: true, pord: true, pasta: true };
-const ordV = x => (typeof x.ordem === 'number' ? x.ordem : x.id);
-const ordCmp = (a, b) => (ordV(a) - ordV(b)) || (a.id - b.id);
+const ordV = x => (typeof x.ordem === 'number' ? x.ordem : (typeof x.id === 'number' ? x.id : 0));
+const ordCmp = (a, b) => (ordV(a) - ordV(b)) || (typeof a.id === 'number' && typeof b.id === 'number' ? a.id - b.id : String(a.id).localeCompare(String(b.id)));
 const proxOrdem = lista => Math.max(0, ...(lista || []).map(ordV)) + 1;
 function ordemEntre(sib, idx) {
     const prev = sib[idx - 1], next = sib[idx];
@@ -1592,7 +1610,6 @@ function respCell(ids) {
     return `${avStack(ids)}<span ${us.length === 1 ? `class="av-click" role="button" tabindex="0" onclick="event.stopPropagation();verUsuario(${us[0].id})"` : ''} title="${escH(us.map(u => u.nome).join(', '))}">${nome}</span>`;
 }
 
-// ─── COMBOBOX DE VÁRIOS RESPONSÁVEIS (estilo "Para:" do Gmail) ───
 const msState = {};
 function msHtml(id) {
     return `<div class="ms" id="ms-${id}" onclick="document.getElementById('ms-${id}-in').focus()">
@@ -1659,7 +1676,6 @@ document.addEventListener('click', ev => {
     document.querySelectorAll('.ms-dd:not(.hidden)').forEach(dd => { if (!dd.closest('.ms').contains(ev.target)) dd.classList.add('hidden'); });
 });
 
-// ─── CACHES / EVENTOS DE STATUS (Agenda, Home e Progresso escutam isto) ───
 function etapaPatchCaches(eId, patch) {
     if (typeof dashDados !== 'undefined' && dashDados?.etapas) {
         const x = dashDados.etapas.find(et => et.id === eId); if (x) Object.assign(x, patch);
@@ -1697,10 +1713,6 @@ function irParaEtapa(eId) {
     window.scrollTo(0, 0);
     focarEtapa(eId);
 }
-// API para a Agenda (Agenda.js): use atributos no HTML ou chame as funções direto
-//   <button data-etapa-goto="ID">   → abre a etapa no projeto
-//   <input type=checkbox data-etapa-toggle="ID"> → alterna concluída/não concluída
-//   window.addEventListener('flowdesk:etapa-status', e => e.detail = {id, status})
 window.FlowDesk = { irParaEtapa, alternarConcluida, setEtapaStatus: (id, st) => updateEtapaStatus(+id, st) };
 document.addEventListener('click', async ev => {
     const t = ev.target.closest?.('[data-etapa-toggle]');
@@ -1715,7 +1727,6 @@ document.addEventListener('click', async ev => {
     if (g) { ev.preventDefault(); ev.stopPropagation(); irParaEtapa(g.dataset.etapaGoto); }
 }, true);
 
-// ─── DRAG & DROP: etapas, atividades e cards do quadro ───
 let dnd = null;
 function dndUnmark() {
     document.querySelectorAll('.drop-before,.drop-after,.drop-in,.kb-col.over').forEach(el => el.classList.remove('drop-before', 'drop-after', 'drop-in', 'over'));
@@ -1779,12 +1790,12 @@ function dndInit() {
     if (!c || c._dnd) return; c._dnd = true;
     c.addEventListener('dragstart', ev => {
         const src = ev.target.closest?.('[data-drag-kind]'); if (!src) return;
-        dnd = { kind: src.dataset.dragKind, id: +src.dataset.dragId };
+        dnd = { kind: src.dataset.dragKind, id: src.dataset.dragKind === 'pasta' ? src.dataset.dragId : +src.dataset.dragId };
         ev.dataTransfer.effectAllowed = 'move';
         ev.dataTransfer.setData('text/plain', String(dnd.id));
         const host = src.closest('[data-etapa-id],[data-sessao-id]') || src;
         const img = dnd.kind === 'sessao' ? (src.closest('.grp-h') || host) : host;
-        if (img !== src) { try { ev.dataTransfer.setDragImage(img, 24, 20); } catch (e) { /* ok */ } }
+        if (img !== src) { try { ev.dataTransfer.setDragImage(img, 24, 20); } catch (e) { } }
         setTimeout(() => host.classList.add('dragging'), 0);
         if (dnd.kind === 'proj' || dnd.kind === 'pasta') { const k = dnd.kind; setTimeout(() => dndTray(k), 0); }
     });
@@ -1837,7 +1848,7 @@ async function moverEtapa(id, o) {
     const ordem = ordemEntre(sib, idx);
 
     const statusMudou = board && o.status !== e.status;
-    const soStatus = board && !currentUserCanEdit;       // quem não edita só muda o status
+    const soStatus = board && !currentUserCanEdit;
     const trocouSessao = !soStatus && sNew !== sOld;
     const patch = {};
     if (statusMudou) patch.status = o.status;
@@ -1915,7 +1926,6 @@ async function moverSessao(id, alvoId, pos) {
     if (error) { toast('Erro ao reordenar atividade: ' + error.message, 'error'); await renderizarProjetos(); }
 }
 
-// ─── UPLOAD POR ARRASTAR ───
 let upQueue = [];
 const upKey = f => `${f.name}|${f.size}|${f.lastModified}`;
 function dtFiles(dt) {
@@ -1923,7 +1933,7 @@ function dtFiles(dt) {
     if (dt?.items?.length) {
         for (const it of dt.items) {
             if (it.kind !== 'file') continue;
-            if (it.webkitGetAsEntry?.()?.isDirectory) continue;      // ignora pastas
+            if (it.webkitGetAsEntry?.()?.isDirectory) continue;
             const f = it.getAsFile(); if (f) out.push(f);
         }
         return out;
@@ -1966,38 +1976,7 @@ function upDrop(ev) {
 })();
 
 
-// ─── PERFIL RÁPIDO DO MEMBRO (clicar no responsável) ───
-function verUsuario(uid) {
-    const u = wsMembers.find(x => x.id === uid); if (!u) return;
-    const hoje = dataLocalHojeISO(), minhas = [];
-    wsProjetos.forEach(p => (p.sessoes || []).forEach(se => (se.etapas || []).forEach(e => {
-        if (etapaRespIds(e).includes(uid)) minhas.push({ e, p, se });
-    })));
-    const abertas = minhas.filter(x => x.e.status !== 'Concluído')
-        .sort((a, b) => (a.e.prazo || '9999').localeCompare(b.e.prazo || '9999'));
-    const feitas = minhas.length - abertas.length;
-    const atras = abertas.filter(x => x.e.prazo && x.e.prazo < hoje).length;
-    const lista = abertas.slice(0, 8).map(({ e, p, se }) => `
-        <div class="ag-prox-i" onclick="fecharModal();irParaEtapa(${e.id})" title="Abrir esta etapa no projeto">
-            <span class="ag-dot"></span><div style="min-width:0"><div style="font-weight:600;overflow-wrap:anywhere">${escH(e.nome)}</div>
-            <div class="muted" style="font-size:.72rem">📁 ${escH(p.nome)} › ${escH(se.nome)}</div></div>
-            <small>${e.prazo ? prazoLabel(e.prazo, e.status) : 'Sem prazo'}</small></div>`).join('');
-    abrirModal('👤 ' + u.nome, `
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-            <span class="av" style="background:${userColor(u.nome)};width:52px;height:52px;font-size:1.1rem">${initials(u.nome)}</span>
-            <div><div style="font-weight:700;font-size:1rem">${escH(u.nome)}</div>
-            <div class="muted" style="font-size:.8rem">@${escH(u.username || '')} · ${u.wsAdmin ? 'Administrador' : 'Membro'}</div></div>
-        </div>
-        <div class="ag-resumo">
-            <div class="ag-rs"><b>${abertas.length}</b><span>Etapas em aberto</span></div>
-            <div class="ag-rs"><b style="${atras ? 'color:var(--danger)' : ''}">${atras}</b><span>Atrasadas</span></div>
-            <div class="ag-rs"><b>${feitas}</b><span>Concluídas</span></div>
-            <div class="ag-rs"><b>${minhas.length}</b><span>Total atribuídas</span></div>
-        </div>
-        <div class="ag-sec">Em aberto${abertas.length > 8 ? ` (mostrando 8 de ${abertas.length})` : ''}</div>
-        ${lista || '<div class="ag-vazio">Nenhuma etapa em aberto. 🎉</div>'}
-    `, [{ label: 'Fechar', cls: 'btn-s', action: 'fecharModal()' }]);
-}
+function verUsuario(uid) { return verContribuidor(uid); }
 
 // ─── CRUD PROJETOS ────────────────────────────────
 function abrirModalProjeto() {
@@ -2299,7 +2278,7 @@ function progSortBy(col) {
 let progQuickOn = [];
 function progQuick(i) {
     const set = progQuickSets[i];
-    if (i > 0 && progQuickOn[i]) Object.keys(set).forEach(k => { progF[k] = ''; });   // já ativo: desativa
+    if (i > 0 && progQuickOn[i]) Object.keys(set).forEach(k => { progF[k] = ''; });
     else Object.assign(progF, set);
     progAtualizar();
 }
@@ -2338,7 +2317,7 @@ function progOrdenar(lista) {
 }
 function progRow(e, i) {
     const us = etapaRespIds(e).map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
-    return `<tr class="prog-row anim-item ${ST_CLS[e.status] || ''}" style="animation-delay:${Math.min(i, 20) * 0.02}s" onclick="irParaEtapa(${e.id})" title="Abrir esta etapa no projeto">
+    return `<tr class="prog-row anim-item ${ST_CLS[e.status] || ''}${e.prazo && prazoClass(e.prazo, e.status) === 'b-amber' ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}" style="animation-delay:${Math.min(i, 20) * 0.02}s" onclick="irParaEtapa(${e.id})" title="Abrir esta etapa no projeto">
         <td><div class="pr-t">${escH(e.nome)}</div><div class="pr-s">📁 ${escH(e.sessoes?.projetos?.nome || '—')}</div></td>
         <td class="pr-sess">${escH(e.sessoes?.nome || '—')}</td>
         <td>${us.length ? `<div class="pr-resp">${us.map(u => `<span class="badge b-purple av-click" role="button" tabindex="0" title="Ver ${escH(u.nome)}" onclick="event.stopPropagation();verUsuario(${u.id})">${escH(u.nome)}</span>`).join('')}</div>` : '<span class="muted" style="font-size:.78rem">—</span>'}</td>
@@ -2980,12 +2959,17 @@ function prazoClass(prazo, status) {
     if (diff <= 7) return 'b-amber';      
     return 'b-acc';
 }
+function prazoAmanha(prazo, status) {
+    if (!prazo || status === 'Concluído') return false;
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    return Math.floor((new Date(prazo + 'T00:00:00') - hoje) / 86400000) === 1;
+}
 function prazoLabel(prazo, status) {
-    if (status === 'Concluído') return '✅ Concluído';
     const hoje = new Date(); hoje.setHours(0,0,0,0);
     const d = new Date(prazo + 'T00:00:00');
     const diff = Math.floor((d - hoje) / 86400000);
     const fmt = d.toLocaleDateString('pt-BR', { day:'2-digit', month:'short' });
+    if (status === 'Concluído') return `✅ ${fmt}`;
     if (d < hoje) return `⚠️ Venceu ${fmt}`;
     if (diff === 0) return `🔴 Hoje!`;
     if (diff === 1) return `🟠 Amanhã`;
@@ -3250,7 +3234,7 @@ function cpopDesenharStats() {
 function cpopLinhaMinha(e) {
     const cls = e.status === 'Concluído' ? 's-ok' : e.status === 'Em andamento' ? 's-an' : '';
     const stCls = e.status === 'Concluído' ? 'b-green' : e.status === 'Em andamento' ? 'b-amber' : 'b-gray';
-    return `<div class="cpop-et ${cls}">
+    return `<div class="cpop-et ${cls}" role="button" tabindex="0" title="Abrir esta etapa no projeto" onclick="fecharCpop();irParaEtapa(${e.id})">
         <div class="cpop-et-i"><div class="cpop-et-n">${escH(e.nome)}</div><div class="cpop-et-s">🗂 ${escH(e.sessoes.nome)}</div></div>
         <div class="cpop-et-b">
             <span class="badge ${stCls}">${e.status}</span>
@@ -3295,6 +3279,7 @@ function renderCpop() {
     if (!wsMembers.find(x => x.id === cpopUserId)) return;
     cpopDesenharStats();
     if (cpopModo === 'atribuir') renderCpopAtribuir();
+    else if (cpopModo === 'nova') cpopAbrirNova();
     else renderCpopLista();
 }
 
@@ -3303,6 +3288,51 @@ function cpopAbrirAtribuir() {
     cpopModo = 'atribuir';
     cpopFiltro = { busca: '', projeto: '' };
     renderCpopAtribuir();
+}
+
+function cpopAbrirNova() {
+    if (!currentUserCanEdit) return;
+    const u = wsMembers.find(x => x.id === cpopUserId); if (!u) return;
+    cpopModo = 'nova';
+    const opts = wsProjetos.filter(p => (p.sessoes || []).length)
+        .map(p => `<optgroup label="${escH(p.nome)}">${p.sessoes.map(se => `<option value="${se.id}">${escH(se.nome)}</option>`).join('')}</optgroup>`).join('');
+    document.getElementById('cpop-body').innerHTML = opts ? `
+        <div class="cpop-sec">Nova etapa para ${escH(u.nome)}</div>
+        <div class="fg"><label class="fl" for="cpop-n-nome">Nome da etapa</label><input id="cpop-n-nome" class="fi" maxlength="120" placeholder="Ex: Revisar relatório" onkeydown="if(event.key==='Enter')cpopCriarNova()"/></div>
+        <div class="fg"><label class="fl" for="cpop-n-sess">Atividade</label><select id="cpop-n-sess" class="fsel">${opts}</select></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="fg"><label class="fl" for="cpop-n-prazo">Prazo <span style="font-weight:400;color:var(--muted)">(opcional)</span></label><input id="cpop-n-prazo" type="date" class="fi"/></div>
+            <div class="fg"><label class="fl" for="cpop-n-prio">Prioridade</label><select id="cpop-n-prio" class="fsel">${[0,1,2,3,4].map(v => `<option value="${v}">${v}</option>`).join('')}</select></div>
+        </div>` : `<div class="cpop-vazio">Nenhum projeto tem atividades ainda. Crie uma atividade em um projeto primeiro.</div>`;
+    const foot = document.getElementById('cpop-foot');
+    foot.innerHTML = `<button class="btn btn-s" onclick="cpopAbrirAtribuir()">← Voltar</button>${opts ? '<button class="btn btn-p" onclick="cpopCriarNova()">Criar e atribuir</button>' : ''}`;
+    foot.classList.remove('hidden');
+    document.getElementById('cpop-n-nome')?.focus();
+}
+
+async function cpopCriarNova() {
+    if (cpopBusy || !currentUserCanEdit) return;
+    const uid = cpopUserId, u = wsMembers.find(x => x.id === uid); if (!u) return;
+    const nome = document.getElementById('cpop-n-nome')?.value?.trim();
+    const sId = +document.getElementById('cpop-n-sess')?.value;
+    const prazo = document.getElementById('cpop-n-prazo')?.value || null;
+    const prio = +document.getElementById('cpop-n-prio')?.value || 0;
+    if (!nome) { toast('Informe o nome da etapa.', 'warning'); return; }
+    if (!sId) { toast('Escolha a atividade.', 'warning'); return; }
+    const sess = wsProjetos.flatMap(p => p.sessoes || []).find(x => x.id === sId);
+    const novo = { sessao_id: sId, nome, descricao: '', responsavel_id: uid, status: 'Não iniciado', prioridade: prio, prazo };
+    if (FD_FEAT.ordem) novo.ordem = proxOrdem(sess?.etapas);
+    cpopBusy = true;
+    const { data, error } = await sb.from('etapas').insert(novo).select().single();
+    if (error) { cpopBusy = false; toast('Erro ao criar etapa: ' + error.message, 'error'); return; }
+    const r = await salvarResponsaveis(data.id, [uid]);
+    cpopBusy = false;
+    if (r.error) toast('Etapa criada, mas o responsável não foi salvo: ' + r.error.message, 'warning');
+    await addLog('create', 'etapa', data.id, { nome: `"${nome}" criada para ${u.nome}` });
+    await pushNotificacao('👤', `${currentUser.nome} criou a etapa "${nome}" para ${u.nome}.`, 'geral', `projeto:${sess ? wsProjetos.find(p => (p.sessoes || []).includes(sess))?.id : ''}`);
+    toast(`Etapa "${nome}" criada para ${u.nome}. ✅`);
+    await renderizarProjetos();
+    if (cpopUserId === uid) await verContribuidor(uid);
 }
 
 function cpopVoltar() {
@@ -3324,7 +3354,7 @@ function renderCpopAtribuir() {
         </div>
         <div id="cpop-pick-list"></div>`;
     const foot = document.getElementById('cpop-foot');
-    foot.innerHTML = '<button class="btn btn-s" onclick="cpopVoltar()">← Voltar às etapas</button>';
+    foot.innerHTML = '<button class="btn btn-s" onclick="cpopVoltar()">← Voltar às etapas</button><button class="btn btn-p" onclick="cpopAbrirNova()">＋ Nova etapa</button>';
     foot.classList.remove('hidden');
     cpopDesenharCandidatas();
 }
@@ -3356,7 +3386,7 @@ function cpopDesenharCandidatas() {
         const atual = etapaRespIds(e).map(id => wsMembers.find(x => x.id === id)).filter(Boolean);
         const cls = e.status === 'Em andamento' ? 's-an' : '';
         return `<div class="cpop-et ${cls}">
-            <div class="cpop-et-i">
+            <div class="cpop-et-i" title="Abrir esta etapa no projeto" onclick="fecharCpop();irParaEtapa(${e.id})">
                 <div class="cpop-et-n">${escH(e.nome)}</div>
                 <div class="cpop-et-s">📁 ${escH(e.sessoes.projetos.nome)} › 🗂 ${escH(e.sessoes.nome)}</div>
             </div>
@@ -3378,7 +3408,7 @@ async function cpopAtribuir(eId) {
     if (!e || !u) return;
     const atuais = etapaRespIds(e);
     let novos;
-    if (FD_FEAT.multi) novos = [...new Set([...atuais, uid])];          // com vários responsáveis: adiciona
+    if (FD_FEAT.multi) novos = [...new Set([...atuais, uid])];
     else {
         const atual = wsMembers.find(x => x.id === atuais[0]);
         if (atual && !confirm(`"${e.nome}" já está com ${atual.nome}. Reatribuir para ${u.nome}?`)) return;
@@ -3492,9 +3522,7 @@ async function addLog(acao, entidade=null, entidadeId=null, payload=null) {
             entidade_id:  entidadeId || null,
             payload:      payload    || null
         });
-        // tabela ainda sem as colunas novas (rode o SQL de migração): grava só o básico, sem erro no console
         if (error && error.code === 'PGRST204') ({ error } = await sb.from('logs').insert(base));
-        // o log nunca deve atrapalhar a ação do usuário; mostramos o motivo real no console para diagnóstico
         if (error) console.warn('addLog: o Supabase recusou o registro de log →', error.message, '|', error.details || '', '|', error.hint || '', '| código', error.code);
     } catch(e) { console.warn('addLog falhou:', e?.message); }
 }
@@ -3689,9 +3717,8 @@ async function carregarFerramentas() {
 
 function abrirFerramenta(path) { window.open(path, '_blank'); }
 
-// ─── INTEGRAÇÕES (API) — só administradores ───────
-// As chaves são geradas e guardadas (só o hash) no banco. O site nunca lê a tabela:
-// tudo passa pelas funções api_key_* (supabase/001_api_keys.sql).
+// ─── INTEGRAÇÕES (API)  ───────
+
 const API_PERMS = [
     { k: 'ver',    rot: 'Visualizar', dica: 'Ler projetos, etapas e progresso' },
     { k: 'editar', rot: 'Editar',     dica: 'Criar etapas e alterar status, prioridade, prazo e responsável' },
@@ -3944,9 +3971,9 @@ async function carregarNotificacoes() {
     list.innerHTML = data.map(n => {
         const tipo = NOTIF_TIPO[n.tipo] || { label: n.tipo||'Geral', cls:'background:#f1f5f9;color:#64748b' };
 
-        // Card especial
+        // Card especial: solicitação de acesso (ainda não respondida)
         if (n.tipo === 'acesso' && !n.lida) {
-  
+            // icone guarda "usuario_id:pedido_id" quando vem do homepage
             const parts = (n.icone||'').split(':');
             const usuarioId = parts[1] || null;
             const pedidoId  = parts[2] || null;
