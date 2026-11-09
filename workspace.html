@@ -296,6 +296,33 @@
         .file-viewer-content iframe{display:block;width:100%;height:min(75vh,900px);border:0;background:#fff}
         .file-viewer-foot{padding:11px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end}
 
+
+        .cd-chip{display:inline-flex;align-items:center;gap:4px;max-width:210px;padding:2px 8px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font:600 .7rem var(--font);color:var(--muted)}
+        .cd-chip.pend{background:#fffbeb;border-color:#fcd34d;color:#b45309}
+        .cd-chip.ok{background:#ecfdf5;border-color:#6ee7b7;color:#047857}
+        .cd-chip .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .grp-solta{border-left:3px solid #c7d2fe}
+        .grp-solta .row{border-top:none}
+        .dnd-gap{height:12px;margin-top:-12px;position:relative;z-index:4;border-radius:8px;transition:height .1s,background .1s}
+        .dnd-gap.first{margin-top:0;height:10px}
+        .dnd-gap.drop-in{height:30px;background:var(--acc-lt);outline:2px dashed var(--acc);outline-offset:-2px}
+        .anx-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+        .grp-h .anx-chips{margin:0}
+        .anx-chip{display:inline-flex;align-items:center;gap:4px;max-width:210px;padding:2px 8px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font:600 .7rem var(--font);color:var(--acc);cursor:pointer}
+        .anx-chip:hover{background:var(--acc-lt);border-color:#c7d2fe}
+        .anx-chip .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .anx-chip .anx-chip-b{display:inline-flex;align-items:center;gap:4px;background:none;border:none;padding:0;font:inherit;color:inherit;cursor:pointer;min-width:0}
+        .anx-chip .ms-x{width:16px;height:16px;font-size:.8rem}
+        .anx-acts{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+        .anx-picker,.anx-lista{margin-top:8px;border:1px solid var(--border);border-radius:10px;max-height:190px;overflow-y:auto;background:var(--surface)}
+        .anx-lista{max-height:none;margin-top:0}
+        .anx-item{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:.82rem;cursor:pointer;border-top:1px solid var(--border)}
+        .anx-item:first-child{border-top:none}
+        .anx-item:hover,.anx-item:focus-visible{background:var(--acc-lt);outline:none}
+        .anx-item .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .file-viewer-content video{display:block;max-width:100%;max-height:calc(100vh - 150px)}
+        .file-viewer-content audio{display:block;width:min(520px,100%)}
+
         /* ── TOAST ── */
         .toast-ctr{position:fixed;bottom:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:6px}
         .toast{background:#1e293b;color:#fff;padding:10px 15px;border-radius:var(--rsm);font-size:.83rem;box-shadow:var(--sh-md);animation:tIn .3s ease;border-left:3px solid var(--ok);max-width:290px}
@@ -424,7 +451,10 @@
     <link rel="stylesheet" href="Agenda.css">
 
     <style id="ui-refresh">
-     :root{
+        /* ═══════════ UI REFRESH ═══════════
+           Calm design: menos bordas/sombras, sidebar discreta, status por ícone,
+           listas com cabeçalho fixo e ações no hover. Bloco isolado: remover este <style> volta ao visual anterior. */
+        :root{
             --bg:#f5f6fb; --border:#e5e8f0; --r:12px; --rsm:8px;
             --sh:0 1px 2px rgba(16,24,40,.05);
             --sh-md:0 8px 20px -6px rgba(16,24,40,.12);
@@ -437,7 +467,7 @@
         :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
         input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
 
-        /* ── Botões e campos ── */
+        /* ── Botões e campos: mais leves ── */
         .btn{padding:9px 16px;border-radius:10px}
         .btn::before{display:none}
         .btn-p{background:var(--acc);box-shadow:0 1px 2px rgba(79,70,229,.35)}
@@ -448,7 +478,7 @@
         .fi,.fta,.fsel{border:1px solid var(--border);border-radius:10px;padding:10px 12px}
         .fi:focus,.fta:focus,.fsel:focus{box-shadow:0 0 0 3px rgba(79,70,229,.12)}
 
-        /* ── Sidebar calma  ── */
+        /* ── Sidebar calma (ícones SVG, ativo sutil) ── */
         .nav-btn{color:#8b93a7;font-size:.85rem;padding:8px 10px;border-radius:8px;gap:10px;position:relative}
         .nav-btn:hover{background:rgba(255,255,255,.06);color:#e5e7f0}
         .nav-btn.active{background:rgba(129,140,248,.16);color:#fff}
@@ -459,6 +489,7 @@
         .ni svg{width:17px;height:17px}
         .ws-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--acc),#818cf8);display:flex;align-items:center;justify-content:center;color:#fff}
         .ws-icon svg{width:16px;height:16px}
+        /* contraste: estes textos estavam quase invisíveis no fundo escuro */
         .sb-sec{color:#64748b}
         .ws-code{color:#7c8aa5}
         .sb-user .ur{color:#8592a8}
@@ -482,18 +513,18 @@
         .home-greeting{font-size:1.7rem;letter-spacing:-.02em}
         @media(max-width:860px){.main{padding:16px 14px 40px}}
 
-        /* ── Dashboard  ── */
+        /* ── Dashboard (Dashboard.js injeta o CSS depois, por isso #app) ── */
         #app .dash-card{border-radius:16px}
         #app .dash-kpi{border-radius:16px}
         #app .dash-ct{letter-spacing:.07em}
 
-        /* ── Projetos ── */
+        /* ── Projetos: cards de visão geral ── */
         .pv-card,.pv-folder-card{position:relative;overflow:hidden}
         .pv-card::before,.pv-folder-card::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--acc),#818cf8);opacity:0;transition:opacity .15s}
         .pv-card:hover::before,.pv-folder-card:hover::before{opacity:1}
         .pv-folder-card strong{font-size:1rem}
 
-       
+        /* ── Lista: cabeçalho fixo, ações no hover, concluídas recuam ── */
         .grp{overflow:visible;border-radius:12px}
         .grp-h{position:sticky;top:var(--stick-top);z-index:3;background:var(--surface);border-radius:12px 12px 0 0}
         .grp>:last-child{border-radius:0 0 12px 12px}
@@ -506,12 +537,12 @@
         .row:hover .ib,.row:focus-within .ib,.grp-h:hover .ib,.grp-h:focus-within .ib,.ib:focus-visible{opacity:1}
         @media(hover:none){.row .ib,.grp-h .ib{opacity:1}}
 
-        /* status por  */
+        /* status por ícone: vazio → meio → cheio */
         .dot{width:12px;height:12px;border:2px solid #cbd5e1;background:transparent;margin-top:3px}
         .s-doing .dot{border-color:var(--warn);background:conic-gradient(var(--warn) 0 50%,transparent 0)}
         .s-done .dot{border-color:var(--ok);background:var(--ok)}
 
-        /* ── Quadro: cards */
+        /* ── Quadro: cards compactos, atrasadas em destaque ── */
         .kb{grid-template-columns:repeat(3,minmax(260px,1fr));gap:16px}
         .kb-col{background:#eef0f7;border-radius:14px}
         .kb-card{transition:transform .12s,box-shadow .12s,border-color .12s}
@@ -520,7 +551,7 @@
         .kb-card.late{border-left:3px solid var(--danger)}
         .kb-col.s-done .kb-card{opacity:.7}
 
-        /* ── Pastas/projetos ── */
+        /* ── Pastas/projetos: cards de destaque + pin ── */
         .pv-section-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:2px 2px 10px}
         .pv-grid+.pv-section-label{margin-top:26px}
         .pv-folder-card{gap:14px;padding:18px;border-radius:16px;cursor:pointer}
@@ -551,7 +582,7 @@
         .pj-sep{color:#cbd5e1;user-select:none}
         .pj-copy{margin-left:auto}
 
-        /* ── Ferramentas: integrações ── */
+        /* ── Ferramentas: integrações (API) ── */
         .int-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
         .int-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--sh);min-width:0}
         .int-top{display:flex;align-items:center;gap:12px;min-width:0}
@@ -693,6 +724,14 @@
         .prog-row.t-orange td{background:#ffedd5;border-color:#fdba74}
         .prog-row.t-orange:hover td{background:#fed7aa}
         .kb-card.t-orange{background:#ffedd5;border-color:#fdba74}
+        button.cpop-chip{border:none;font-family:var(--font);cursor:pointer;transition:background .12s,color .12s}
+        button.cpop-chip:hover{background:var(--acc);color:#fff}
+        .cpop-link{cursor:pointer}
+        .cpop-link:hover{color:var(--acc);text-decoration:underline}
+        .pv-novo{display:flex;align-items:center;justify-content:center;gap:10px;min-height:150px;padding:18px;background:transparent;border:2px dashed #c7d2fe;border-radius:14px;color:var(--acc);font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}
+        .pv-novo:hover{background:rgba(79,70,229,.06);border-color:var(--acc);transform:translateY(-2px)}
+        .pv-novo:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+        .pv-novo-ic{width:30px;height:30px;border-radius:50%;background:var(--acc-lt);display:inline-flex;align-items:center;justify-content:center;font-size:1.3rem;line-height:1}
     </style>
 </head>
 <body>
@@ -712,6 +751,7 @@
         <div class="sb-sec">Principal</div>
         <button id="nav-home"           class="nav-btn active" onclick="switchTab('home')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span> Dashboard</button>
         <button id="nav-projetos"       class="nav-btn"        onclick="switchTab('projetos')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span> Projetos</button>
+        <button id="nav-flow"           class="nav-btn"        onclick="switchTab('flow')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 12h4l4-6h2M11 12l4 6h2"/></svg></span> Flow</button>
         <button id="nav-eventos"        class="nav-btn"        onclick="switchTab('eventos')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> Agenda</button>
         <button id="nav-progresso"      class="nav-btn"        onclick="switchTab('progresso')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span> Progresso</button>
         <button id="nav-contribuidores" class="nav-btn"        onclick="switchTab('contribuidores')"><span class="ni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Colaboradores</button>
@@ -739,7 +779,8 @@
                 </div>
                 <button id="bell-btn" class="bell-btn hidden" onclick="abrirNotificacoes()" title="Notificações">🔔</button>
             </div>
-            <button class="lb" onclick="fazerLogout()">→ Sair da conta</button>
+            <button class="lb" style="display:block" onclick="fazerLogout()">→ Sair da conta</button>
+            <button class="lb" style="display:block" onclick="confirmarSairWorkspace()">⎋ Sair do workspace</button>
         </div>
     </nav>
 
@@ -833,6 +874,9 @@
             </div>
         </div>
 
+        <!-- FLOW (renderizado por Flow.js) -->
+        <div id="tab-flow" class="tab-c"></div>
+
         <!-- ANOTAÇÕES -->
         <div id="tab-anotacoes" class="tab-c">
             <div class="ph"><div><div class="pt">Minhas Anotações</div><div class="ps">Salvas localmente no navegador</div></div></div>
@@ -848,7 +892,7 @@
         <!-- LOGS -->
         <div id="tab-logs" class="tab-c">
             <div class="ph">
-                <div><div class="pt">System Logs</div><div class="ps">Histórico estruturado de atividades(em manutenção)</div></div>
+                <div><div class="pt">System Logs</div><div class="ps">Histórico de atividades do workspace</div></div>
                 <div style="display:flex;gap:8px">
                     <button class="btn btn-s btn-sm" onclick="exportarLogs()">⬇️ Exportar CSV</button>
                     <button class="btn btn-s btn-sm" onclick="carregarLogs()">↺ Atualizar</button>
@@ -981,7 +1025,7 @@ function exitProjFocus() { selectedProjetoId = null; selectedEtapaFoco = null; s
 // Projetos:  ?codigo=XXX&aba=projetos
 // Pasta:     ?codigo=XXX&pasta=3   (ou pasta=none | pasta=all)
 // Projeto:   ?codigo=XXX&projeto=12
-const ABAS_VALIDAS = ['home','projetos','progresso','contribuidores','anotacoes','arquivos','logs','eventos','ferramentas'];
+const ABAS_VALIDAS = ['home','projetos','flow','progresso','contribuidores','anotacoes','arquivos','logs','eventos','ferramentas'];
 
 function montarRotaUrl() {
     const u = new URL(window.location.href);
@@ -1133,7 +1177,7 @@ async function entrarNoDashboard() {
 // ─── TABS ─────────────────────────────────────────
 function switchTab(tab, fromRoute = false) {
     abaAtual = tab;
-    ['home','projetos','progresso','contribuidores','anotacoes','arquivos','logs','eventos','ferramentas'].forEach(t => {
+    ['home','projetos','flow','progresso','contribuidores','anotacoes','arquivos','logs','eventos','ferramentas'].forEach(t => {
         const c = document.getElementById(`tab-${t}`);
         const b = document.getElementById(`nav-${t}`);
         if (c) c.classList.toggle('active', t===tab);
@@ -1146,6 +1190,7 @@ function switchTab(tab, fromRoute = false) {
     if (tab === 'arquivos') carregarArquivosWorkspace();
     if (tab === 'home') carregarHome();
     if (tab === 'progresso') carregarProgresso();
+    if (tab === 'flow') window.Flow?.abrir();
     if (!fromRoute) syncRota();
 }
 
@@ -1229,6 +1274,7 @@ async function renderizarProjetos() {
     }
     wsPastasProjetos = pastas || [];
     ordenarPastas();
+    await carregarCondicoes();
     renderProjetosView();
 }
 
@@ -1249,7 +1295,7 @@ function renderProjetosView() {
 }
 
 function projStats(p) {
-    const et = (p.sessoes||[]).flatMap(s => s.etapas||[]);
+    const et = todasEtapas(p);
     const done = et.filter(e => e.status === 'Concluído').length;
     return { total: et.length, done, pct: et.length ? Math.round(done/et.length*100) : 0 };
 }
@@ -1288,11 +1334,11 @@ const PASTA_ICONS = {
 
 function folderStats(projs) {
     let total = 0, done = 0, late = 0;
-    projs.forEach(pr => (pr.sessoes || []).forEach(s => (s.etapas || []).forEach(e => {
+    projs.forEach(pr => todasEtapas(pr).forEach(e => {
         total++;
         if (e.status === 'Concluído') done++;
         else if (e.prazo && prazoClass(e.prazo, e.status) === 'b-rose') late++;
-    })));
+    }));
     return { total, done, late, pct: total ? Math.round(done / total * 100) : 0 };
 }
 
@@ -1354,7 +1400,8 @@ function renderProjOverview() {
     const projetos = projetosVisiveis(false);
     const titulo = pasta ? `📁 ${escH(pasta.nome)}` : selectedPastaProjeto === 'none' ? '📂 Sem pasta' : '🗂️ Todos os projetos';
     return `<div class="pv-folder-empty" style="margin-bottom:14px">${titulo} · ${projetos.length} ${projetos.length === 1 ? 'projeto' : 'projetos'}</div>
-        ${projetos.length ? `<div class="pv-grid">${[...projetos].sort((x, y) => isPinned('p:'+y.id) - isPinned('p:'+x.id)).map(renderProjetoCard).join('')}</div>` : '<div class="pv-folder-empty">Esta pasta ainda não tem projetos.</div>'}`;
+        <div class="pv-grid">${[...projetos].sort((x, y) => isPinned('p:'+y.id) - isPinned('p:'+x.id)).map(renderProjetoCard).join('')}${currentUserCanEdit ? `<button type="button" class="pv-novo" onclick="abrirModalProjeto()"><span class="pv-novo-ic">+</span><span>Novo Projeto</span></button>` : ''}</div>
+        ${!projetos.length && !currentUserCanEdit ? '<div class="pv-folder-empty">Esta pasta ainda não tem projetos.</div>' : ''}`;
 }
 
 function projetosVisiveis(comPins = true) {
@@ -1450,16 +1497,22 @@ function renderProjDetail(p) {
     const head = `<div class="pd-head">
         <div class="pd-prog"><div class="pv-bar"><i style="width:${st.pct}%"></i></div><span>${st.pct}% · ${st.done}/${st.total} etapas</span></div>
         <div class="pd-acts">
-            ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarProjeto(${p.id})">✏️ Editar</button><button class="btn btn-p btn-sm" onclick="abrirModalSessao(${p.id})">+ Atividade</button>` : ''}
+            ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarProjeto(${p.id})">✏️ Editar</button><button class="btn btn-s btn-sm" title="Cria uma etapa; escolha uma atividade ou deixe sem atividade" onclick="abrirModalEtapa(${p.id},null)">+ Etapa</button><button class="btn btn-p btn-sm" onclick="abrirModalSessao(${p.id})">+ Atividade</button>` : ''}
             <button class="btn btn-s btn-sm" onclick="irParaAnexosProjeto(${p.id})">🔗 Anexos</button>
         </div></div>`;
-    if (!(p.sessoes||[]).length) return head + `<div class="empty-state"><div class="ei">🗂</div><h3>Nenhuma atividade</h3><p>Crie uma atividade para organizar as etapas deste projeto.</p></div>`;
+    if (!(p.sessoes||[]).length && !(p.soltas||[]).length) return head + `<div class="empty-state"><div class="ei">🗂</div><h3>Nada por aqui ainda</h3><p>Crie uma atividade para organizar as etapas deste projeto — ou uma etapa solta, sem atividade.</p></div>`;
     return head + (projetosViewMode === 'board' ? renderBoard(p) : renderListView(p));
 }
 
 
 function renderListView(p) {
-    return (p.sessoes||[]).map(s => {
+    return topoLista(p).map(({ k, o }) => k[0] === 'e' ? renderSolta(p.id, o) : renderSessaoGrp(p, o)).join('');
+}
+function renderSolta(pId, e) {
+    return `<section class="grp grp-solta" data-orfa-id="${e.id}">${renderEtapa(pId, null, e)}</section>`;
+}
+function renderSessaoGrp(p, s) {
+    {
         const et = s.etapas || [], closed = collapsedSess.has(s.id);
         const done = et.filter(e => e.status === 'Concluído').length;
         const colabs = (s.sessao_usuarios||[]).map(su => wsMembers.find(u => u.id === su.usuario_id)).filter(Boolean);
@@ -1467,20 +1520,20 @@ function renderListView(p) {
             <div class="grp-h" onclick="toggleGrp(${s.id})">
                 ${currentUserCanEdit ? `<span class="grip" draggable="true" data-drag-kind="sessao" data-drag-id="${s.id}" title="Arraste para reordenar a atividade" onclick="event.stopPropagation()">⠿</span>` : ''}
                 <span class="chev ${closed ? '' : 'open'}">▶</span><b>${escH(s.nome)}</b>
-                <span class="badge b-gray">${done}/${et.length}</span><span class="avs">${colabs.map(avClick).join('')}</span><span class="grp-sp"></span>
+                <span class="badge b-gray">${done}/${et.length}</span><span class="avs">${colabs.map(avClick).join('')}</span>${anxChips(s, 2, 's')}${condChips('sessao', s, 2)}<span class="grp-sp"></span>
                 ${currentUserCanEdit ? `<button class="ib" title="Editar atividade" onclick="event.stopPropagation();editarSessao(${s.id},${p.id})">✏️</button>` : ''}
             </div>
             ${closed ? '' : `${et.length ? `<div class="row row-h"><span>Etapa</span><span>Responsáveis</span><span>Prazo</span><span>Prio.</span><span>Status</span></div>${et.map(e => renderEtapa(p.id, s.id, e)).join('')}` : '<div class="row-empty" style="border-top:1px solid var(--border)">Nenhuma etapa ainda. Arraste uma etapa para cá.</div>'}
             ${currentUserCanEdit ? `<button class="add-row" onclick="abrirModalEtapa(${p.id},${s.id})">+ Nova etapa</button>` : ''}`}
         </section>`;
-    }).join('');
+    }
 }
 
 
 function renderEtapa(pId, sId, e) {
     const perto = e.prazo && prazoClass(e.prazo, e.status) === 'b-amber';
     return `<div class="row ${ST_CLS[e.status]||''}${perto ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}" data-etapa-id="${e.id}">
-        <div class="r-name">${currentUserCanEdit ? `<span class="grip" draggable="true" data-drag-kind="etapa" data-drag-id="${e.id}" title="Arraste para reordenar ou mover para outra atividade">⠿</span>` : ''}<span class="dot"></span><div><div class="r-t">${escH(e.nome)}</div>${e.descricao ? `<div class="r-d">${escH(e.descricao)}</div>` : ''}</div></div>
+        <div class="r-name">${currentUserCanEdit ? `<span class="grip" draggable="true" data-drag-kind="etapa" data-drag-id="${e.id}" title="Arraste para reordenar ou mover para outra atividade">⠿</span>` : ''}<span class="dot"></span><div><div class="r-t">${escH(e.nome)}</div>${e.descricao ? `<div class="r-d">${escH(e.descricao)}</div>` : ''}${anxChips(e, 3, 'e')}${condChips('etapa', e)}</div></div>
         <div class="r-resp">${respCell(etapaRespIds(e))}</div>
         <div>${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span class="muted">—</span>'}</div>
         <div><select class="mini" title="Prioridade" onchange="updateEtapaPrio(${e.id}, this.value)">${[0,1,2,3,4].map(v => `<option ${e.prioridade==v?'selected':''}>${v}</option>`).join('')}</select></div>
@@ -1491,7 +1544,7 @@ function renderEtapa(pId, sId, e) {
 
 
 function renderBoard(p) {
-    const all = (p.sessoes||[]).flatMap(s => (s.etapas||[]).map(e => ({ e, s }))).sort((a, b) => ordCmp(a.e, b.e));
+    const all = [...(p.soltas||[]).map(e => ({ e, s: null })), ...(p.sessoes||[]).flatMap(s => (s.etapas||[]).map(e => ({ e, s })))].sort((a, b) => ordCmp(a.e, b.e));
     return `<div class="kb">${STATUS.map(st => {
         const items = all.filter(x => x.e.status === st);
         return `<div class="kb-col ${ST_CLS[st]}" data-kb-status="${st}">
@@ -1499,7 +1552,7 @@ function renderBoard(p) {
             ${items.map(({ e, s }) => {
                 const ids = etapaRespIds(e);
                 return `<div class="kb-card ${e.prazo && e.status !== 'Concluído' && prazoClass(e.prazo, e.status) === 'b-rose' ? 'late' : ''}${e.prazo && prazoClass(e.prazo, e.status) === 'b-amber' ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}" draggable="true" data-etapa-id="${e.id}" data-drag-kind="etapa" data-drag-id="${e.id}" ${currentUserCanEdit ? `onclick="editarEtapa(${e.id})"` : ''}>
-                    <div class="r-t">${escH(e.nome)}</div><div class="r-d">🗂 ${escH(s.nome)}</div>
+                    <div class="r-t">${escH(e.nome)}</div><div class="r-d">${s ? '🗂 ' + escH(s.nome) : '🔹 Etapa solta'}</div>${anxChips(e, 2, 'e')}${condChips('etapa', e, 2)}
                     <div class="kb-f">${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span></span>'}${avStack(ids)}</div></div>`;
             }).join('') || '<div class="row-empty">Vazio — solte um card aqui</div>'}
         </div>`;
@@ -1509,7 +1562,7 @@ function renderBoard(p) {
 
 // ═══════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════
-const FD_FEAT = { multi: true, ordem: true, pord: true, pasta: true };
+const FD_FEAT = { multi: true, ordem: true, pord: true, pasta: true, orf: false, anx: false, cond: false };
 const ordV = x => (typeof x.ordem === 'number' ? x.ordem : (typeof x.id === 'number' ? x.id : 0));
 const ordCmp = (a, b) => (ordV(a) - ordV(b)) || (typeof a.id === 'number' && typeof b.id === 'number' ? a.id - b.id : String(a.id).localeCompare(String(b.id)));
 const proxOrdem = lista => Math.max(0, ...(lista || []).map(ordV)) + 1;
@@ -1519,6 +1572,26 @@ function ordemEntre(sib, idx) {
     if (prev) return ordV(prev) + 1;
     if (next) return ordV(next) - 1;
     return 1;
+}
+
+// Etapas do projeto, soltas e dentro de atividades
+const todasEtapas = p => [...(p.soltas || []), ...(p.sessoes || []).flatMap(s => s.etapas || [])];
+function topoLista(p) {
+    return [
+        ...(p.sessoes || []).map(o => ({ k: 's:' + o.id, o })),
+        ...(p.soltas || []).map(o => ({ k: 'e:' + o.id, o }))
+    ].sort((a, b) => ordCmp(a.o, b.o) || a.k.localeCompare(b.k));
+}
+// Posição (campo ordem) de um item do topo ao soltar antes/depois de alvoKey; null = soltou em si mesmo
+function ordemTopo(p, excluirKey, alvoKey, pos) {
+    const sib = topoLista(p).filter(x => x.k !== excluirKey);
+    let idx = sib.length;
+    if (alvoKey && alvoKey !== 'end') {
+        const i = sib.findIndex(x => x.k === alvoKey);
+        if (i < 0) return null;
+        idx = pos === 'after' ? i + 1 : i;
+    }
+    return ordemEntre(sib.map(x => x.o), idx);
 }
 
 function etapaRespIds(e) {
@@ -1541,19 +1614,51 @@ function etapasFlatSelect() {
     return 'id, nome, status, prazo, prioridade, responsavel_id' + (FD_FEAT.multi ? ', etapa_responsaveis(usuario_id)' : '')
         + ', sessoes!inner(id, nome, projeto_id, projetos!inner(id, nome, workspace_id))';
 }
+// Versão que inclui etapas soltas (filtrar por flatWsCol()); usada em Progresso e no popup de contribuidores
+function etapasFlatSelectWs() {
+    return FD_FEAT.orf
+        ? etapasFlatSelect().replace(/, sessoes!inner\(.*$/, '') + ', sessao_id, projeto_id, sessoes(id, nome, projeto_id), projetos!inner(id, nome, workspace_id)'
+        : etapasFlatSelect();
+}
+const flatWsCol = () => FD_FEAT.orf ? 'projetos.workspace_id' : 'sessoes.projetos.workspace_id';
+// Etapa solta recebe uma atividade fictícia "Sem atividade" para não quebrar quem lê e.sessoes
+function flatNorm(lista) {
+    return (lista || []).map(e => {
+        const pr = e.projetos || e.sessoes?.projetos || null;
+        e.sessoes = e.sessoes
+            ? { ...e.sessoes, projetos: pr }
+            : { id: 'solta', nome: 'Sem atividade', projeto_id: pr?.id ?? null, projetos: pr };
+        return e;
+    }).filter(e => e.sessoes.projetos);
+}
 function projSelectStr(c) {
+    const anx = FD_FEAT.anx ? ', anexo_vinculos(id, arquivo_id, arquivos(id, nome, path, tamanho, visibilidade, criado_por))' : '';
+    const etCampos = `id, nome, descricao, status, responsavel_id, prioridade, prazo${FD_FEAT.orf ? ', sessao_id' : ''}${c.ordem ? ', ordem' : ''}${c.multi ? ', etapa_responsaveis(usuario_id)' : ''}${anx}`;
     return `id, nome, descricao, pasta_id${FD_FEAT.pord ? ', ordem' : ''},
         projeto_usuarios(usuario_id),
         sessoes(id, nome, descricao${c.ordem ? ', ordem' : ''},
-            sessao_usuarios(usuario_id),
-            etapas(id, nome, descricao, status, responsavel_id, prioridade, prazo${c.ordem ? ', ordem' : ''}${c.multi ? ', etapa_responsaveis(usuario_id)' : ''}))`;
+            sessao_usuarios(usuario_id)${anx},
+            etapas(${etCampos}))${FD_FEAT.orf ? `,
+        etapas(${etCampos})` : ''}`;
 }
 async function carregarProjetosDb() {
+    let r = await carregarProjetosCombos();
+    if (r.error && (FD_FEAT.orf || FD_FEAT.anx)) {
+        console.warn('FlowDesk: falha ao carregar com etapas soltas/anexos, tentando sem.', r.error);
+        FD_FEAT.orf = false; FD_FEAT.anx = false;
+        toast('Não consegui carregar etapas soltas/anexos. Confira o SQL de migração.', 'warning');
+        r = await carregarProjetosCombos();
+    }
+    return r;
+}
+async function carregarProjetosCombos() {
     const combos = [{ multi: true, ordem: true }, { multi: false, ordem: true }, { multi: true, ordem: false }, { multi: false, ordem: false }]
         .filter(c => (!c.multi || FD_FEAT.multi) && (!c.ordem || FD_FEAT.ordem));
     let ultimo = null;
     for (const c of combos) {
-        const r = await sb.from('projetos').select(projSelectStr(c)).eq('workspace_id', currentWorkspace.id).order('id');
+        let q = sb.from('projetos').select(projSelectStr(c)).eq('workspace_id', currentWorkspace.id).order('id');
+        if (FD_FEAT.orf) q = q.is('etapas.sessao_id', null);
+        const r = await q;
         if (!r.error) {
             FD_FEAT.multi = c.multi; FD_FEAT.ordem = c.ordem;
             if ((!c.multi || !c.ordem) && !window.__fdAvisoMig) {
@@ -1569,11 +1674,20 @@ async function carregarProjetosDb() {
 }
 async function probeFeat() {
     if (probeFeat.feito) return; probeFeat.feito = true;
-    const [a, b] = await Promise.all([
+    const [a, b, c, d, f] = await Promise.all([
         sb.from('projetos').select('ordem').limit(1),
-        sb.from('pastas_projetos').select('categoria, ordem').limit(1)
+        sb.from('pastas_projetos').select('categoria, ordem').limit(1),
+        sb.from('etapas').select('projeto_id').limit(1),
+        sb.from('anexo_vinculos').select('id').limit(1),
+        sb.from('condicoes').select('id').limit(1)
     ]);
+    FD_FEAT.cond = !f.error;
     FD_FEAT.pord = !a.error; FD_FEAT.pasta = !b.error;
+    FD_FEAT.orf = !c.error; FD_FEAT.anx = !d.error;
+    if ((c.error || d.error) && !window.__fdAvisoMig3) {
+        window.__fdAvisoMig3 = true;
+        toast('Para usar etapas soltas e anexos em atividades/etapas, rode o SQL migracao_etapas_soltas_anexos.sql no Supabase.', 'warning');
+    }
     if ((a.error || b.error) && !window.__fdAvisoMig2) {
         window.__fdAvisoMig2 = true;
         toast('Para salvar a ordem de projetos/pastas e usar categorias, rode o SQL de migração atualizado.', 'warning');
@@ -1587,8 +1701,12 @@ function setPastaCat(c) { pastaCatFiltro = pastaCatFiltro === c ? '' : c; render
 function normalizarProjetos() {
     wsProjetos.sort(ordCmp);
     wsProjetos.forEach(p => {
+        if (Array.isArray(p.etapas)) { p.soltas = p.etapas; delete p.etapas; }
+        else if (!p.soltas) p.soltas = [];
+        p.soltas.sort(ordCmp);
         (p.sessoes || []).sort(ordCmp);
-        (p.sessoes || []).forEach(s => (s.etapas || []).sort(ordCmp));
+        (p.sessoes || []).forEach(s => { (s.etapas || []).sort(ordCmp); anxRegVinculos(s); (s.etapas || []).forEach(anxRegVinculos); });
+        p.soltas.forEach(anxRegVinculos);
     });
 }
 
@@ -1688,7 +1806,10 @@ async function alternarConcluida(eId) {
     return ok ? novo : e.status;
 }
 function findEtapaCtx(id) {
-    for (const p of wsProjetos) for (const s of p.sessoes || []) { const e = (s.etapas || []).find(x => x.id === id); if (e) return { p, s, e }; }
+    for (const p of wsProjetos) {
+        const solta = (p.soltas || []).find(x => x.id === id); if (solta) return { p, s: null, e: solta };
+        for (const s of p.sessoes || []) { const e = (s.etapas || []).find(x => x.id === id); if (e) return { p, s, e }; }
+    }
     return null;
 }
 function focarEtapa(eId) {
@@ -1703,7 +1824,7 @@ function irParaEtapa(eId) {
     const ctx = findEtapaCtx(eId);
     if (!ctx) { toast('Etapa não encontrada (pode ter sido excluída).', 'warning'); return; }
     selectedProjetoId = ctx.p.id; selectedEtapaFoco = eId; projetosViewMode = 'list';
-    collapsedSess.delete(ctx.s.id);
+    if (ctx.s) collapsedSess.delete(ctx.s.id);
     switchTab('projetos', true);
     syncRota();
     renderProjetosView();
@@ -1732,7 +1853,7 @@ function dndUnmark() {
 function dndClear() {
     dnd = null; dndUnmark();
     document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
-    document.querySelectorAll('.dnd-tray').forEach(el => el.remove());
+    document.querySelectorAll('.dnd-tray,.dnd-gap').forEach(el => el.remove());
 }
 function dndPosX(ev, el) { const r = el.getBoundingClientRect(); return (ev.clientX - r.left) < r.width / 2 ? 'before' : 'after'; }
 function dndTray(kind) {
@@ -1744,11 +1865,25 @@ function dndTray(kind) {
     d.innerHTML = `<small>${kind === 'proj' ? 'Solte em uma pasta:' : 'Solte em uma categoria:'}</small>${chips}`;
     c.appendChild(d);
 }
+// Faixas entre os itens do projeto durante o arraste: soltar uma etapa ali a deixa solta
+function dndGaps() {
+    if (!dnd || (dnd.kind !== 'etapa' && dnd.kind !== 'sessao')) return;
+    const c = document.getElementById('projetos-container'); if (!c) return;
+    const itens = [...c.querySelectorAll('section.grp[data-sessao-id], section.grp[data-orfa-id]')];
+    if (!itens.length) return;
+    const mk = (key, first) => { const d = document.createElement('div'); d.className = 'dnd-gap' + (first ? ' first' : ''); d.dataset.gap = key; return d; };
+    itens.forEach((el, i) => el.before(mk(el.dataset.sessaoId ? 's:' + el.dataset.sessaoId : 'e:' + el.dataset.orfaId, i === 0)));
+    itens[itens.length - 1].after(mk('end'));
+}
 function dndPos(ev, el) { const r = el.getBoundingClientRect(); return (ev.clientY - r.top) < r.height / 2 ? 'before' : 'after'; }
 
 function dndTarget(ev) {
     if (!dnd || !ev.target.closest) return null;
     const t = ev.target;
+    if (dnd.kind === 'etapa' || dnd.kind === 'sessao') {
+        const gap = t.closest('[data-gap]');
+        if (gap) return { type: 'gap', el: gap, before: gap.dataset.gap };
+    }
     if (dnd.kind === 'etapa') {
         const row = t.closest('[data-etapa-id]');
         if (row) {
@@ -1760,6 +1895,8 @@ function dndTarget(ev) {
         const sec = t.closest('[data-sessao-id]');
         if (sec) return { type: t.closest('.grp-h') ? 'sstart' : 'send', el: sec, sid: +sec.dataset.sessaoId };
     } else if (dnd.kind === 'sessao') {
+        const orf = t.closest('[data-orfa-id]');
+        if (orf) return { type: 'topo', el: orf, id: +orf.dataset.orfaId, pos: dndPos(ev, orf) };
         const sec = t.closest('[data-sessao-id]');
         if (sec && +sec.dataset.sessaoId !== dnd.id) return { type: 'sessao', el: sec, id: +sec.dataset.sessaoId, pos: dndPos(ev, sec) };
     } else if (dnd.kind === 'proj') {
@@ -1778,7 +1915,7 @@ function dndTarget(ev) {
 
 function dndMark(t) {
     dndUnmark();
-    if (['etapa', 'sessao', 'projcard', 'pastacard'].includes(t.type)) t.el.classList.add(t.pos === 'before' ? 'drop-before' : 'drop-after');
+    if (['etapa', 'sessao', 'topo', 'projcard', 'pastacard'].includes(t.type)) t.el.classList.add(t.pos === 'before' ? 'drop-before' : 'drop-after');
     else if (t.type === 'kbcol') t.el.classList.add('over');
     else t.el.classList.add('drop-in');
 }
@@ -1795,6 +1932,7 @@ function dndInit() {
         if (img !== src) { try { ev.dataTransfer.setDragImage(img, 24, 20); } catch (e) { } }
         setTimeout(() => host.classList.add('dragging'), 0);
         if (dnd.kind === 'proj' || dnd.kind === 'pasta') { const k = dnd.kind; setTimeout(() => dndTray(k), 0); }
+        if ((dnd.kind === 'etapa' || dnd.kind === 'sessao') && projetosViewMode === 'list') setTimeout(dndGaps, 0);
     });
     c.addEventListener('dragover', ev => {
         const t = dndTarget(ev); if (!t) return;
@@ -1820,11 +1958,16 @@ function dndDrop(d, t) {
         return;
     }
     if (d.kind === 'etapa') {
+        if (t.type === 'gap') return moverEtapa(d.id, { topo: t.before });
         if (t.type === 'etapa') return moverEtapa(d.id, { beforeId: t.pos === 'before' ? t.id : null, afterId: t.pos === 'after' ? t.id : null, status: t.status });
         if (t.type === 'kbcol') return moverEtapa(d.id, { status: t.status, end: true });
         if (t.type === 'sstart') return moverEtapa(d.id, { sessaoId: t.sid, start: true });
         if (t.type === 'send') return moverEtapa(d.id, { sessaoId: t.sid, end: true });
-    } else if (d.kind === 'sessao' && t.type === 'sessao') return moverSessao(d.id, t.id, t.pos);
+    } else if (d.kind === 'sessao') {
+        if (t.type === 'gap') return moverSessao(d.id, t.before, 'before');
+        if (t.type === 'topo') return moverSessao(d.id, 'e:' + t.id, t.pos);
+        if (t.type === 'sessao') return moverSessao(d.id, 's:' + t.id, t.pos);
+    }
 }
 async function updateChecado(tabela, patch, id) {
     const { data, error } = await sb.from(tabela).update(patch).eq('id', id).select('id');
@@ -1837,37 +1980,53 @@ async function moverEtapa(id, o) {
     const { p, s: sOld, e } = ctx;
     const board = typeof o.status === 'string';
     const alvoId = o.beforeId ?? o.afterId ?? null;
-    let sNew = sOld, sib;
+    let sNew = sOld, ordem, sib;
     if (board) {
-        sib = p.sessoes.flatMap(s => s.etapas || []).filter(x => x.status === o.status && x.id !== id).sort(ordCmp);
-    } else {
-        if (alvoId != null) { const c2 = findEtapaCtx(alvoId); if (!c2) return; sNew = c2.s; }
-        else if (o.sessaoId != null) sNew = p.sessoes.find(s => s.id === o.sessaoId) || sOld;
-        sib = (sNew.etapas || []).filter(x => x.id !== id).sort(ordCmp);
+        sib = todasEtapas(p).filter(x => x.status === o.status && x.id !== id).sort(ordCmp);
+    } else if (o.topo != null) {
+        sNew = null;
+    } else if (alvoId != null) {
+        const c2 = findEtapaCtx(alvoId); if (!c2) return; sNew = c2.s;
+    } else if (o.sessaoId != null) {
+        sNew = p.sessoes.find(s => s.id === o.sessaoId) || sOld;
     }
-    let idx = sib.length;
-    if (o.start) idx = 0;
-    else if (alvoId != null) { const i = sib.findIndex(x => x.id === alvoId); idx = i < 0 ? sib.length : (o.beforeId != null ? i : i + 1); }
-    const ordem = ordemEntre(sib, idx);
+    if (!board && !sNew && !FD_FEAT.orf) { toast('Rode o SQL de migração para usar etapas soltas.', 'warning'); return; }
+
+    if (!board && !sNew) {
+        const alvoKey = o.topo != null ? o.topo : 'e:' + alvoId;
+        ordem = ordemTopo(p, 'e:' + id, alvoKey, o.topo != null ? 'before' : (o.beforeId != null ? 'before' : 'after'));
+        if (ordem == null) return;
+    } else {
+        if (!board) sib = (sNew.etapas || []).filter(x => x.id !== id).sort(ordCmp);
+        let idx = sib.length;
+        if (o.start) idx = 0;
+        else if (alvoId != null) { const i = sib.findIndex(x => x.id === alvoId); idx = i < 0 ? sib.length : (o.beforeId != null ? i : i + 1); }
+        ordem = ordemEntre(sib, idx);
+    }
 
     const statusMudou = board && o.status !== e.status;
+    if (statusMudou && !condConfirmar(id, o.status)) { renderProjetosView(); return; }
     const soStatus = board && !currentUserCanEdit;
     const trocouSessao = !soStatus && sNew !== sOld;
     const patch = {};
     if (statusMudou) patch.status = o.status;
-    if (!soStatus) { if (FD_FEAT.ordem) patch.ordem = ordem; if (trocouSessao) patch.sessao_id = sNew.id; }
+    if (!soStatus) { if (FD_FEAT.ordem) patch.ordem = ordem; if (trocouSessao) patch.sessao_id = sNew ? sNew.id : null; }
 
     if (statusMudou) { e.status = o.status; etapaPatchCaches(id, { status: o.status }); }
     if (!soStatus) {
         e.ordem = ordem;
-        if (trocouSessao) { sOld.etapas = (sOld.etapas || []).filter(x => x.id !== id); (sNew.etapas = sNew.etapas || []).push(e); }
-        sNew.etapas.sort(ordCmp);
+        if (trocouSessao) {
+            if (sOld) sOld.etapas = (sOld.etapas || []).filter(x => x.id !== id); else p.soltas = (p.soltas || []).filter(x => x.id !== id);
+            if (sNew) (sNew.etapas = sNew.etapas || []).push(e); else (p.soltas = p.soltas || []).push(e);
+            e.sessao_id = sNew ? sNew.id : null;
+        }
+        (sNew ? sNew.etapas : p.soltas).sort(ordCmp);
     }
     renderProjetosView();
     if (!Object.keys(patch).length) return;
     const { error } = await updateChecado('etapas', patch, id);
     if (error) { toast('Erro ao mover etapa: ' + error.message, 'error'); await renderizarProjetos(); return; }
-    if (trocouSessao) addLog('update', 'etapa', id, { nome: `"${e.nome}" movida para "${sNew.nome}"` });
+    if (trocouSessao) addLog('update', 'etapa', id, { nome: `"${e.nome}" movida para ${sNew ? `"${sNew.nome}"` : 'etapa solta (sem atividade)'}` });
 }
 async function moverProjeto(id, alvoId, pos) {
     const p = wsProjetos.find(x => x.id === id); if (!p) return;
@@ -1916,16 +2075,16 @@ async function moverPastaCat(id, cat) {
     const { error } = await updateChecado('pastas_projetos', { categoria: nova, ordem: f.ordem }, id);
     if (error) { toast('Erro ao mudar categoria: ' + error.message, 'error'); await renderizarProjetos(); }
 }
-async function moverSessao(id, alvoId, pos) {
+async function moverSessao(id, alvoKey, pos) {
     const p = wsProjetos.find(x => x.id === selectedProjetoId); if (!p) return;
-    const s = p.sessoes.find(x => x.id === id); if (!s) return;
-    const sib = p.sessoes.filter(x => x.id !== id).sort(ordCmp);
-    const i = sib.findIndex(x => x.id === alvoId); if (i < 0) return;
-    s.ordem = ordemEntre(sib, pos === 'before' ? i : i + 1);
+    const sess = p.sessoes.find(x => x.id === id); if (!sess) return;
+    const ordem = ordemTopo(p, 's:' + id, alvoKey, pos);
+    if (ordem == null) return;
+    sess.ordem = ordem;
     p.sessoes.sort(ordCmp);
     renderProjetosView();
     if (!FD_FEAT.ordem) return;
-    const { error } = await updateChecado('sessoes', { ordem: s.ordem }, id);
+    const { error } = await updateChecado('sessoes', { ordem: sess.ordem }, id);
     if (error) { toast('Erro ao reordenar atividade: ' + error.message, 'error'); await renderizarProjetos(); }
 }
 
@@ -2044,6 +2203,218 @@ async function deletarProjetoConfirm(projId) {
     await addLog('delete','projeto',null); toast('Projeto deletado.'); await renderizarProjetos(); popularSelectProjetos();
 }
 
+// Anexo = arquivo da aba Anexos vinculado a uma atividade/etapa (tabela anexo_vinculos)
+const anxReg = new Map();
+let anxSt = null;
+function anxRegVinculos(obj) {
+    (obj?.anexo_vinculos || []).forEach(v => { if (v.arquivos) anxReg.set(v.arquivos.id, v.arquivos); });
+}
+const anxVisivel = f => !!f && (f.visibilidade !== 'privado' || f.criado_por === currentUser?.id);
+function anxVinculos(obj) { return (obj?.anexo_vinculos || []).filter(v => anxVisivel(v.arquivos)); }
+function anxUrl(f) { return sb.storage.from('workspace-files').getPublicUrl(f.path)?.data?.publicUrl || ''; }
+
+function anxChips(obj, max = 3, tipo = 'e') {
+    const vs = anxVinculos(obj); if (!vs.length) return '';
+    return `<div class="anx-chips">${vs.slice(0, max).map(v => `<button type="button" class="anx-chip" title="${escH(v.arquivos.nome)}" onclick="event.stopPropagation();abrirAnexo(${v.arquivos.id})"><span>${fileIcon(v.arquivos.nome)}</span><span class="n">${escH(v.arquivos.nome)}</span></button>`).join('')}${vs.length > max ? `<button type="button" class="anx-chip" title="Ver todos os anexos" onclick="event.stopPropagation();abrirListaAnexos('${tipo}',${obj.id})">+${vs.length - max}</button>` : ''}</div>`;
+}
+function tipoVisualizador(nome) {
+    if (isImage(nome)) return 'image';
+    if (isPdf(nome)) return 'pdf';
+    if (/\.(mp4|webm|m4v|mov)$/i.test(nome || '')) return 'video';
+    if (/\.(mp3|wav|ogg|m4a)$/i.test(nome || '')) return 'audio';
+    return '';
+}
+function abrirAnexo(id) {
+    const f = anxReg.get(+id);
+    if (!f) { toast('Anexo não encontrado (pode ter sido excluído).', 'warning'); return; }
+    const url = anxUrl(f);
+    if (!url) { toast('Não foi possível gerar o link do anexo.', 'error'); return; }
+    const tipo = tipoVisualizador(f.nome);
+    if (!tipo) { window.open(url, '_blank', 'noopener'); return; }
+    abrirVisualizador(url, f.nome, tipo);
+}
+function abrirListaAnexos(tipo, id) {
+    const obj = tipo === 'e' ? findEtapa(id) : wsProjetos.flatMap(p => p.sessoes || []).find(x => x.id === id);
+    if (!obj) return;
+    const vs = anxVinculos(obj);
+    abrirModal(`📎 Anexos — ${obj.nome}`,
+        vs.length ? `<div class="anx-lista">${vs.map(v => `<div class="anx-item" role="button" tabindex="0" onclick="abrirAnexo(${v.arquivos.id})" onkeydown="if(event.key==='Enter')abrirAnexo(${v.arquivos.id})"><span>${fileIcon(v.arquivos.nome)}</span><span class="n">${escH(v.arquivos.nome)}</span><small class="muted">${fmtBytes(v.arquivos.tamanho)}</small></div>`).join('')}</div>`
+            : '<div class="row-empty">Nenhum anexo.</div>',
+        [{ label: 'Fechar', cls: 'btn-s', action: 'fecharModal()' }]);
+}
+
+// Seletor de anexos usado nos modais de atividade e etapa
+function anxHtml() {
+    if (!FD_FEAT.anx) return `<div class="fg"><label class="fl">Anexos</label><p class="fhint">Rode o SQL migracao_etapas_soltas_anexos.sql no Supabase para anexar arquivos.</p></div>`;
+    return `<div class="fg"><label class="fl">Anexos</label>
+        <div id="anx-chips" class="anx-chips"></div>
+        <div class="anx-acts">
+            <button type="button" class="btn btn-s btn-sm" onclick="anxTogglePicker()">📎 Anexar arquivo do projeto</button>
+            <label class="btn btn-s btn-sm" style="cursor:pointer">⬆️ Enviar novo<input type="file" multiple style="display:none" onchange="anxUpload(this)"></label>
+        </div>
+        <div id="anx-picker" class="anx-picker hidden"></div>
+        <p class="fhint">Clique em um anexo para ver o conteúdo.</p></div>`;
+}
+function anxInit(pId, ids = []) {
+    if (!FD_FEAT.anx) { anxSt = null; return; }
+    anxSt = { pId, ids: [...ids], orig: [...ids], arqs: null, aberto: false };
+    anxChipsRender();
+    anxCarregar();
+}
+async function anxCarregar() {
+    const st = anxSt; if (!st) return;
+    const { data, error } = await sb.from('arquivos').select('id, nome, path, tamanho, visibilidade, criado_por')
+        .eq('projeto_id', st.pId).order('created_at', { ascending: false });
+    if (anxSt !== st) return;
+    if (error) { toast('Erro ao carregar os arquivos do projeto: ' + error.message, 'error'); st.arqs = []; return; }
+    st.arqs = (data || []).filter(anxVisivel);
+    st.arqs.forEach(f => anxReg.set(f.id, f));
+    anxChipsRender(); anxPickerRender();
+}
+function anxChipsRender() {
+    const el = document.getElementById('anx-chips'); if (!el || !anxSt) return;
+    const vis = anxSt.ids.map(id => anxReg.get(id)).filter(anxVisivel);
+    el.innerHTML = vis.length
+        ? vis.map(f => `<span class="anx-chip"><button type="button" class="anx-chip-b" title="Ver conteúdo" onclick="abrirAnexo(${f.id})"><span>${fileIcon(f.nome)}</span><span class="n">${escH(f.nome)}</span></button><button type="button" class="ms-x" aria-label="Remover anexo" onclick="anxDel(${f.id})">×</button></span>`).join('')
+        : '<span class="muted" style="font-size:.78rem">Nenhum anexo.</span>';
+}
+function anxTogglePicker() {
+    if (!anxSt) return;
+    anxSt.aberto = !anxSt.aberto;
+    document.getElementById('anx-picker')?.classList.toggle('hidden', !anxSt.aberto);
+    anxPickerRender();
+}
+function anxPickerRender() {
+    const el = document.getElementById('anx-picker'); if (!el || !anxSt || !anxSt.aberto) return;
+    if (anxSt.arqs == null) { el.innerHTML = '<div class="row-empty">Carregando…</div>'; return; }
+    const livres = anxSt.arqs.filter(f => !anxSt.ids.includes(f.id));
+    el.innerHTML = livres.length
+        ? livres.map(f => `<div class="anx-item" role="button" tabindex="0" onclick="anxAdd(${f.id})" onkeydown="if(event.key==='Enter')anxAdd(${f.id})"><span>${fileIcon(f.nome)}</span><span class="n">${escH(f.nome)}</span><small class="muted">${fmtBytes(f.tamanho)}</small><b>＋</b></div>`).join('')
+        : `<div class="row-empty">${anxSt.arqs.length ? 'Todos os arquivos do projeto já estão anexados.' : 'Este projeto ainda não tem arquivos. Use “Enviar novo”.'}</div>`;
+}
+function anxAdd(id) { if (!anxSt || anxSt.ids.includes(id)) return; anxSt.ids.push(id); anxChipsRender(); anxPickerRender(); }
+function anxDel(id) { if (!anxSt) return; anxSt.ids = anxSt.ids.filter(x => x !== id); anxChipsRender(); anxPickerRender(); }
+async function anxUpload(input) {
+    const st = anxSt, files = Array.from(input.files || []); if (!st || !files.length) return;
+    let ok = 0, err = 0;
+    for (const file of files) {
+        const seguro = file.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w.\-]+/g, '_');
+        const filePath = `${currentWorkspace.id}/projetos/${st.pId}/${Date.now()}-${seguro}`;
+        const up = await sb.storage.from('workspace-files').upload(filePath, file);
+        if (up.error) { err++; continue; }
+        const { data, error } = await sb.from('arquivos').insert({
+            nome: file.name, path: filePath, projeto_id: st.pId, workspace_id: currentWorkspace.id,
+            criado_por: currentUser.id, visibilidade: 'publico', tamanho: file.size
+        }).select('id, nome, path, tamanho, visibilidade, criado_por').single();
+        if (error) { await sb.storage.from('workspace-files').remove([filePath]); err++; continue; }
+        anxReg.set(data.id, data);
+        if (!st.arqs) st.arqs = [];
+        st.arqs.unshift(data);
+        if (!st.ids.includes(data.id)) st.ids.push(data.id);
+        ok++;
+    }
+    input.value = '';
+    if (anxSt === st) { anxChipsRender(); anxPickerRender(); }
+    if (ok) { toast(`${ok} arquivo(s) enviado(s) e anexado(s).`); addLog('upload', 'arquivo', null, { quantidade: ok, projeto_id: st.pId }); }
+    if (err) toast(`${err} arquivo(s) falharam no envio.`, 'error');
+}
+// Grava só a diferença entre os anexos originais e os atuais (tipo: 'e' etapa, 's' atividade)
+async function anxSalvar(tipo, id) {
+    if (!FD_FEAT.anx || !anxSt) return;
+    const col = tipo === 'e' ? 'etapa_id' : 'sessao_id';
+    const add = anxSt.ids.filter(x => !anxSt.orig.includes(x)), del = anxSt.orig.filter(x => !anxSt.ids.includes(x));
+    if (del.length) {
+        const r = await sb.from('anexo_vinculos').delete().eq(col, id).in('arquivo_id', del);
+        if (r.error) toast('Não consegui remover alguns anexos: ' + r.error.message, 'warning');
+    }
+    if (add.length) {
+        const r = await sb.from('anexo_vinculos').insert(add.map(a => ({ arquivo_id: a, [col]: id, criado_por: currentUser.id })));
+        if (r.error) toast('Salvo, mas os anexos não: ' + r.error.message, 'warning');
+    }
+}
+const anxIdsDe = obj => (obj?.anexo_vinculos || []).map(v => v.arquivo_id);
+
+// ─── CONDIÇÕES ───────────────────────────────────────
+let wsCondicoes = [];
+let cdSt = null;   
+async function carregarCondicoes() {
+    if (!FD_FEAT.cond) { wsCondicoes = []; return; }
+    const { data, error } = await sb.from('condicoes').select('id, alvo_tipo, alvo_id, cond_tipo, cond_id').eq('workspace_id', currentWorkspace.id);
+    wsCondicoes = error ? [] : (data || []);
+}
+const condDe = (tipo, id) => wsCondicoes.filter(c => c.alvo_tipo === tipo && c.alvo_id === id);
+function condItem(tipo, id) {
+    if (tipo === 'etapa') { const e = findEtapa(id); return e ? { nome: e.nome, ok: e.status === 'Concluído' } : null; }
+    for (const p of wsProjetos) { const s = (p.sessoes || []).find(x => x.id === id); if (s) { const et = s.etapas || []; return { nome: s.nome, ok: et.length > 0 && et.every(e => e.status === 'Concluído') }; } }
+    return null;
+}
+function condPendentes(eId) {
+    const ctx = findEtapaCtx(eId); if (!ctx) return [];
+    return [...condDe('etapa', eId), ...(ctx.s ? condDe('sessao', ctx.s.id) : [])]
+        .map(c => condItem(c.cond_tipo, c.cond_id)).filter(it => it && !it.ok);
+}
+function condConfirmar(eId, novoStatus) {
+    if (!FD_FEAT.cond || novoStatus === 'Não iniciado') return true;
+    const pend = condPendentes(eId); if (!pend.length) return true;
+    return confirm('Esta etapa tem condições pendentes:\n• ' + pend.map(p => p.nome).join('\n• ') + '\n\nIniciar/concluir mesmo assim?');
+}
+function condChips(tipo, obj, max = 3) {
+    const itens = condDe(tipo, obj.id).map(c => condItem(c.cond_tipo, c.cond_id)).filter(Boolean);
+    if (!itens.length) return '';
+    return `<div class="anx-chips">${itens.slice(0, max).map(it => `<span class="cd-chip ${it.ok ? 'ok' : 'pend'}" title="${it.ok ? 'Condição cumprida' : 'Condição pendente'}: ${escH(it.nome)}"><span>${it.ok ? '✓' : '🔒'}</span><span class="n">${escH(it.nome)}</span></span>`).join('')}${itens.length > max ? `<span class="cd-chip" title="${escH(itens.slice(max).map(i => i.nome).join(', '))}">+${itens.length - max}</span>` : ''}</div>`;
+}
+function cdDepende(a, b, vis = new Set()) {
+    const k = a.t + ':' + a.i; if (vis.has(k)) return false; vis.add(k);
+    return wsCondicoes.filter(c => c.alvo_tipo === a.t && c.alvo_id === a.i)
+        .some(c => (c.cond_tipo === b.t && c.cond_id === b.i) || cdDepende({ t: c.cond_tipo, i: c.cond_id }, b, vis));
+}
+function cdHtml() {
+    if (!FD_FEAT.cond) return `<div class="fg"><label class="fl">Condições</label><p class="fhint">Rode o SQL migracao_flow_condicoes.sql no Supabase para usar condições.</p></div>`;
+    return `<div class="fg"><label class="fl">Condições</label>
+        <div id="cd-chips" class="anx-chips"></div>
+        <div class="anx-acts"><select id="cd-sel" class="fsel" style="flex:1;min-width:0"></select><button type="button" class="btn btn-s btn-sm" onclick="cdAdd()">+ Adicionar</button></div>
+        <p class="fhint">Só deve ser iniciada/concluída depois que estas atividades e etapas do projeto estiverem concluídas.</p></div>`;
+}
+function cdInit(pId, tipo, id) {
+    if (!FD_FEAT.cond) { cdSt = null; return; }
+    const itens = id == null ? [] : condDe(tipo, id).map(c => ({ t: c.cond_tipo, i: c.cond_id }));
+    cdSt = { pId, tipo, id, itens, orig: itens.map(x => ({ ...x })) };
+    cdRender();
+}
+function cdRender() {
+    if (!cdSt) return;
+    const chips = document.getElementById('cd-chips'), sel = document.getElementById('cd-sel'); if (!chips || !sel) return;
+    chips.innerHTML = cdSt.itens.map(x => { const it = condItem(x.t, x.i); return `<span class="cd-chip ${it?.ok ? 'ok' : 'pend'}"><span>${x.t === 'sessao' ? '🗂' : '✅'}</span><span class="n">${escH(it?.nome || '(removido)')}</span><button type="button" class="ms-x" aria-label="Remover condição" onclick="cdDel('${x.t}',${x.i})">×</button></span>`; }).join('')
+        || '<span class="muted" style="font-size:.78rem">Nenhuma condição.</span>';
+    const proj = wsProjetos.find(p => p.id === cdSt.pId), self = cdSt.id == null ? null : { t: cdSt.tipo, i: cdSt.id };
+    const minhaSessao = cdSt.tipo === 'etapa' && cdSt.id != null ? findEtapaCtx(cdSt.id)?.s?.id : null;
+    const ja = (t, i) => cdSt.itens.some(x => x.t === t && x.i === i);
+    const ok = (t, i) => !ja(t, i) && !(self && self.t === t && self.i === i) && !(self && cdDepende({ t, i }, self));
+    const ses = (proj?.sessoes || []).filter(s => s.id !== minhaSessao && ok('sessao', s.id));
+    const ets = (proj ? todasEtapas(proj) : []).filter(e => ok('etapa', e.id) && !(cdSt.tipo === 'sessao' && cdSt.id != null && (proj.sessoes.find(s => s.id === cdSt.id)?.etapas || []).some(x => x.id === e.id)));
+    sel.innerHTML = ses.length || ets.length
+        ? `${ses.length ? `<optgroup label="Atividades">${ses.map(s => `<option value="sessao:${s.id}">${escH(s.nome)}</option>`).join('')}</optgroup>` : ''}${ets.length ? `<optgroup label="Etapas">${ets.map(e => `<option value="etapa:${e.id}">${escH(e.nome)}</option>`).join('')}</optgroup>` : ''}`
+        : '<option value="">Nada disponível neste projeto</option>';
+}
+function cdAdd() {
+    const v = document.getElementById('cd-sel')?.value; if (!cdSt || !v) return;
+    const [t, i] = v.split(':'); cdSt.itens.push({ t, i: +i }); cdRender();
+}
+function cdDel(t, i) { if (!cdSt) return; cdSt.itens = cdSt.itens.filter(x => !(x.t === t && x.i === i)); cdRender(); }
+async function cdSalvar(tipo, id) {
+    if (!FD_FEAT.cond || !cdSt) return;
+    const tem = (l, x) => l.some(y => y.t === x.t && y.i === x.i);
+    const add = cdSt.itens.filter(x => !tem(cdSt.orig, x)), del = cdSt.orig.filter(x => !tem(cdSt.itens, x));
+    for (const x of del) {
+        const r = await sb.from('condicoes').delete().match({ alvo_tipo: tipo, alvo_id: id, cond_tipo: x.t, cond_id: x.i });
+        if (r.error) toast('Não consegui remover uma condição: ' + r.error.message, 'warning');
+    }
+    if (add.length) {
+        const r = await sb.from('condicoes').insert(add.map(x => ({ workspace_id: currentWorkspace.id, alvo_tipo: tipo, alvo_id: id, cond_tipo: x.t, cond_id: x.i, criado_por: currentUser.id })));
+        if (r.error) toast('Salvo, mas as condições não: ' + r.error.message, 'warning');
+    }
+}
+
 // ─── CRUD Atividade ──────────────────────────────────
 
 function abrirModalSessao(pId) {
@@ -2052,11 +2423,15 @@ function abrirModalSessao(pId) {
         <div class="fg"><label class="fl">Descrição</label><input id="m-sdesc" class="fi" placeholder="Breve descrição..."/></div>
         <div class="fg"><label class="fl">Colaboradores</label>${msHtml('scol', 'Adicionar colaborador…')}
             <p class="fhint">Digite para buscar e tecle Enter (ou clique no nome). Dá para adicionar várias pessoas.</p></div>
+        ${anxHtml()}
+        ${cdHtml()}
     `, [
         { label: '+ Criar', cls: 'btn-p', action: `criarSessao(${pId})` },
         { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
     ]);
     msInit('scol', [currentUser.id]);
+    anxInit(pId, []);
+    cdInit(pId, 'sessao', null);
 }
 
 async function criarSessao(pId) {
@@ -2064,10 +2439,12 @@ async function criarSessao(pId) {
     const desc = document.getElementById('m-sdesc')?.value?.trim() || '';
     const sel  = msGet('scol');
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
-    const { data, error } = await sb.from('sessoes').insert({ projeto_id: pId, nome, descricao: desc, ...(FD_FEAT.ordem ? { ordem: proxOrdem(wsProjetos.find(x => x.id === pId)?.sessoes) } : {}) }).select().single();
+    const { data, error } = await sb.from('sessoes').insert({ projeto_id: pId, nome, descricao: desc, ...(FD_FEAT.ordem ? { ordem: proxOrdem(topoLista(wsProjetos.find(x => x.id === pId) || {}).map(x => x.o)) } : {}) }).select().single();
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     const users = [...new Set([currentUser.id, ...sel])];
     await sb.from('sessao_usuarios').insert(users.map(uid => ({ sessao_id: data.id, usuario_id: uid })));
+    await anxSalvar('s', data.id);
+    await cdSalvar('sessao', data.id);
     await addLog('create','sessao',null,{nome}); fecharModal(); toast(`Atividade "${nome}" criada!`); await renderizarProjetos();
 }
 
@@ -2086,8 +2463,12 @@ async function editarSessao(sessId, projId) {
         <div class="fg"><label class="fl">Descrição</label><input id="m-sdesc-edit" class="fi" value="${escH(sess.descricao||'')}"/></div>
         <div class="fg"><label class="fl">Colaboradores</label>${msHtml('scol', 'Adicionar colaborador…')}
             <p class="fhint">Digite para buscar e tecle Enter (ou clique no nome). Dá para adicionar várias pessoas.</p></div>
+        ${anxHtml()}
+        ${cdHtml()}
     `, buttons);
     msInit('scol', selIds);
+    anxInit(projId, anxIdsDe(sess));
+    cdInit(projId, 'sessao', sessId);
 }
 
 async function salvarEdicaoSessao(sessId) {
@@ -2100,6 +2481,8 @@ async function salvarEdicaoSessao(sessId) {
     await sb.from('sessao_usuarios').delete().eq('sessao_id', sessId);
     const users = [...new Set([currentUser.id, ...sel])];
     await sb.from('sessao_usuarios').insert(users.map(uid => ({ sessao_id: sessId, usuario_id: uid })));
+    await anxSalvar('s', sessId);
+    await cdSalvar('sessao', sessId);
     await addLog('update','sessao',null); fecharModal(); toast('Atividade atualizada!'); await renderizarProjetos();
 }
 
@@ -2118,12 +2501,19 @@ function uSelect(id, selId=null) {
 }
 
 
-function abrirModalEtapa(pId, sId, e=null) {
+function abrirModalEtapa(pId, sId, e=null, respInicial=null) {
+    if (!e && !sId && !FD_FEAT.orf) { toast('Para criar etapas soltas, rode o SQL migracao_etapas_soltas_anexos.sql no Supabase.', 'warning'); return; }
+    const proj = wsProjetos.find(x => x.id === pId);
+    const atividadeSel = `<div class="fg"><label class="fl">Atividade</label><select id="m-esess" class="fsel">
+        ${FD_FEAT.orf ? `<option value="" ${sId ? '' : 'selected'}>— Sem atividade (etapa solta) —</option>` : ''}
+        ${[...(proj?.sessoes || [])].sort(ordCmp).map(x => `<option value="${x.id}" ${x.id === sId ? 'selected' : ''}>${escH(x.nome)}</option>`).join('')}
+    </select></div>`;
     const nome = e?.nome || '', desc = e?.descricao || '';
     const status = e?.status || 'Não iniciado', prio = e?.prioridade || 0, prazo = e?.prazo || '';
     abrirModal(e ? '✏️ Editar Etapa' : '✅ Nova Etapa', `
         <div class="fg"><label class="fl">Nome</label><input id="m-enome" class="fi" value="${escH(nome)}" placeholder="Ex: Implementar tela..."/></div>
         <div class="fg"><label class="fl">Descrição</label><input id="m-edesc" class="fi" value="${escH(desc)}" placeholder="Critérios de aceite..."/></div>
+        ${atividadeSel}
         <div class="fg"><label class="fl">Responsáveis</label>${msHtml('eresp')}
             <p class="fhint">Digite para buscar e tecle Enter (ou clique no nome). Dá para adicionar várias pessoas.</p></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -2138,6 +2528,8 @@ function abrirModalEtapa(pId, sId, e=null) {
         <div class="fg"><label class="fl">Prioridade (0-4)</label><select id="m-eprio" class="fsel">
             ${[0,1,2,3,4].map(v => `<option value="${v}" ${prio==v?'selected':''}>${v}${v===0?' - Baixa':v===4?' - Alta':''}</option>`).join('')}
         </select></div>
+        ${anxHtml()}
+        ${cdHtml()}
     `, e ? [
         { label: 'Salvar', cls: 'btn-p', action: `editarEtapaSave(${e.id})` },
         { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' },
@@ -2146,7 +2538,9 @@ function abrirModalEtapa(pId, sId, e=null) {
         { label: '+ Criar', cls: 'btn-p', action: `criarEtapa(${pId}, ${sId})` },
         { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
     ]);
-    msInit('eresp', e ? etapaRespIds(e) : []);
+    msInit('eresp', e ? etapaRespIds(e) : (respInicial || [currentUser.id]));
+    anxInit(pId, e ? anxIdsDe(e) : []);
+    cdInit(pId, 'etapa', e ? e.id : null);
 }
 
 
@@ -2158,24 +2552,27 @@ async function criarEtapa(pId, sId) {
     const prio = +document.getElementById('m-eprio')?.value || 0;
     const prazo = document.getElementById('m-eprazo')?.value || null;
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
-    const sess = wsProjetos.flatMap(p => p.sessoes || []).find(x => x.id === sId);
-    const novo = { sessao_id: sId, nome, descricao: desc, responsavel_id: resps[0] || null, status, prioridade: prio, prazo };
-    if (FD_FEAT.ordem) novo.ordem = proxOrdem(sess?.etapas);
+    const selSess = document.getElementById('m-esess');
+    if (selSess) sId = selSess.value ? +selSess.value : null;
+    if (!sId && !FD_FEAT.orf) { toast('Escolha uma atividade (etapas soltas exigem o SQL de migração).', 'warning'); return; }
+    const proj = wsProjetos.find(x => x.id === pId);
+    const sess = (proj?.sessoes || []).find(x => x.id === sId);
+    const novo = { sessao_id: sId || null, nome, descricao: desc, responsavel_id: resps[0] || null, status, prioridade: prio, prazo };
+    if (FD_FEAT.orf) novo.projeto_id = pId;
+    if (FD_FEAT.ordem) novo.ordem = sId ? proxOrdem(sess?.etapas) : proxOrdem(topoLista(proj || {}).map(x => x.o));
     const { data, error } = await sb.from('etapas').insert(novo).select().single();
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     const r = await salvarResponsaveis(data.id, resps);
     if (r.error) toast('Etapa criada, mas os responsáveis não foram salvos: ' + r.error.message, 'warning');
+    await anxSalvar('e', data.id);
+    await cdSalvar('etapa', data.id);
     await addLog('create','etapa',null,{nome}); fecharModal(); toast(`Etapa "${nome}" criada!`); await renderizarProjetos();
+    if (cpopUserId != null && !document.getElementById('cpop-ov').classList.contains('hidden')) await verContribuidor(cpopUserId);
 }
 
 function editarEtapa(eId) {
-    let etapa = null;
-    for (const p of wsProjetos) {
-        for (const s of p.sessoes||[]) { etapa = (s.etapas||[]).find(e => e.id===eId); if (etapa) break; }
-        if (etapa) break;
-    }
-    if (!etapa) return;
-    abrirModalEtapa(null, null, etapa);
+    const ctx = findEtapaCtx(eId); if (!ctx) return;
+    abrirModalEtapa(ctx.p.id, ctx.s ? ctx.s.id : null, ctx.e);
 }
 
 
@@ -2188,10 +2585,21 @@ async function editarEtapaSave(eId) {
     const prazo = document.getElementById('m-eprazo')?.value || null;
     if (!nome) { toast('Informe o nome.', 'warning'); return; }
     const atualizacao = { nome, descricao: desc, responsavel_id: resps[0] || null, status, prioridade: prio, prazo };
+    const ctx = findEtapaCtx(eId), selSess = document.getElementById('m-esess');
+    if (ctx && selSess) {
+        const nova = selSess.value ? +selSess.value : null, velha = ctx.s ? ctx.s.id : null;
+        if (nova !== velha) {
+            if (!nova && !FD_FEAT.orf) { toast('Escolha uma atividade.', 'warning'); return; }
+            atualizacao.sessao_id = nova;
+            if (FD_FEAT.ordem) atualizacao.ordem = nova ? proxOrdem(ctx.p.sessoes.find(x => x.id === nova)?.etapas) : proxOrdem(topoLista(ctx.p).map(x => x.o));
+        }
+    }
     const { error } = await sb.from('etapas').update(atualizacao).eq('id', eId);
     if (error) { toast('Erro: '+error.message, 'error'); return; }
     const r = await salvarResponsaveis(eId, resps);
     if (r.error) toast('Etapa salva, mas os responsáveis não: ' + r.error.message, 'warning');
+    await anxSalvar('e', eId);
+    await cdSalvar('etapa', eId);
     if (typeof dashDados !== 'undefined' && dashDados) {
         const etapaDashboard = dashDados.etapas.find(etapa => etapa.id === eId);
         if (etapaDashboard) Object.assign(etapaDashboard, atualizacao);
@@ -2201,7 +2609,7 @@ async function editarEtapaSave(eId) {
 }
 
 function findEtapa(id) {
-    for (const p of wsProjetos) for (const s of p.sessoes||[]) { const e = (s.etapas||[]).find(x => x.id === id); if (e) return e; }
+    for (const p of wsProjetos) { const e = todasEtapas(p).find(x => x.id === id); if (e) return e; }
     return null;
 }
 async function updateEtapaPrio(eId, prio) {
@@ -2213,6 +2621,7 @@ async function updateEtapaPrio(eId, prio) {
 async function updateEtapaStatus(eId, status) {
     const e = findEtapa(eId); if (!e) return false;
     if (e.status === status) return true;
+    if (!condConfirmar(eId, status)) { renderProjetosView(); return false; }
     const old = e.status; e.status = status; renderProjetosView(); etapaPatchCaches(eId, { status });
     const { error } = await sb.from('etapas').update({ status }).eq('id', eId);
     if (error) { e.status = old; renderProjetosView(); etapaPatchCaches(eId, { status: old }); toast('Erro ao atualizar status.', 'error'); return false; }
@@ -2253,10 +2662,10 @@ let progressoFiltro = 'todos';
 async function carregarProgresso() {
     const c = document.getElementById('progresso-container');
     if (!progData.length) c.innerHTML = '<div class="loading-c"><div class="spinner"></div></div>';
-    const { data: etapas, error } = await sb.from('etapas').select(etapasFlatSelect())
-        .eq('sessoes.projetos.workspace_id', currentWorkspace.id);
+    const { data: etapas, error } = await sb.from('etapas').select(etapasFlatSelectWs())
+        .eq(flatWsCol(), currentWorkspace.id);
     if (error) { c.innerHTML = `<div class="empty-state"><div class="ei">⚠️</div><h3>Erro</h3><p>${escH(error.message)}</p></div>`; return; }
-    progData = etapas || [];
+    progData = flatNorm(etapas);
     renderProgresso();
 }
 
@@ -2452,12 +2861,17 @@ function visualizarArquivo(button) {
         toast('Não foi possível abrir este anexo.', 'error');
         return;
     }
-
+    abrirVisualizador(url, name, type);
+}
+function abrirVisualizador(url, name, type) {
     document.getElementById('file-viewer-name').textContent = name;
     document.getElementById('file-viewer-open').href = url;
-    document.getElementById('file-viewer-content').innerHTML = type === 'image'
-        ? `<img src="${escH(url)}" alt="${escH(name)}" onerror="this.onerror=null;this.parentNode.textContent='Não foi possível carregar esta imagem.'">`
-        : `<iframe src="${escH(url)}" title="${escH(name)}"></iframe>`;
+    const u = escH(url), n = escH(name);
+    document.getElementById('file-viewer-content').innerHTML =
+        type === 'image' ? `<img src="${u}" alt="${n}" onerror="this.onerror=null;this.parentNode.textContent='Não foi possível carregar esta imagem.'">`
+        : type === 'video' ? `<video src="${u}" controls autoplay></video>`
+        : type === 'audio' ? `<audio src="${u}" controls autoplay></audio>`
+        : `<iframe src="${u}" title="${n}"></iframe>`;
     document.getElementById('file-viewer-ov').classList.remove('hidden');
     document.querySelector('#file-viewer-ov .m-x').focus();
 }
@@ -3199,15 +3613,20 @@ async function verContribuidor(userId) {
     const roleSelect = currentUserIsWorkspaceAdmin
         ? `<select class="fsel" onchange="alterarRole(${u.id}, this.value)">${roleOptions}</select>`
         : `<span class="badge ${u.wsAdmin?'b-acc':'b-gray'}">${u.wsAdmin?'Admin':'Membro'}</span>`;
-    document.getElementById('cpop-badges').innerHTML = roleSelect;
+    const podeExpulsar = currentUserIsWorkspaceAdmin && u.id !== currentUser.id && u.id !== currentWorkspaceCreatorId;
+    const podeSair = u.id === currentUser.id && u.id !== currentWorkspaceCreatorId;
+    const btnRemover = podeExpulsar
+        ? `<button class="btn btn-s btn-sm" style="border-color:var(--danger);color:var(--danger)" title="Remover do workspace" onclick="confirmarExpulsar(${u.id})">Expulsar</button>`
+        : podeSair ? `<button class="btn btn-s btn-sm" style="border-color:var(--danger);color:var(--danger)" onclick="confirmarSairWorkspace()">Sair</button>` : '';
+    document.getElementById('cpop-badges').innerHTML = roleSelect + btnRemover;
     document.getElementById('cpop-stats').classList.add('hidden');
     document.getElementById('cpop-foot').classList.add('hidden');
     document.getElementById('cpop-body').innerHTML = '<div style="text-align:center;padding:30px"><div class="spinner"></div></div>';
     document.getElementById('cpop-ov').classList.remove('hidden');
     const [rEt, rPr] = await Promise.all([
         sb.from('etapas')
-            .select(etapasFlatSelect())
-            .eq('sessoes.projetos.workspace_id', currentWorkspace.id),
+            .select(etapasFlatSelectWs())
+            .eq(flatWsCol(), currentWorkspace.id),
         sb.from('projeto_usuarios')
             .select('projetos!inner(id, nome, workspace_id)')
             .eq('usuario_id', userId).eq('projetos.workspace_id', currentWorkspace.id)
@@ -3217,7 +3636,7 @@ async function verContribuidor(userId) {
         document.getElementById('cpop-body').innerHTML = `<div class="cpop-vazio">Erro ao carregar as etapas: ${escH(rEt.error.message)}</div>`;
         return;
     }
-    cpopEtapas = rEt.data || [];
+    cpopEtapas = flatNorm(rEt.data);
     cpopProjetos = (rPr.data || []).map(r => r.projetos);
     renderCpop();
 }
@@ -3252,16 +3671,16 @@ function renderCpopLista() {
     const grupos = new Map();
     minhas.forEach(e => {
         const p = e.sessoes.projetos;
-        if (!grupos.has(p.id)) grupos.set(p.id, { nome: p.nome, itens: [] });
+        if (!grupos.has(p.id)) grupos.set(p.id, { id: p.id, nome: p.nome, itens: [] });
         grupos.get(p.id).itens.push(e);
     });
     const ordem = [...grupos.values()].sort((a, b) => b.itens.filter(e => e.status !== 'Concluído').length - a.itens.filter(e => e.status !== 'Concluído').length);
     const chips = cpopProjetos.length
-        ? `<div class="cpop-chips">${cpopProjetos.map(p => `<span class="cpop-chip">📁 ${escH(p.nome)}</span>`).join('')}</div>`
+        ? `<div class="cpop-chips">${cpopProjetos.map(p => `<button type="button" class="cpop-chip" title="Abrir o projeto ${escH(p.nome)}" onclick="irParaProjeto(${p.id})">📁 ${escH(p.nome)}</button>`).join('')}</div>`
         : `<p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">Não está em nenhum projeto ainda.</p>`;
     const lista = ordem.length
         ? ordem.map(g => `<div class="cpop-grp">
-            <div class="cpop-grp-h">📁 ${escH(g.nome)} <span class="badge b-gray">${g.itens.length}</span></div>
+            <div class="cpop-grp-h"><span class="cpop-link" role="button" tabindex="0" title="Abrir o projeto" onclick="irParaProjeto(${g.id})">📁 ${escH(g.nome)}</span> <span class="badge b-gray">${g.itens.length}</span></div>
             ${g.itens.map(cpopLinhaMinha).join('')}
         </div>`).join('')
         : `<div class="cpop-vazio">Nenhuma etapa sob responsabilidade de ${escH(u.nome.split(' ')[0])}.${currentUserCanEdit ? '<br>Use o botão abaixo para atribuir uma.' : ''}</div>`;
@@ -3292,50 +3711,34 @@ function cpopAbrirAtribuir() {
     renderCpopAtribuir();
 }
 
+
 function cpopAbrirNova() {
     if (!currentUserCanEdit) return;
     const u = wsMembers.find(x => x.id === cpopUserId); if (!u) return;
+    if (wsProjetos.length === 1) { cpopContinuarNova(wsProjetos[0].id); return; }
     cpopModo = 'nova';
-    const opts = wsProjetos.filter(p => (p.sessoes || []).length)
-        .map(p => `<optgroup label="${escH(p.nome)}">${p.sessoes.map(se => `<option value="${se.id}">${escH(se.nome)}</option>`).join('')}</optgroup>`).join('');
+    const opts = [...wsProjetos].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+        .map(p => `<option value="${p.id}">${escH(p.nome)}</option>`).join('');
     document.getElementById('cpop-body').innerHTML = opts ? `
         <div class="cpop-sec">Nova etapa para ${escH(u.nome)}</div>
-        <div class="fg"><label class="fl" for="cpop-n-nome">Nome da etapa</label><input id="cpop-n-nome" class="fi" maxlength="120" placeholder="Ex: Revisar relatório" onkeydown="if(event.key==='Enter')cpopCriarNova()"/></div>
-        <div class="fg"><label class="fl" for="cpop-n-sess">Atividade</label><select id="cpop-n-sess" class="fsel">${opts}</select></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="fg"><label class="fl" for="cpop-n-prazo">Prazo <span style="font-weight:400;color:var(--muted)">(opcional)</span></label><input id="cpop-n-prazo" type="date" class="fi"/></div>
-            <div class="fg"><label class="fl" for="cpop-n-prio">Prioridade</label><select id="cpop-n-prio" class="fsel">${[0,1,2,3,4].map(v => `<option value="${v}">${v}</option>`).join('')}</select></div>
-        </div>` : `<div class="cpop-vazio">Nenhum projeto tem atividades ainda. Crie uma atividade em um projeto primeiro.</div>`;
+        <div class="fg"><label class="fl" for="cpop-n-proj">Em qual projeto?</label><select id="cpop-n-proj" class="fsel">${opts}</select>
+            <p class="fhint">Os detalhes (nome, atividade, prazo, anexos) você preenche na janela padrão de etapa. ${escH(u.nome.split(' ')[0])} já vem como responsável.</p></div>`
+        : `<div class="cpop-vazio">Nenhum projeto criado ainda.</div>`;
     const foot = document.getElementById('cpop-foot');
-    foot.innerHTML = `<button class="btn btn-s" onclick="cpopAbrirAtribuir()">← Voltar</button>${opts ? '<button class="btn btn-p" onclick="cpopCriarNova()">Criar e atribuir</button>' : ''}`;
+    foot.innerHTML = `<button class="btn btn-s" onclick="cpopAbrirAtribuir()">← Voltar</button>${opts ? '<button class="btn btn-p" onclick="cpopContinuarNova()">Continuar</button>' : ''}`;
     foot.classList.remove('hidden');
-    document.getElementById('cpop-n-nome')?.focus();
 }
 
-async function cpopCriarNova() {
-    if (cpopBusy || !currentUserCanEdit) return;
-    const uid = cpopUserId, u = wsMembers.find(x => x.id === uid); if (!u) return;
-    const nome = document.getElementById('cpop-n-nome')?.value?.trim();
-    const sId = +document.getElementById('cpop-n-sess')?.value;
-    const prazo = document.getElementById('cpop-n-prazo')?.value || null;
-    const prio = +document.getElementById('cpop-n-prio')?.value || 0;
-    if (!nome) { toast('Informe o nome da etapa.', 'warning'); return; }
-    if (!sId) { toast('Escolha a atividade.', 'warning'); return; }
-    const sess = wsProjetos.flatMap(p => p.sessoes || []).find(x => x.id === sId);
-    const novo = { sessao_id: sId, nome, descricao: '', responsavel_id: uid, status: 'Não iniciado', prioridade: prio, prazo };
-    if (FD_FEAT.ordem) novo.ordem = proxOrdem(sess?.etapas);
-    cpopBusy = true;
-    const { data, error } = await sb.from('etapas').insert(novo).select().single();
-    if (error) { cpopBusy = false; toast('Erro ao criar etapa: ' + error.message, 'error'); return; }
-    const r = await salvarResponsaveis(data.id, [uid]);
-    cpopBusy = false;
-    if (r.error) toast('Etapa criada, mas o responsável não foi salvo: ' + r.error.message, 'warning');
-    await addLog('create', 'etapa', data.id, { nome: `"${nome}" criada para ${u.nome}` });
-    await pushNotificacao('👤', `${currentUser.nome} criou a etapa "${nome}" para ${u.nome}.`, 'geral', `projeto:${sess ? wsProjetos.find(p => (p.sessoes || []).includes(sess))?.id : ''}`);
-    toast(`Etapa "${nome}" criada para ${u.nome}. ✅`);
-    await renderizarProjetos();
-    if (cpopUserId === uid) await verContribuidor(uid);
+function cpopContinuarNova(pIdDireto) {
+    if (!currentUserCanEdit || cpopUserId == null) return;
+    const pId = pIdDireto || +document.getElementById('cpop-n-proj')?.value;
+    const proj = wsProjetos.find(p => p.id === pId); if (!proj) return;
+    const sess = [...(proj.sessoes || [])].sort(ordCmp)[0];
+    if (!sess && !FD_FEAT.orf) { toast('Este projeto ainda não tem atividades. Crie uma atividade nele primeiro.', 'warning'); return; }
+    abrirModalEtapa(pId, sess ? sess.id : null, null, [cpopUserId]);
 }
+
+
 
 function cpopVoltar() {
     cpopModo = 'lista';
@@ -3432,9 +3835,109 @@ async function cpopAtribuir(eId) {
     cpopDesenharCandidatas();
 }
 
+function irParaProjeto(pId) {
+    fecharCpop();
+    switchTab('projetos', true);
+    abrirProjeto(pId);
+}
+
 function fecharCpop() {
     cpopUserId = null;
     document.getElementById('cpop-ov').classList.add('hidden');
+}
+
+function mensagemBloqueioSaida(uid) {
+    if (uid === currentWorkspaceCreatorId) return 'O criador do workspace não pode sair nem ser removido.';
+    const alvo = wsMembers.find(m => m.id === uid);
+    if (alvo?.wsAdmin && wsMembers.filter(m => m.wsAdmin).length <= 1) return 'Este é o único administrador. Promova outro membro a administrador antes.';
+    return null;
+}
+
+async function removerMembroWorkspace(uid) {
+    const bloqueio = mensagemBloqueioSaida(uid);
+    if (bloqueio) return { error: { message: bloqueio } };
+    const del = await sb.from('workspace_usuarios').delete().eq('workspace_id', currentWorkspace.id).eq('usuario_id', uid).select('id');
+    if (del.error) return { error: del.error };
+    if (!del.data?.length) return { error: { message: 'o banco não removeu o membro (sem permissão de exclusão em workspace_usuarios).' } };
+
+    const etapas = wsProjetos.flatMap(p => todasEtapas(p));
+    const sessIds = wsProjetos.flatMap(p => (p.sessoes || []).map(se => se.id));
+    const projIds = wsProjetos.map(p => p.id);
+    const dele = etapas.filter(e => etapaRespIds(e).includes(uid));
+    const tarefas = [];
+    if (dele.length && FD_FEAT.multi) tarefas.push(sb.from('etapa_responsaveis').delete().eq('usuario_id', uid).in('etapa_id', dele.map(e => e.id)));
+    dele.forEach(e => {
+        const restantes = etapaRespIds(e).filter(id => id !== uid);
+        tarefas.push(sb.from('etapas').update({ responsavel_id: restantes[0] || null }).eq('id', e.id));
+    });
+    if (projIds.length) tarefas.push(sb.from('projeto_usuarios').delete().eq('usuario_id', uid).in('projeto_id', projIds));
+    if (sessIds.length) tarefas.push(sb.from('sessao_usuarios').delete().eq('usuario_id', uid).in('sessao_id', sessIds));
+    await Promise.all(tarefas);
+    return { error: null };
+}
+
+function confirmarSairWorkspace() {
+    const bloqueio = mensagemBloqueioSaida(currentUser.id);
+    if (bloqueio) { toast(bloqueio, 'warning'); return; }
+    fecharCpop();
+    abrirModal('⎋ Sair do workspace', `
+        <p>Sair de <b>${escH(currentWorkspace.nome)}</b>?</p>
+        <div class="n-hint" style="margin-top:12px">⚠ Você perde o acesso aos projetos, anexos e agenda deste workspace. As etapas atribuídas a você ficam sem responsável. Para voltar, será preciso pedir acesso novamente.</div>
+    `, [
+        { label: 'Sair do workspace', cls: 'btn-s', style: 'border-color:var(--danger);color:var(--danger)', action: 'sairDoWorkspace()' },
+        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
+    ]);
+}
+
+async function sairDoWorkspace() {
+    if (cpopBusy) return;
+    const bloqueio = mensagemBloqueioSaida(currentUser.id);
+    if (bloqueio) { toast(bloqueio, 'warning'); return; }
+    cpopBusy = true;
+    const aviso = await sb.from('notificacoes').insert({
+        workspace_id: currentWorkspace.id, icone: '👤', tipo: 'membro', lida: false, criado_por: currentUser.id,
+        mensagem: `${currentUser.nome} (@${currentUser.username}) saiu do workspace.`
+    }).select('id').maybeSingle();
+    if (aviso.error) console.warn('Notificação de saída não registrada:', aviso.error.message);
+    const { error } = await removerMembroWorkspace(currentUser.id);
+    cpopBusy = false;
+    if (error) {
+        if (aviso.data?.id) await sb.from('notificacoes').delete().eq('id', aviso.data.id);
+        toast('Não foi possível sair: ' + error.message, 'error');
+        return;
+    }
+    await addLog('delete', 'usuario', currentUser.id, { nome: `${currentUser.nome} saiu do workspace` });
+    window.location.href = 'homepage.html';
+}
+
+function confirmarExpulsar(uid) {
+    if (!currentUserIsWorkspaceAdmin) return;
+    const u = wsMembers.find(x => x.id === uid); if (!u) return;
+    const bloqueio = mensagemBloqueioSaida(uid);
+    if (bloqueio) { toast(bloqueio, 'warning'); return; }
+    abrirModal('🚪 Expulsar membro', `
+        <p>Remover <b>${escH(u.nome)}</b> (@${escH(u.username)}) de <b>${escH(currentWorkspace.nome)}</b>?</p>
+        <div class="n-hint" style="margin-top:12px">⚠ Ele perde o acesso ao workspace e as etapas atribuídas a ele ficam sem responsável. Os arquivos que ele enviou continuam aqui.</div>
+    `, [
+        { label: 'Expulsar', cls: 'btn-s', style: 'border-color:var(--danger);color:var(--danger)', action: `expulsarMembro(${uid})` },
+        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
+    ]);
+}
+
+async function expulsarMembro(uid) {
+    if (!currentUserIsWorkspaceAdmin || cpopBusy) return;
+    const u = wsMembers.find(x => x.id === uid); if (!u) return;
+    cpopBusy = true;
+    const { error } = await removerMembroWorkspace(uid);
+    cpopBusy = false;
+    if (error) { toast('Não foi possível expulsar: ' + error.message, 'error'); return; }
+    wsMembers = wsMembers.filter(x => x.id !== uid);
+    await addLog('delete', 'usuario', uid, { nome: `@${u.username} removido do workspace` });
+    await pushNotificacao('👤', `${currentUser.nome} removeu @${u.username} do workspace.`, 'membro');
+    fecharModal(); fecharCpop();
+    toast(`${u.nome} foi removido do workspace.`);
+    await renderizarProjetos();
+    renderContribuidor();
 }
 
 async function alterarRole(userId, newRole) {
@@ -3506,6 +4009,19 @@ const LOG_ENTIDADES = {
     'pasta':'Pasta', 'evento':'Evento', 'aviso':'Recado', 'nota':'Nota', 'api_key':'Chave de API'
 };
 
+let logsExt = null;
+async function logsEstendido() {
+    if (logsExt !== null) return logsExt;
+    const r = await sb.from('logs').select('acao, entidade, entidade_id, payload').limit(1);
+    logsExt = !r.error;
+    return logsExt;
+}
+function inferirAcao(l) {
+    if (l.acao) return l.acao;
+    const msg = l.mensagem || '';
+    return Object.keys(LOG_ACOES).find(k => msg.startsWith(LOG_ACOES[k])) || 'outro';
+}
+
 async function addLog(acao, entidade=null, entidadeId=null, payload=null) {
     try {
         // Montar mensagem legível automaticamente
@@ -3517,14 +4033,18 @@ async function addLog(acao, entidade=null, entidadeId=null, payload=null) {
         if (payload?.status) mensagem += ` → ${payload.status}`;
 
         const base = { usuario_id: currentUser.id, usuario_nome: currentUser.nome, mensagem, workspace_id: currentWorkspace.id };
-        let { error } = await sb.from('logs').insert({
-            ...base,
-            acao,
-            entidade:     entidade   || null,
-            entidade_id:  entidadeId || null,
-            payload:      payload    || null
-        });
-        if (error && error.code === 'PGRST204') ({ error } = await sb.from('logs').insert(base));
+        let error = null;
+        if (logsExt !== false) {
+            ({ error } = await sb.from('logs').insert({
+                ...base,
+                acao,
+                entidade:     entidade   || null,
+                entidade_id:  entidadeId || null,
+                payload:      payload    || null
+            }));
+            if (error && error.code === 'PGRST204') { logsExt = false; error = null; }
+        }
+        if (logsExt === false) ({ error } = await sb.from('logs').insert(base));
         if (error) console.warn('addLog: o Supabase recusou o registro de log →', error.message, '|', error.details || '', '|', error.hint || '', '| código', error.code);
     } catch(e) { console.warn('addLog falhou:', e?.message); }
 }
@@ -3533,35 +4053,32 @@ async function addLog(acao, entidade=null, entidadeId=null, payload=null) {
 let logFiltroAcao = '';
 let logFiltroUsuario = '';
 
+
 async function carregarLogs() {
     if (!currentUserIsWorkspaceAdmin && currentUser?.nivel !== 2) return;
     const p = document.getElementById('logs-panel');
     p.innerHTML = '<div style="color:#475569;padding:8px 0">Carregando...</div>';
 
+    const ext = await logsEstendido();
     let q = sb.from('logs').select('*').eq('workspace_id', currentWorkspace.id)
         .order('created_at', { ascending: false }).limit(300);
-
-    if (logFiltroAcao)     q = q.eq('acao', logFiltroAcao);
+    if (ext && logFiltroAcao) q = q.eq('acao', logFiltroAcao);
     if (logFiltroUsuario)  q = q.eq('usuario_id', parseInt(logFiltroUsuario));
 
-    const { data, error } = await q;
-    if (error) { p.innerHTML=`<div style="color:#ef4444">Erro: ${escH(error.message)}</div>`; return; }
-    if (!data?.length) { p.innerHTML='<div style="color:#475569;padding:8px 0">Nenhum log encontrado.</div>'; return; }
-
-    const actionColor = {
-        create:'#3fb950', update:'#58a6ff', delete:'#f85149', upload:'#d2a8ff',
-        login:'#56d364', logout:'#8b949e', invite:'#79c0ff', role_change:'#e3b341',
-        aviso:'#f0883e', status_change:'#a8daff', prazo:'#ffa657', download:'#bc8cff'
-    };
+    const { data: bruto, error } = await q;
+    if (error) { p.innerHTML=`<div style="color:#ef4444">Erro ao carregar os logs: ${escH(error.message)}</div>`; return; }
+    const data = (!ext && logFiltroAcao) ? (bruto || []).filter(l => inferirAcao(l) === logFiltroAcao) : (bruto || []);
+    const aviso = ext ? '' : '<div style="background:#3b2f0b;color:#facc15;border-radius:8px;padding:9px 12px;margin-bottom:14px;font-family:var(--font);font-size:.78rem">⚠ A tabela de logs ainda não tem as colunas de detalhe (ação, entidade, payload). Os registros aparecem só com o texto. Rode o arquivo migracao_flowdesk.sql no Supabase para o histórico completo.</div>';
+    if (!data.length) { p.innerHTML = aviso + '<div style="color:#475569;padding:8px 0">Nenhum log encontrado.</div>'; return; }
 
     const grouped = data.reduce((acc, l) => {
-        const key = l.acao || 'outro';
+        const key = inferirAcao(l);
         acc[key] = acc[key] || [];
         acc[key].push(l);
         return acc;
     }, {});
 
-    p.innerHTML = Object.entries(grouped).map(([action, logs]) => {
+    p.innerHTML = aviso + Object.entries(grouped).map(([action, logs]) => {
         const actionLabel = LOG_ACOES[action] || action || 'Outro';
         const aColor = {
             create:'#3fb950', update:'#58a6ff', delete:'#f85149', upload:'#d2a8ff',
@@ -3600,7 +4117,7 @@ async function exportarLogs() {
     const header = 'data_hora,acao,entidade,entidade_id,usuario,mensagem,payload\n';
     const rows = data.map(l => [
         new Date(l.created_at).toLocaleString('pt-BR'),
-        l.acao||'', l.entidade||'', l.entidade_id||'',
+        inferirAcao(l), l.entidade||'', l.entidade_id||'',
         l.usuario_nome||'', `"${(l.mensagem||'').replace(/"/g,'""')}"`,
         l.payload ? `"${JSON.stringify(l.payload).replace(/"/g,'""')}"` : ''
     ].join(',')).join('\n');
@@ -3719,7 +4236,9 @@ async function carregarFerramentas() {
 
 function abrirFerramenta(path) { window.open(path, '_blank'); }
 
-// ─── INTEGRAÇÕES 
+// ─── INTEGRAÇÕES (API) — só administradores ───────
+// As chaves são geradas e guardadas (só o hash) no banco. O site nunca lê a tabela:
+// tudo passa pelas funções api_key_* (supabase/001_api_keys.sql).
 const API_PERMS = [
     { k: 'ver',    rot: 'Visualizar', dica: 'Ler projetos, etapas e progresso' },
     { k: 'editar', rot: 'Editar',     dica: 'Criar etapas e alterar status, prioridade, prazo e responsável' },
@@ -4140,6 +4659,7 @@ function userColor(name) {
 function initials(name) { return name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2); }
 </script>
 <script src="Chat.js"></script>
+<script src="Flow.js"></script>
 <script src="Dashboard.js"></script>
 <script src="Agenda.js"></script>
 </body>
