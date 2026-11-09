@@ -1500,7 +1500,7 @@ function renderProjDetail(p) {
             ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarProjeto(${p.id})">✏️ Editar</button><button class="btn btn-s btn-sm" title="Cria uma etapa; escolha uma atividade ou deixe sem atividade" onclick="abrirModalEtapa(${p.id},null)">+ Etapa</button><button class="btn btn-p btn-sm" onclick="abrirModalSessao(${p.id})">+ Atividade</button>` : ''}
             <button class="btn btn-s btn-sm" onclick="irParaAnexosProjeto(${p.id})">🔗 Anexos</button>
         </div></div>`;
-    if (!(p.sessoes||[]).length && !(p.soltas||[]).length) return head + `<div class="empty-state"><div class="ei">🗂</div><h3>Nada por aqui ainda</h3><p>Crie uma atividade para organizar as etapas deste projeto — ou uma etapa solta, sem atividade.</p></div>`;
+    if (!(p.sessoes||[]).length && !(p.soltas||[]).length) return head + `<div class="empty-state"><div class="ei">🗂</div><h3>Nada por aqui ainda</h3><p>Crie uma atividade para organizar as etapas deste projeto</p></div>`;
     return head + (projetosViewMode === 'board' ? renderBoard(p) : renderListView(p));
 }
 
@@ -1614,14 +1614,12 @@ function etapasFlatSelect() {
     return 'id, nome, status, prazo, prioridade, responsavel_id' + (FD_FEAT.multi ? ', etapa_responsaveis(usuario_id)' : '')
         + ', sessoes!inner(id, nome, projeto_id, projetos!inner(id, nome, workspace_id))';
 }
-// Versão que inclui etapas soltas (filtrar por flatWsCol()); usada em Progresso e no popup de contribuidores
 function etapasFlatSelectWs() {
     return FD_FEAT.orf
         ? etapasFlatSelect().replace(/, sessoes!inner\(.*$/, '') + ', sessao_id, projeto_id, sessoes(id, nome, projeto_id), projetos!inner(id, nome, workspace_id)'
         : etapasFlatSelect();
 }
 const flatWsCol = () => FD_FEAT.orf ? 'projetos.workspace_id' : 'sessoes.projetos.workspace_id';
-// Etapa solta recebe uma atividade fictícia "Sem atividade" para não quebrar quem lê e.sessoes
 function flatNorm(lista) {
     return (lista || []).map(e => {
         const pr = e.projetos || e.sessoes?.projetos || null;
