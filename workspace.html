@@ -672,7 +672,15 @@
         .pr-t{font-weight:700;font-size:.87rem;overflow-wrap:anywhere}
         .pr-s{font-size:.74rem;color:var(--muted);margin-top:2px}
         .pr-sess{font-size:.8rem;color:var(--muted);overflow-wrap:anywhere}
-        .pr-resp{display:flex;flex-wrap:wrap;gap:4px}
+        .pr-resp{display:flex;align-items:center;gap:8px;font-size:.82rem;cursor:pointer;border-radius:8px;padding:3px 4px;margin:-3px -4px;transition:background .12s}
+        .pr-resp:hover{background:var(--acc-lt)}
+        .resp-et{font-size:.82rem;color:var(--muted);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);overflow-wrap:anywhere}
+        .resp-it{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:border-color .12s,background .12s}
+        .resp-it:hover{border-color:#c7d2fe;background:var(--acc-lt)}
+        .resp-it .av{width:36px;height:36px;font-size:.8rem;border:none}
+        .resp-i{flex:1;min-width:0}
+        .resp-n{font-weight:600;font-size:.88rem}
+        .resp-u{font-size:.74rem;color:var(--muted)}
         .prog-row.s-done .pr-t{color:var(--muted)}
 
 
@@ -1500,7 +1508,7 @@ function renderProjDetail(p) {
             ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarProjeto(${p.id})">✏️ Editar</button><button class="btn btn-s btn-sm" title="Cria uma etapa; escolha uma atividade ou deixe sem atividade" onclick="abrirModalEtapa(${p.id},null)">+ Etapa</button><button class="btn btn-p btn-sm" onclick="abrirModalSessao(${p.id})">+ Atividade</button>` : ''}
             <button class="btn btn-s btn-sm" onclick="irParaAnexosProjeto(${p.id})">🔗 Anexos</button>
         </div></div>`;
-    if (!(p.sessoes||[]).length && !(p.soltas||[]).length) return head + `<div class="empty-state"><div class="ei">🗂</div><h3>Nada por aqui ainda</h3><p>Crie uma atividade para organizar as etapas deste projeto</p></div>`;
+    if (!(p.sessoes||[]).length && !(p.soltas||[]).length) return head + `<div class="empty-state"><div class="ei">🗂</div><h3>Nada por aqui ainda</h3><p>Crie uma atividade para organizar as etapas deste projeto — ou uma etapa solta, sem atividade.</p></div>`;
     return head + (projetosViewMode === 'board' ? renderBoard(p) : renderListView(p));
 }
 
@@ -1534,7 +1542,7 @@ function renderEtapa(pId, sId, e) {
     const perto = e.prazo && prazoClass(e.prazo, e.status) === 'b-amber';
     return `<div class="row ${ST_CLS[e.status]||''}${perto ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}" data-etapa-id="${e.id}">
         <div class="r-name">${currentUserCanEdit ? `<span class="grip" draggable="true" data-drag-kind="etapa" data-drag-id="${e.id}" title="Arraste para reordenar ou mover para outra atividade">⠿</span>` : ''}<span class="dot"></span><div><div class="r-t">${escH(e.nome)}</div>${e.descricao ? `<div class="r-d">${escH(e.descricao)}</div>` : ''}${anxChips(e, 3, 'e')}${condChips('etapa', e)}</div></div>
-        <div class="r-resp">${respCell(etapaRespIds(e))}</div>
+        <div class="r-resp">${respCell(etapaRespIds(e), e.id)}</div>
         <div>${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span class="muted">—</span>'}</div>
         <div><select class="mini" title="Prioridade" onchange="updateEtapaPrio(${e.id}, this.value)">${[0,1,2,3,4].map(v => `<option ${e.prioridade==v?'selected':''}>${v}</option>`).join('')}</select></div>
         <div class="r-st"><select class="mini st" onchange="updateEtapaStatus(${e.id}, this.value)">${STATUS.map(s => `<option ${e.status===s?'selected':''}>${s}</option>`).join('')}</select>
@@ -1716,11 +1724,38 @@ function avStack(ids) {
     if (!us.length) return '';
     return `<span class="avs">${us.slice(0, 3).map(avClick).join('')}${us.length > 3 ? `<span class="av av-more">+${us.length - 3}</span>` : ''}</span>`;
 }
-function respCell(ids) {
+function respCell(ids, eId = null) {
     const us = ids.map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
     if (!us.length) return '<span class="muted">—</span>';
     const nome = us.length === 1 ? escH(us[0].nome.split(' ')[0]) : `${us.length} pessoas`;
-    return `${avStack(ids)}<span ${us.length === 1 ? `class="av-click" role="button" tabindex="0" onclick="event.stopPropagation();verUsuario(${us[0].id})"` : ''} title="${escH(us.map(u => u.nome).join(', '))}">${nome}</span>`;
+    const acao = us.length === 1 ? `verUsuario(${us[0].id})` : (eId != null ? `abrirRespEtapa(${eId})` : '');
+    return `${avStack(ids)}<span ${acao ? `class="av-click" role="button" tabindex="0" onclick="event.stopPropagation();${acao}"` : ''} title="${escH(us.map(u => u.nome).join(', '))}">${nome}</span>`;
+}
+
+function respVisual(ids) {
+    const us = ids.map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
+    if (!us.length) return '<span class="muted">—</span>';
+    const nome = us.length === 1 ? escH(us[0].nome.split(' ')[0]) : `${us.length} pessoas`;
+    return `<span class="avs">${us.slice(0, 3).map(avatar).join('')}${us.length > 3 ? `<span class="av av-more">+${us.length - 3}</span>` : ''}</span><span>${nome}</span>`;
+}
+
+function abrirRespEtapa(eId) {
+    const e = findEtapa(eId) || (typeof progData !== 'undefined' ? progData.find(x => x.id === eId) : null);
+    if (!e) return;
+    const us = etapaRespIds(e).map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
+    if (!us.length) return;
+    const linhas = us.map(u => `<div class="resp-it" role="button" tabindex="0" title="Ver ${escH(u.nome)}" onclick="fecharModal();verUsuario(${u.id})" onkeydown="if(event.key==='Enter'){fecharModal();verUsuario(${u.id})}">
+        ${avatar(u)}
+        <div class="resp-i"><div class="resp-n">${escH(u.nome)}</div><div class="resp-u">@${escH(u.username || '')}</div></div>
+        <span class="badge ${u.wsAdmin ? 'b-acc' : 'b-gray'}">${u.wsAdmin ? 'Admin' : 'Membro'}</span>
+    </div>`).join('');
+    abrirModal(`👥 Responsáveis (${us.length})`, `
+        <div class="resp-et">${escH(e.nome)}</div>
+        ${linhas}
+    `, [
+        { label: 'Ver etapa', cls: 'btn-p', action: `fecharModal();irParaEtapa(${e.id})` },
+        { label: 'Fechar', cls: 'btn-s', action: 'fecharModal()' }
+    ]);
 }
 
 const msState = {};
@@ -2316,7 +2351,6 @@ async function anxUpload(input) {
     if (ok) { toast(`${ok} arquivo(s) enviado(s) e anexado(s).`); addLog('upload', 'arquivo', null, { quantidade: ok, projeto_id: st.pId }); }
     if (err) toast(`${err} arquivo(s) falharam no envio.`, 'error');
 }
-// Grava só a diferença entre os anexos originais e os atuais (tipo: 'e' etapa, 's' atividade)
 async function anxSalvar(tipo, id) {
     if (!FD_FEAT.anx || !anxSt) return;
     const col = tipo === 'e' ? 'etapa_id' : 'sessao_id';
@@ -2334,7 +2368,7 @@ const anxIdsDe = obj => (obj?.anexo_vinculos || []).map(v => v.arquivo_id);
 
 // ─── CONDIÇÕES ───────────────────────────────────────
 let wsCondicoes = [];
-let cdSt = null;   
+let cdSt = null;  
 async function carregarCondicoes() {
     if (!FD_FEAT.cond) { wsCondicoes = []; return; }
     const { data, error } = await sb.from('condicoes').select('id, alvo_tipo, alvo_id, cond_tipo, cond_id').eq('workspace_id', currentWorkspace.id);
@@ -2346,6 +2380,7 @@ function condItem(tipo, id) {
     for (const p of wsProjetos) { const s = (p.sessoes || []).find(x => x.id === id); if (s) { const et = s.etapas || []; return { nome: s.nome, ok: et.length > 0 && et.every(e => e.status === 'Concluído') }; } }
     return null;
 }
+// condições pendentes de uma etapa (as dela + as da atividade onde ela está)
 function condPendentes(eId) {
     const ctx = findEtapaCtx(eId); if (!ctx) return [];
     return [...condDe('etapa', eId), ...(ctx.s ? condDe('sessao', ctx.s.id) : [])]
@@ -2361,6 +2396,7 @@ function condChips(tipo, obj, max = 3) {
     if (!itens.length) return '';
     return `<div class="anx-chips">${itens.slice(0, max).map(it => `<span class="cd-chip ${it.ok ? 'ok' : 'pend'}" title="${it.ok ? 'Condição cumprida' : 'Condição pendente'}: ${escH(it.nome)}"><span>${it.ok ? '✓' : '🔒'}</span><span class="n">${escH(it.nome)}</span></span>`).join('')}${itens.length > max ? `<span class="cd-chip" title="${escH(itens.slice(max).map(i => i.nome).join(', '))}">+${itens.length - max}</span>` : ''}</div>`;
 }
+// A depende (direta ou indiretamente) de B?
 function cdDepende(a, b, vis = new Set()) {
     const k = a.t + ':' + a.i; if (vis.has(k)) return false; vis.add(k);
     return wsCondicoes.filter(c => c.alvo_tipo === a.t && c.alvo_id === a.i)
@@ -2399,6 +2435,7 @@ function cdAdd() {
     const [t, i] = v.split(':'); cdSt.itens.push({ t, i: +i }); cdRender();
 }
 function cdDel(t, i) { if (!cdSt) return; cdSt.itens = cdSt.itens.filter(x => !(x.t === t && x.i === i)); cdRender(); }
+// Grava só a diferença entre as condições originais e as atuais
 async function cdSalvar(tipo, id) {
     if (!FD_FEAT.cond || !cdSt) return;
     const tem = (l, x) => l.some(y => y.t === x.t && y.i === x.i);
@@ -2729,7 +2766,7 @@ function progRow(e, i) {
     return `<tr class="prog-row anim-item ${ST_CLS[e.status] || ''}${e.prazo && prazoClass(e.prazo, e.status) === 'b-amber' ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}" style="animation-delay:${Math.min(i, 20) * 0.02}s" onclick="irParaEtapa(${e.id})" title="Abrir esta etapa no projeto">
         <td><div class="pr-t">${escH(e.nome)}</div><div class="pr-s">📁 ${escH(e.sessoes?.projetos?.nome || '—')}</div></td>
         <td class="pr-sess">${escH(e.sessoes?.nome || '—')}</td>
-        <td>${us.length ? `<div class="pr-resp">${us.map(u => `<span class="badge b-purple av-click" role="button" tabindex="0" title="Ver ${escH(u.nome)}" onclick="event.stopPropagation();verUsuario(${u.id})">${escH(u.nome)}</span>`).join('')}</div>` : '<span class="muted" style="font-size:.78rem">—</span>'}</td>
+        <td>${us.length ? `<div class="pr-resp" role="button" tabindex="0" title="${escH(us.map(u => u.nome).join(', '))}" onclick="event.stopPropagation();${us.length === 1 ? `verUsuario(${us[0].id})` : `abrirRespEtapa(${e.id})`}" onkeydown="if(event.key==='Enter'){event.stopPropagation();${us.length === 1 ? `verUsuario(${us[0].id})` : `abrirRespEtapa(${e.id})`}}">${respVisual(us.map(u => u.id))}</div>` : '<span class="muted" style="font-size:.78rem">—</span>'}</td>
         <td>${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span class="badge b-gray">Sem prazo</span>'}</td>
         <td><span class="badge ${e.status==='Concluído'?'b-green':e.status==='Em andamento'?'b-amber':'b-gray'}">${e.status}</span></td>
         <td><span class="badge b-gray">${e.prioridade ?? 0}</span></td>

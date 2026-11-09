@@ -138,6 +138,11 @@ const DASHBOARD_ESTILO = `.dash-head{display:flex;justify-content:space-between;
 .dash-line-box{position:relative;flex:1;min-height:200px}
 .dash-line-svg{position:absolute;left:0;top:0;display:block}
 .dash-nota{display:block;margin-top:6px;flex-shrink:0;color:var(--muted)}
+.dash-filtros{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.dash-cat{display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.dash-cat-top{width:auto;padding:6px 30px 6px 12px;font-size:.82rem;font-weight:600;border-radius:9px;text-transform:none;letter-spacing:0;color:var(--text)}
+.dash-cat-sel{width:auto;max-width:60%;padding:4px 24px 4px 9px;border:1px solid var(--border);border-radius:8px;background:#fff;font:600 .72rem var(--font);color:var(--text);text-transform:none;letter-spacing:0;cursor:pointer}
+.dash-cat-sel:focus{outline:2px solid var(--acc);outline-offset:1px}
 .dash-lg{display:flex;gap:12px;font-size:.7rem;font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted)}
 .dash-lg i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
 @media(max-width:760px){.dash-body{grid-template-columns:minmax(0,1fr)}}
@@ -169,6 +174,37 @@ document.head.appendChild(Object.assign(document.createElement('style'), { textC
 
 let dashEscopo = localStorage.getItem('fd-dash-escopo') || 'workspace';
 let dashDados = null;
+let dashCategoria = localStorage.getItem('fd-dash-categoria') || '';
+
+function dashCategoriaDoProjeto(pid) {
+    const projetos = typeof wsProjetos !== 'undefined' ? wsProjetos : [];
+    const pastas = typeof wsPastasProjetos !== 'undefined' ? wsPastasProjetos : [];
+    const p = projetos.find(x => x.id === pid);
+    const pasta = p && p.pasta_id ? pastas.find(x => String(x.id) === String(p.pasta_id)) : null;
+    return pasta && pasta.categoria ? pasta.categoria : '';
+}
+function dashNaCategoria(e) {
+    if (!dashCategoria) return true;
+    const c = dashCategoriaDoProjeto(e.sessoes && e.sessoes.projetos ? e.sessoes.projetos.id : null);
+    return dashCategoria === '__none__' ? !c : c === dashCategoria;
+}
+function dashCategorias() {
+    const pastas = typeof wsPastasProjetos !== 'undefined' ? wsPastasProjetos : [];
+    return [...new Set(pastas.map(p => p.categoria).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+}
+function dashSetCategoria(v) {
+    dashCategoria = v;
+    localStorage.setItem('fd-dash-categoria', v);
+    dashRender();
+}
+function dashSeletorCategoria(cats, classe) {
+    if (!cats.length) return '';
+    return `<select class="${classe}" aria-label="Filtrar o dashboard por categoria" title="Filtra todos os indicadores do dashboard" onchange="dashSetCategoria(this.value)">
+        <option value="">Todas as categorias</option>
+        ${cats.map(c => `<option value="${escH(c)}" ${dashCategoria === c ? 'selected' : ''}>${escH(c)}</option>`).join('')}
+        <option value="__none__" ${dashCategoria === '__none__' ? 'selected' : ''}>Sem categoria</option>
+    </select>`;
+}
 
 const DASH_COR_STATUS = { naoIniciado: '#cbd5e1', andamento: '#f59e0b', concluido: '#10b991' };
 const DASH_COR_PRIO = ['#94a3b8', '#38bdf8', '#818cf8', '#f59e0b', '#ef4444'];
@@ -340,9 +376,10 @@ function dashMostrarEtapasSemana(tipo, inicio) {
 }
 
 function dashEtapasNoEscopo() {
+    const base = dashDados.etapas.filter(dashNaCategoria);
     return dashEscopo === 'meu'
-        ? dashDados.etapas.filter(etapa => etapa.responsavel_id === currentUser.id)
-        : dashDados.etapas;
+        ? base.filter(etapa => etapa.responsavel_id === currentUser.id)
+        : base;
 }
 
 function dashAbrirProjetoEtapa(projetoId) {
@@ -584,7 +621,7 @@ function dashMeusProjetoIds() {
 
 function dashMeusProjetos(todas) {
     const ids = dashMeusProjetoIds(), uid = currentUser.id;
-    return (typeof wsProjetos !== 'undefined' ? wsProjetos : []).filter(p => ids.has(p.id)).map(p => {
+    return (typeof wsProjetos !== 'undefined' ? wsProjetos : []).filter(p => ids.has(p.id) && (!dashCategoria || (dashCategoria === '__none__' ? !dashCategoriaDoProjeto(p.id) : dashCategoriaDoProjeto(p.id) === dashCategoria))).map(p => {
         const et = todas.filter(e => e.sessoes?.projetos?.id === p.id);
         const minhas = et.filter(e => e.responsavel_id === uid && e.status !== 'Concluído');
         const ok = et.filter(e => e.status === 'Concluído').length;
@@ -672,7 +709,9 @@ function dashMontarLinha(c, serie) {
 
 function dashRender() {
     const c = document.getElementById('home-container');
-    const todas = dashDados.etapas;
+    const cats = dashCategorias();
+    if (dashCategoria && dashCategoria !== '__none__' && !cats.includes(dashCategoria)) dashCategoria = '';
+    const todas = dashDados.etapas.filter(dashNaCategoria);
     const meu = dashEscopo === 'meu';
     const escopo = meu ? todas.filter(e => e.responsavel_id === currentUser.id) : todas;
     const m = dashMetricas(escopo);
@@ -725,7 +764,7 @@ function dashRender() {
 
     const corpoWs = `
         <div class="dash-card dash-c ga-st anim-item" style="animation-delay:.08s">
-            <div class="dash-ct">Status das etapas</div>
+            <div class="dash-ct">Status das etapas${dashSeletorCategoria(cats, 'dash-cat-sel')}</div>
             ${m.total ? `<div class="dash-donut-wrap">
                 ${dashDonut([
                     { nome: 'Concluídas', v: m.concluidas, cor: DASH_COR_STATUS.concluido },
@@ -770,9 +809,12 @@ function dashRender() {
                 <div class="home-greeting">${saudacao}, ${escH(currentUser.nome.split(' ')[0])}! 👋</div>
                 <div class="home-sub">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })} · ${escH(currentWorkspace.nome)}</div>
             </div>
-            <div class="proj-view-switch">
-                <button class="btn btn-s btn-sm ${meu ? 'active' : ''}" onclick="dashTrocarEscopo('meu')">Meu trabalho</button>
-                <button class="btn btn-s btn-sm ${meu ? '' : 'active'}" onclick="dashTrocarEscopo('workspace')">Workspace</button>
+            <div class="dash-filtros">
+                ${cats.length ? `<label class="dash-cat"><span>Categoria</span>${dashSeletorCategoria(cats, 'fsel dash-cat-top')}</label>` : ''}
+                <div class="proj-view-switch">
+                    <button class="btn btn-s btn-sm ${meu ? 'active' : ''}" onclick="dashTrocarEscopo('meu')">Meu trabalho</button>
+                    <button class="btn btn-s btn-sm ${meu ? '' : 'active'}" onclick="dashTrocarEscopo('workspace')">Workspace</button>
+                </div>
             </div>
         </div>
         ${avisoHtml}
@@ -811,4 +853,4 @@ async function carregarHome() {
     }
     dashDados = { etapas: rEt.data || [], eventos: rEv.data || [] };
     dashRender();
-}    
+}
