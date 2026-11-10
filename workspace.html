@@ -740,6 +740,26 @@
         .pv-novo:hover{background:rgba(79,70,229,.06);border-color:var(--acc);transform:translateY(-2px)}
         .pv-novo:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
         .pv-novo-ic{width:30px;height:30px;border-radius:50%;background:var(--acc-lt);display:inline-flex;align-items:center;justify-content:center;font-size:1.3rem;line-height:1}
+        .pj-end{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+        .pj-end .pj-copy{margin-left:0}
+        .row.t-late:not(.row-h){background:#fef2f2}
+        .row.t-late:not(.row-h):hover{background:#fee2e2}
+        .row.t-late .r-t{color:#991b1b}
+        .prog-row.t-late td{background:#fef2f2;border-color:#fecaca}
+        .prog-row.t-late:hover td{background:#fee2e2}
+        .prog-row.t-late .pr-t{color:#991b1b}
+        .kb{grid-template-columns:repeat(3,minmax(290px,1fr));gap:18px}
+        .kb-col{--c:#94a3b8;background:#f1f3f9;border:1px solid #e3e7f2;border-top:4px solid var(--c);border-radius:16px;padding:12px;gap:12px;min-height:260px}
+        .kb-col.s-doing{--c:var(--warn)}
+        .kb-col.s-done{--c:var(--ok)}
+        .kb-col.over{border-color:var(--acc);background:var(--acc-lt)}
+        .kb-h{font-size:.86rem;padding:2px 4px 0}
+        .kb-grp{background:rgba(255,255,255,.6);border:1px solid #e1e5f2;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:8px}
+        .kb-grp-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 4px 0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+        .kb-grp-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .kb-card{gap:8px;padding:12px;border-radius:12px}
+        .kb-card.t-late{background:#fef2f2;border-color:#fecaca}
+        .kb-st{padding:5px 8px;font-size:.74rem;border-radius:8px}
     </style>
 </head>
 <body>
@@ -803,11 +823,6 @@
             <div class="ph" style="align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
                 <div><div class="pt" id="proj-title">Projetos</div><div class="ps" id="proj-sub">Visão geral dos projetos do workspace</div></div>
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                    
-                    <div class="proj-view-switch hidden" id="proj-view-sw">
-                        <button id="proj-view-list" class="btn btn-s btn-sm active" onclick="setProjetosViewMode('list')">Lista</button>
-                        <button id="proj-view-grid" class="btn btn-s btn-sm" onclick="setProjetosViewMode('board')">Quadro</button>
-                    </div>
                     <button id="btn-nova-pasta-proj" class="btn btn-s hidden" onclick="abrirModalNovaPastaProjeto()">📁 Nova Pasta</button>
                     <button id="btn-novo-proj" class="btn btn-p hidden" onclick="abrirModalProjeto()">+ Novo Projeto</button>
                 </div>
@@ -882,7 +897,6 @@
             </div>
         </div>
 
-        <!-- FLOW (renderizado por Flow.js) -->
         <div id="tab-flow" class="tab-c"></div>
 
         <!-- ANOTAÇÕES -->
@@ -1109,10 +1123,14 @@ function projToolbar() {
         ? `<button type="button" class="pj-crumb" title="${escH(c.label)}" onclick="projIr('${c.nav}')">${escH(c.label)}</button>`
         : `<span class="pj-crumb cur" aria-current="page" title="${escH(c.label)}">${escH(c.label)}</span>`
     ).join('<span class="pj-sep" aria-hidden="true">/</span>');
+    const sw = p ? `<div class="proj-view-switch" id="proj-view-sw">
+            <button id="proj-view-list" class="btn btn-s btn-sm ${projetosViewMode === 'list' ? 'active' : ''}" onclick="setProjetosViewMode('list')">Lista</button>
+            <button id="proj-view-grid" class="btn btn-s btn-sm ${projetosViewMode === 'board' ? 'active' : ''}" onclick="setProjetosViewMode('board')">Quadro</button>
+        </div>` : '';
     return `<div class="pj-bar">
         <button type="button" class="btn btn-s btn-sm" onclick="projIr('${pai.nav}')">← ${pai.nav === 'folders' ? 'Pastas' : escH(pai.label)}</button>
         <nav class="pj-crumbs" aria-label="Caminho">${itens}</nav>
-        <button type="button" class="btn btn-s btn-sm pj-copy" title="Copiar o link desta página" onclick="copiarLinkProj()">🔗 Copiar link</button>
+        <div class="pj-end">${sw}<button type="button" class="btn btn-s btn-sm pj-copy" title="Copiar o link desta página" onclick="copiarLinkProj()">🔗 Copiar link</button></div>
     </div>`;
 }
 function toggleGrp(id) { collapsedSess.has(id) ? collapsedSess.delete(id) : collapsedSess.add(id); renderProjetosView(); }
@@ -1284,6 +1302,7 @@ async function renderizarProjetos() {
     ordenarPastas();
     await carregarCondicoes();
     renderProjetosView();
+    window.dispatchEvent(new Event('fd:projetos'));
 }
 
 function renderProjetosView() {
@@ -1296,9 +1315,7 @@ function renderProjetosView() {
     const pastaIdSelecionada = selectedPastaProjeto.startsWith('folder:') ? selectedPastaProjeto.slice('folder:'.length) : null;
     const pastaSelecionada = wsPastasProjetos.find(item => String(item.id) === pastaIdSelecionada);
     g('proj-sub').textContent = p ? (p.descricao || 'Sem descrição') : pastaSelecionada ? `Projetos na pasta ${pastaSelecionada.nome}` : selectedPastaProjeto === 'none' ? 'Projetos sem pasta' : 'Organize e acesse os projetos pelas pastas';
-    g('proj-view-sw').classList.toggle('hidden', !p);
-    g('proj-view-list').classList.toggle('active', projetosViewMode === 'list');
-    g('proj-view-grid').classList.toggle('active', projetosViewMode === 'board');
+    g('btn-nova-pasta-proj').classList.toggle('hidden', !(currentUserCanEdit && !p && selectedPastaProjeto === 'folders'));
     c.innerHTML = projToolbar() + (p ? renderProjDetail(p) : renderProjOverview());
 }
 
@@ -1507,8 +1524,9 @@ function renderProjDetail(p) {
         <div class="pd-acts">
             ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarProjeto(${p.id})">✏️ Editar</button><button class="btn btn-s btn-sm" title="Cria uma etapa; escolha uma atividade ou deixe sem atividade" onclick="abrirModalEtapa(${p.id},null)">+ Etapa</button><button class="btn btn-p btn-sm" onclick="abrirModalSessao(${p.id})">+ Atividade</button>` : ''}
             <button class="btn btn-s btn-sm" onclick="irParaAnexosProjeto(${p.id})">🔗 Anexos</button>
+            <button class="btn btn-s btn-sm" onclick="abrirFlowProjeto(${p.id})" title="Abrir este projeto no Flow para editá-lo visualmente">Flow</button>
         </div></div>`;
-    if (!(p.sessoes||[]).length && !(p.soltas||[]).length) return head + `<div class="empty-state"><div class="ei">🗂</div><h3>Nada por aqui ainda</h3><p>Crie uma atividade para organizar as etapas deste projeto — ou uma etapa solta, sem atividade.</p></div>`;
+    if (!(p.sessoes||[]).length && !(p.soltas||[]).length) return head + `<div class="empty-state"><div class="ei">🗂</div><h3>Nada por aqui ainda</h3><p>Crie uma atividade para organizar as etapas deste projeto</p></div>`;
     return head + (projetosViewMode === 'board' ? renderBoard(p) : renderListView(p));
 }
 
@@ -1540,7 +1558,7 @@ function renderSessaoGrp(p, s) {
 
 function renderEtapa(pId, sId, e) {
     const perto = e.prazo && prazoClass(e.prazo, e.status) === 'b-amber';
-    return `<div class="row ${ST_CLS[e.status]||''}${perto ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}" data-etapa-id="${e.id}">
+    return `<div class="row ${ST_CLS[e.status]||''}${perto ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}${etapaVencida(e) ? ' t-late' : ''}" data-etapa-id="${e.id}">
         <div class="r-name">${currentUserCanEdit ? `<span class="grip" draggable="true" data-drag-kind="etapa" data-drag-id="${e.id}" title="Arraste para reordenar ou mover para outra atividade">⠿</span>` : ''}<span class="dot"></span><div><div class="r-t">${escH(e.nome)}</div>${e.descricao ? `<div class="r-d">${escH(e.descricao)}</div>` : ''}${anxChips(e, 3, 'e')}${condChips('etapa', e)}</div></div>
         <div class="r-resp">${respCell(etapaRespIds(e), e.id)}</div>
         <div>${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span class="muted">—</span>'}</div>
@@ -1551,25 +1569,31 @@ function renderEtapa(pId, sId, e) {
 }
 
 
+
 function renderBoard(p) {
-    const all = [...(p.soltas||[]).map(e => ({ e, s: null })), ...(p.sessoes||[]).flatMap(s => (s.etapas||[]).map(e => ({ e, s })))].sort((a, b) => ordCmp(a.e, b.e));
+    const grupos = (p.sessoes || []).map(s => ({ s, itens: s.etapas || [] }));
+    if ((p.soltas || []).length) grupos.push({ s: null, itens: p.soltas });
     return `<div class="kb">${STATUS.map(st => {
-        const items = all.filter(x => x.e.status === st);
+        const blocos = grupos.map(g => ({ s: g.s, itens: g.itens.filter(e => e.status === st).sort(ordCmp) })).filter(g => g.itens.length);
+        const total = blocos.reduce((n, g) => n + g.itens.length, 0);
         return `<div class="kb-col ${ST_CLS[st]}" data-kb-status="${st}">
-            <div class="kb-h"><span class="dot"></span>${st}<span class="badge b-gray">${items.length}</span></div>
-            ${items.map(({ e, s }) => {
-                const ids = etapaRespIds(e);
-                return `<div class="kb-card ${e.prazo && e.status !== 'Concluído' && prazoClass(e.prazo, e.status) === 'b-rose' ? 'late' : ''}${e.prazo && prazoClass(e.prazo, e.status) === 'b-amber' ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}" draggable="true" data-etapa-id="${e.id}" data-drag-kind="etapa" data-drag-id="${e.id}" ${currentUserCanEdit ? `onclick="editarEtapa(${e.id})"` : ''}>
-                    <div class="r-t">${escH(e.nome)}</div><div class="r-d">${s ? '🗂 ' + escH(s.nome) : '🔹 Etapa solta'}</div>${anxChips(e, 2, 'e')}${condChips('etapa', e, 2)}
-                    <div class="kb-f">${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span></span>'}${avStack(ids)}</div></div>`;
-            }).join('') || '<div class="row-empty">Vazio — solte um card aqui</div>'}
+            <div class="kb-h"><span class="dot"></span>${st}<span class="badge b-gray">${total}</span></div>
+            ${blocos.map(g => `<div class="kb-grp">
+                <div class="kb-grp-h" title="${g.s ? escH(g.s.nome) : 'Etapas soltas'}"><span class="kb-grp-n">${g.s ? '🗂 ' + escH(g.s.nome) : '🔹 Etapas soltas'}</span><span class="badge b-gray">${g.itens.length}</span></div>
+                ${g.itens.map(renderKbCard).join('')}
+            </div>`).join('') || '<div class="row-empty">Vazio — solte um card aqui</div>'}
         </div>`;
     }).join('')}</div>`;
 }
-
-
-// ═══════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════
+function renderKbCard(e) {
+    const perto = e.prazo && prazoClass(e.prazo, e.status) === 'b-amber';
+    return `<div class="kb-card${etapaVencida(e) ? ' late t-late' : ''}${perto ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}" draggable="true" data-etapa-id="${e.id}" data-drag-kind="etapa" data-drag-id="${e.id}" ${currentUserCanEdit ? `onclick="editarEtapa(${e.id})"` : ''}>
+        <div class="r-t">${escH(e.nome)}</div>
+        ${anxChips(e, 2, 'e')}${condChips('etapa', e, 2)}
+        <div class="kb-f">${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span></span>'}${avStack(etapaRespIds(e))}</div>
+        <select class="mini st kb-st" title="Alterar o status desta etapa" aria-label="Status de ${escH(e.nome)}" onclick="event.stopPropagation()" onchange="updateEtapaStatus(${e.id}, this.value)">${STATUS.map(x => `<option ${e.status === x ? 'selected' : ''}>${x}</option>`).join('')}</select>
+    </div>`;
+}
 const FD_FEAT = { multi: true, ordem: true, pord: true, pasta: true, orf: false, anx: false, cond: false };
 const ordV = x => (typeof x.ordem === 'number' ? x.ordem : (typeof x.id === 'number' ? x.id : 0));
 const ordCmp = (a, b) => (ordV(a) - ordV(b)) || (typeof a.id === 'number' && typeof b.id === 'number' ? a.id - b.id : String(a.id).localeCompare(String(b.id)));
@@ -2351,6 +2375,7 @@ async function anxUpload(input) {
     if (ok) { toast(`${ok} arquivo(s) enviado(s) e anexado(s).`); addLog('upload', 'arquivo', null, { quantidade: ok, projeto_id: st.pId }); }
     if (err) toast(`${err} arquivo(s) falharam no envio.`, 'error');
 }
+// Grava só a diferença entre os anexos originais e os atuais (tipo: 'e' etapa, 's' atividade)
 async function anxSalvar(tipo, id) {
     if (!FD_FEAT.anx || !anxSt) return;
     const col = tipo === 'e' ? 'etapa_id' : 'sessao_id';
@@ -2368,7 +2393,7 @@ const anxIdsDe = obj => (obj?.anexo_vinculos || []).map(v => v.arquivo_id);
 
 // ─── CONDIÇÕES ───────────────────────────────────────
 let wsCondicoes = [];
-let cdSt = null;  
+let cdSt = null;   
 async function carregarCondicoes() {
     if (!FD_FEAT.cond) { wsCondicoes = []; return; }
     const { data, error } = await sb.from('condicoes').select('id, alvo_tipo, alvo_id, cond_tipo, cond_id').eq('workspace_id', currentWorkspace.id);
@@ -2763,7 +2788,7 @@ function progOrdenar(lista) {
 }
 function progRow(e, i) {
     const us = etapaRespIds(e).map(id => wsMembers.find(u => u.id === id)).filter(Boolean);
-    return `<tr class="prog-row anim-item ${ST_CLS[e.status] || ''}${e.prazo && prazoClass(e.prazo, e.status) === 'b-amber' ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}" style="animation-delay:${Math.min(i, 20) * 0.02}s" onclick="irParaEtapa(${e.id})" title="Abrir esta etapa no projeto">
+    return `<tr class="prog-row anim-item ${ST_CLS[e.status] || ''}${e.prazo && prazoClass(e.prazo, e.status) === 'b-amber' ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}${etapaVencida(e) ? ' t-late' : ''}" style="animation-delay:${Math.min(i, 20) * 0.02}s" onclick="irParaEtapa(${e.id})" title="Abrir esta etapa no projeto">
         <td><div class="pr-t">${escH(e.nome)}</div><div class="pr-s">📁 ${escH(e.sessoes?.projetos?.nome || '—')}</div></td>
         <td class="pr-sess">${escH(e.sessoes?.nome || '—')}</td>
         <td>${us.length ? `<div class="pr-resp" role="button" tabindex="0" title="${escH(us.map(u => u.nome).join(', '))}" onclick="event.stopPropagation();${us.length === 1 ? `verUsuario(${us[0].id})` : `abrirRespEtapa(${e.id})`}" onkeydown="if(event.key==='Enter'){event.stopPropagation();${us.length === 1 ? `verUsuario(${us[0].id})` : `abrirRespEtapa(${e.id})`}}">${respVisual(us.map(u => u.id))}</div>` : '<span class="muted" style="font-size:.78rem">—</span>'}</td>
@@ -2872,6 +2897,11 @@ function irParaAnexos(pasta = null) {
 
 function irParaAnexosProjeto(projetoId) {
     irParaAnexos(`proj_${projetoId}`);
+}
+
+function abrirFlowProjeto(projetoId) {
+    if (window.Flow && window.Flow.irProjeto) window.Flow.irProjeto(projetoId);
+    else toast('O arquivo Flow.js não foi carregado.', 'error');
 }
 
 function fileIcon(nome) {
@@ -3414,6 +3444,9 @@ function prazoAmanha(prazo, status) {
     if (!prazo || status === 'Concluído') return false;
     const hoje = new Date(); hoje.setHours(0,0,0,0);
     return Math.floor((new Date(prazo + 'T00:00:00') - hoje) / 86400000) === 1;
+}
+function etapaVencida(e) {
+    return !!e.prazo && e.status !== 'Concluído' && prazoClass(e.prazo, e.status) === 'b-rose';
 }
 function prazoLabel(prazo, status) {
     const hoje = new Date(); hoje.setHours(0,0,0,0);

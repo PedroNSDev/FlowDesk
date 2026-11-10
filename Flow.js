@@ -2,15 +2,18 @@
     'use strict';
 
     const COR = ['#4f46e5', '#7c3aed', '#059669', '#d97706', '#e11d48', '#0891b2', '#475569'];
-    const TIPO = { p: { ic: '📁', w: 220 }, s: { ic: '🗂', w: 250 }, e: { ic: '', w: 200 }, n: { ic: '', w: 190 }, b: { ic: '', w: 360 } };
-    const ST_COR = { 'Não iniciado': '#94a3b8', 'Em andamento': '#f59e0b', 'Concluído': '#10b981' };
+    const TIPO = { p: { ic: '📁', w: 220 }, s: { ic: '🗂', w: 250 }, e: { ic: '', w: 200 }, n: { ic: '', w: 190 }, b: { ic: '', w: 360 }, a: { ic: '📎', w: 200 } };
+    const ST_COR = { 'Não iniciado': '#94a3b8', 'Em andamento': '#eab308', 'Concluído': '#10b981' };
     const SVGNS = 'http://www.w3.org/2000/svg';
-    const SH = 54, KH = 40, GAP = 6;
+    const SH = 54, KH = 40, GAP = 6, ANX = 26;
 
     let root = null, view = null, world = null, layB = null, layN = null, svg = null;
     let mapas = [], atual = null, sel = null, editing = false, saveT = null, semTabela = false;
     let grupo = new Set(), espaco = false, modoMao = false;
-    let pn = { aberto: false, foco: null };
+    let alvoProjeto = null, colProj = false;
+    let pn = { aberto: false, foco: null, aba: 'det', projAnx: null };
+    let dragAtivo = false, Rult = null;
+    const recem = new Set(), arqCache = {}, carregandoArq = new Set();
 
     const uid = () => Math.random().toString(36).slice(2, 9);
     const D = () => atual && atual.dados;
@@ -31,13 +34,13 @@
         if ($('fl-css')) return;
         const st = document.createElement('style'); st.id = 'fl-css';
         st.textContent = `
-        .fl-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+        .fl-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
         .fl-top .fsel{width:auto;min-width:200px}
-        .fl-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:12px 0 10px}
+        .fl-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 8px}
         .fl-bar .sp{flex:1}
         .fl-bar .zl{min-width:46px;text-align:center;font:600 .78rem var(--font);color:var(--muted)}
         .fl-st{font:600 .75rem var(--font);color:var(--muted);margin-left:6px}
-        .fl-wrap{display:flex;height:calc(100vh - 215px);min-height:460px;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface);user-select:none;-webkit-user-select:none}
+        .fl-wrap{display:flex;height:calc(100vh - 150px);min-height:460px;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface);user-select:none;-webkit-user-select:none}
         body.fl-drag,body.fl-drag *{user-select:none!important;-webkit-user-select:none!important}
         .fl-view{position:relative;flex:1;min-width:0;height:100%;overflow:hidden;touch-action:none;cursor:default;
             background-image:radial-gradient(#cbd5e1 1px,transparent 1px);background-size:24px 24px;background-color:#f8fafc}
@@ -100,12 +103,48 @@
         .fl-hd{height:${SH}px;box-sizing:border-box;padding:8px 12px 0 10px;overflow:hidden}
         .fl-hd .fl-t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .fl-slot{position:absolute;left:12px;right:12px;height:${KH}px;box-sizing:border-box;border:2px dashed color-mix(in srgb,var(--c) 40%,transparent);border-radius:8px;display:flex;align-items:center;justify-content:center;font:500 .74rem var(--font);color:var(--muted);pointer-events:none}
-        .fl-kid{height:${KH}px;box-sizing:border-box;padding:0 12px 0 8px;border-left-width:4px;display:flex;align-items:center}
-        .fl-kid .fl-row{width:100%;align-items:center}
+        .fl-kid{box-sizing:border-box;padding:0 12px 0 8px;border-left-width:4px;display:block}
+        .fl-kid .fl-row{height:${KH - 3}px;align-items:center}
         .fl-kid .fl-t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .fl-kid .fl-s{display:none}
         .fl-n.snap{box-shadow:0 0 0 3px #22c55e,0 2px 10px rgba(34,197,94,.3)}
         .fl-snapln{position:absolute;height:5px;border-radius:3px;background:#22c55e;pointer-events:none;z-index:9}
+        .fl-n.fl-n-e{background:color-mix(in srgb,var(--c) 11%,var(--surface))}
+        .fl-n.fl-n-e.fl-cond{border-color:var(--c)}
+        .fp-st{position:relative;flex:none;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 .7rem var(--font);color:#fff;cursor:pointer;background:#94a3b8}
+        .fp-st.s1{background:#eab308}.fp-st.s2{background:#10b981}
+        .fp-st select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+        .fl-n.fl-n-a{background:#f0f9ff;border-color:#0891b2}
+        .fl-th{display:block;width:100%;height:96px;object-fit:cover;border-radius:6px;margin-top:6px;background:#e2e8f0;pointer-events:none}
+        .fl-clip{position:absolute;left:10px;top:-10px;z-index:4;padding:1px 8px;border-radius:20px;background:#eff6ff;border:1px solid #93c5fd;color:#1d4ed8;font:700 .64rem var(--font);cursor:pointer}
+        .fl-n.alvo-anx{outline:3px dashed #3b82f6;outline-offset:2px}
+        .fp-tabs{display:flex;gap:4px;margin-bottom:12px;background:var(--border);padding:3px;border-radius:10px}
+        .fp-tabs button{flex:1;border:none;background:none;padding:5px 8px;border-radius:8px;font:600 .78rem var(--font);cursor:pointer;color:var(--muted)}
+        .fp-tabs button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(15,23,42,.12)}
+        .fp-file{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;margin-bottom:5px;cursor:grab}
+        .fp-file:hover{background:var(--acc-lt)}.fp-file .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .fp-th{width:34px;height:34px;object-fit:cover;border-radius:6px;flex:none;background:#e2e8f0}
+        .fp-ic{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex:none}
+        .fl-tg{border:none;background:none;padding:0 4px 0 0;font:700 .8rem var(--font);color:var(--c);cursor:pointer;line-height:1}
+        .fl-ax{display:flex;gap:4px;padding:0 0 0 17px;height:${ANX}px;align-items:flex-start;overflow:hidden}
+        .fl-n:not(.fl-kid) .fl-ax{height:auto;padding:6px 0 0}
+        .fl-chip{display:inline-flex;align-items:center;gap:4px;max-width:140px;padding:1px 7px;border-radius:20px;border:1px solid #93c5fd;background:#eff6ff;color:#1d4ed8;font:600 .64rem var(--font);cursor:pointer}
+        .fl-chip *{pointer-events:none}
+        .fl-chip .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .fl-n:not(.fl-n-b) .fl-rs{opacity:0;width:12px;height:12px;right:3px;bottom:3px;border-width:0 3px 3px 0;transition:opacity .1s}
+        .fl-n:not(.fl-n-b):hover .fl-rs,.fl-n.sel .fl-rs{opacity:1}
+        .fl-panel{padding:12px 14px}
+        .fl-panel .fp-row{align-items:flex-start;gap:8px;padding:6px 8px;margin-bottom:4px;font-size:.8rem;line-height:1.3}
+        .fl-panel .fp-row .n{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+        .fl-panel .fp-st{width:16px;height:16px;margin-top:1px;font-size:.56rem;background:#fff;border:2px solid #94a3b8}
+        .fl-panel .fp-st.s1{background:#eab308;border-color:#eab308}
+        .fl-panel .fp-st.s2{background:#10b981;border-color:#10b981}
+        .fl-panel .fp-sec{margin:12px 0 6px}
+        .fl-panel .fp-t{font-size:.95rem}
+        .fl-panel .fp-acts{margin:8px 0}
+        .fl-add{position:absolute;right:10px;top:9px;border:1px solid var(--c);background:var(--surface);color:var(--c);border-radius:20px;padding:1px 9px;font:700 .68rem var(--font);cursor:pointer}
+        .fl-add:hover{background:var(--c);color:#fff}
+        .fl-hd .fl-row{padding-right:74px}
         .fl-imp{max-height:52vh;overflow:auto;border:1px solid var(--border);border-radius:10px;padding:6px 10px}
         .fl-imp summary{cursor:pointer;padding:5px 0;font-weight:700}
         .fl-i1{margin-left:22px;padding:2px 0}.fl-i2{margin-left:24px;font-size:.84rem}
@@ -118,23 +157,20 @@
         if (root.dataset.pronto) return;
         root.dataset.pronto = '1';
         root.innerHTML = `
-        <div class="ph"><div><div class="pt">Flow</div><div class="ps">Mapas mentais dos projetos — privados ou compartilhados</div></div>
-            <div class="fl-top">
+        <div class="fl-top">
                 <select id="fl-sel" class="fsel" onchange="Flow.trocar(this.value)" aria-label="Mapa"></select>
                 <button class="btn btn-p btn-sm" onclick="Flow.modalMapa()">+ Novo mapa</button>
                 <button class="btn btn-s btn-sm" id="fl-cfg" onclick="Flow.modalMapa(true)" title="Nome, visibilidade e exclusão do mapa">⚙️</button>
                 <button class="btn btn-s btn-sm" onclick="Flow.recarregar()" title="Recarregar (útil em mapas compartilhados)">↻</button>
-            </div></div>
+            </div>
         <div class="fl-bar" id="fl-bar">
             <button class="btn btn-s btn-sm" onclick="Flow.novo('b')">▭ Bloco</button>
             <button class="btn btn-s btn-sm" onclick="Flow.novo('s')">🗂 Atividade</button>
             <button class="btn btn-s btn-sm" onclick="Flow.novo('e')">✅ Etapa</button>
             <button class="btn btn-s btn-sm" onclick="Flow.novo('n')">🗒 Nota</button>
-            <button class="btn btn-s btn-sm" onclick="Flow.modalImportar()">📥 Do projeto</button>
-            <button class="btn btn-s btn-sm" id="fl-filho" data-sel="1" onclick="Flow.filho()" title="Cria um nó ligado ao selecionado (Tab)">↳ Filho</button>
+            <button class="btn btn-s btn-sm" id="fl-imp" onclick="Flow.modalImportar()">📥 Do projeto</button>
             <button class="btn btn-s btn-sm" data-sel="1" onclick="Flow.cor()" title="Trocar a cor">🎨</button>
-            <button class="btn btn-s btn-sm" data-sel="1" onclick="Flow.remover()" title="Remove do mapa (não apaga nada do projeto)">🗑</button>
-            <button class="btn btn-s btn-sm" id="fl-dep" onclick="Flow.alternarDep()" title="Selecione uma seta: fluxo normal (padrão) ou dependência — a origem passa a ser condição do destino">🔒 Dependência</button>
+            <button class="btn btn-s btn-sm" id="fl-del" data-sel="1" onclick="Flow.remover()" title="Remove do mapa (não apaga nada do projeto)">🗑</button>
             <button class="btn btn-s btn-sm" id="fl-edit" onclick="Flow.editarReal()" title="Editar o projeto, a atividade ou a etapa real">✏️ Editar</button>
             <button class="btn btn-s btn-sm" id="fl-pbtn" onclick="Flow.painel()" title="Ver os detalhes do item selecionado">👁 Detalhes</button>
             <button class="btn btn-p btn-sm" id="fl-bp" onclick="Flow.modalBloco()" title="Cria um projeto a partir do que está dentro do bloco selecionado">💾 Bloco → Projeto</button>
@@ -159,15 +195,36 @@
             const r = view.getBoundingClientRect();
             zoomEm(ev.clientX - r.left, ev.clientY - r.top, D().view.z * (ev.deltaY < 0 ? 1.1 : 1 / 1.1));
         }, { passive: false });
+        const temArquivo = ev => { const t = [...((ev.dataTransfer && ev.dataTransfer.types) || [])]; return t.includes('text/fd-arquivo') || t.includes('Files'); };
+        const marcaAlvo = el => {
+            view.querySelectorAll('.alvo-anx').forEach(x => x.classList.remove('alvo-anx'));
+            if (el && !el.classList.contains('fl-n-b') && !el.classList.contains('fl-n-a')) el.classList.add('alvo-anx');
+        };
+        view.addEventListener('dragover', ev => { if (!D() || !temArquivo(ev)) return; ev.preventDefault(); ev.dataTransfer.dropEffect = 'copy'; marcaAlvo(ev.target.closest('.fl-n')); });
+        view.addEventListener('dragleave', ev => { if (!ev.relatedTarget || !view.contains(ev.relatedTarget)) marcaAlvo(null); });
+        view.addEventListener('drop', ev => { if (!D() || !temArquivo(ev)) return; ev.preventDefault(); marcaAlvo(null); soltarArquivo(ev); });
+        $('fl-panel').addEventListener('dragstart', ev => {
+            const r = ev.target.closest('[data-arq]'); if (!r) return;
+            ev.dataTransfer.setData('text/fd-arquivo', r.dataset.arq); ev.dataTransfer.effectAllowed = 'copy';
+        });
     }
 
-    async function abrir() {
-        injetaCss(); monta();
-        if (saveT) await flush();
-        if (!(wsProjetos || []).length) { try { await renderizarProjetos(); } catch (e) { } }
-        const r = await sb.from('flows').select('id, nome, visibilidade, criado_por, updated_at').eq('workspace_id', currentWorkspace.id).order('updated_at', { ascending: false });
+    const dedicado = () => !!(atual && atual.projeto_id);
+    function irProjeto(pId) { alvoProjeto = pId; switchTab('flow'); }
+    async function listar() {
+        const cols = 'id, nome, visibilidade, criado_por, updated_at';
+        let r = await sb.from('flows').select(cols + ', projeto_id').eq('workspace_id', currentWorkspace.id).order('updated_at', { ascending: false });
+        colProj = !r.error;
+        if (r.error) r = await sb.from('flows').select(cols).eq('workspace_id', currentWorkspace.id).order('updated_at', { ascending: false });
         semTabela = !!r.error;
         mapas = semTabela ? [] : (r.data || []).filter(m => m.visibilidade === 'compartilhado' || m.criado_por === currentUser.id);
+    }
+    async function abrir() {
+        injetaCss(); monta();
+        if (alvoProjeto != null) { const id = alvoProjeto; alvoProjeto = null; return abrirProjeto(id); }
+        if (saveT) await flush();
+        if (!(wsProjetos || []).length) { try { await renderizarProjetos(); } catch (e) { } }
+        await listar();
         if (semTabela) { atual = null; return telaVazia('⚠️', 'Tabela dos mapas não encontrada', 'Rode o SQL migracao_flow_condicoes.sql no Supabase e recarregue a página.'); }
         let id = null;
         try { id = +localStorage.getItem('fd-flow-' + currentWorkspace.id) || null; } catch (e) { }
@@ -175,8 +232,31 @@
         preencheSelect(id);
         if (id) await carregar(id); else { atual = null; telaVazia('🧠', 'Nenhum mapa ainda', 'Crie um mapa para organizar projetos, atividades e etapas visualmente.', true); }
     }
+    async function abrirProjeto(pId) {
+        injetaCss(); monta();
+        if (saveT) await flush();
+        if (!(wsProjetos || []).length) { try { await renderizarProjetos(); } catch (e) { } }
+        const p = (wsProjetos || []).find(x => x.id === pId);
+        if (!p) { atual = null; return telaVazia('⚠️', 'Projeto não encontrado', 'Ele pode ter sido excluído.'); }
+        await listar();
+        if (semTabela) { atual = null; return telaVazia('⚠️', 'Tabela dos mapas não encontrada', 'Rode o SQL migracao_flow_condicoes.sql no Supabase e recarregue a página.'); }
+        if (!colProj) { atual = null; return telaVazia('⚠️', 'Falta atualizar o banco', 'Rode o SQL migracao_flow_projeto.sql no Supabase e recarregue a página.'); }
+        let m = mapas.find(x => x.projeto_id === pId);
+        if (!m) {
+            const dados = { v: 1, view: { x: 60, y: 60, z: 1 }, nodes: [], edges: [] };
+            sincProjeto(dados, p);
+            const r = await sb.from('flows').insert({ workspace_id: currentWorkspace.id, nome: p.nome, visibilidade: 'compartilhado', projeto_id: pId, dados, criado_por: currentUser.id })
+                .select('id, nome, visibilidade, criado_por, updated_at, projeto_id').single();
+            if (r.error) { atual = null; return telaVazia('⚠️', 'Não consegui criar o Flow do projeto', escH(r.error.message)); }
+            m = r.data; mapas.unshift(m);
+        }
+        preencheSelect(m.id);
+        await carregar(m.id);
+    }
     function preencheSelect(id) {
-        $('fl-sel').innerHTML = mapas.map(m => `<option value="${m.id}" ${m.id === id ? 'selected' : ''}>${m.visibilidade === 'compartilhado' ? '👥' : '🔒'} ${escH(m.nome)}</option>`).join('');
+        const op = m => `<option value="${m.id}" ${m.id === id ? 'selected' : ''}>${m.projeto_id ? '📁' : m.visibilidade === 'compartilhado' ? '👥' : '🔒'} ${escH(m.nome)}</option>`;
+        const livres = mapas.filter(m => !m.projeto_id), projs = mapas.filter(m => m.projeto_id);
+        $('fl-sel').innerHTML = (livres.length ? `<optgroup label="Mapas">${livres.map(op).join('')}</optgroup>` : '') + (projs.length ? `<optgroup label="Flows de projetos">${projs.map(op).join('')}</optgroup>` : '');
         $('fl-sel').classList.toggle('hidden', !mapas.length);
         $('fl-cfg').classList.toggle('hidden', !mapas.length);
     }
@@ -195,7 +275,19 @@
         view.querySelector('.fl-vazio')?.remove();
         $('fl-bar').classList.remove('hidden'); world.classList.remove('hidden');
         setStatus('');
+        const ded = !!m.projeto_id; let primeira = false;
+        if (ded) {
+            const p = (wsProjetos || []).find(x => x.id === m.projeto_id);
+            if (!p) { atual = null; return telaVazia('⚠️', 'Projeto não encontrado', 'Ele pode ter sido excluído.'); }
+            primeira = !m.dados.nodes.length;
+            if (sincProjeto(m.dados, p)) salvar();
+        }
+        $('fl-cfg').classList.toggle('hidden', ded);
+        ['fl-imp', 'fl-bp'].forEach(b => $(b) && $(b).classList.toggle('hidden', ded));
+        $('fl-del').title = ded ? 'Exclui o item selecionado do projeto (pede confirmação)' : 'Remove do mapa (não apaga nada do projeto)';
         render(); applyView(); desenhaPainel();
+        if (primeira) ajustar();
+        carregarArqsMapa();
     }
     async function trocar(id) { if (saveT) await flush(); await carregar(+id); }
     async function recarregar() { if (saveT) await flush(); await abrir(); }
@@ -221,6 +313,11 @@
         return { P, S, E };
     }
     function info(n, R) {
+        if (n.t === 'a') {
+            const f = anxReg.get(n.ref);
+            if (!f || !anxVisivel(f)) return { txt: n.txt || '(arquivo indisponível)', gone: true, ic: '📎' };
+            return { txt: f.nome, sub: typeof fmtBytes === 'function' ? fmtBytes(f.tamanho) : '', ic: fileIcon(f.nome), thumb: isImage(f.nome) ? anxUrl(f) : '' };
+        }
         if (n.t === 'p' && n.ref) {
             const p = R.P.get(n.ref); if (!p) return { txt: n.txt || '(projeto removido)', gone: true };
             const et = todasEtapas(p); return { txt: p.nome, sub: `${et.filter(e => e.status === 'Concluído').length}/${et.length} etapas` };
@@ -236,22 +333,33 @@
         return { txt: n.txt || '' };
     }
 
+    const oculto = n => !!(n.pai && nodeById(n.pai) && nodeById(n.pai).fechada);
+    const kidH = (k, R) => KH + (anexosDe(k, R || Rult || refs()).length ? ANX : 0);
+    function chipsNo(n, R) {
+        const l = anexosDe(n, R); if (!l.length) return '';
+        return `<div class="fl-ax">${l.slice(0, 2).map(f => `<button type="button" class="fl-chip" data-act="open" data-arq="${f.id}" title="${escH(f.nome)}"><span>${fileIcon(f.nome)}</span><span class="n">${escH(f.nome)}</span></button>`).join('')}${l.length > 2 ? `<button type="button" class="fl-chip" data-act="clip" title="Ver todos os anexos">+${l.length - 2}</button>` : ''}</div>`;
+    }
     function nodeHtml(n, R) {
         const i = info(n, R), eSel = !!sel && ((sel.k === 'n' && sel.id === n.id) || (sel.k === 'm' && grupo.has(n.id)));
         const kid = n.t === 'e' && n.pai;
         const fonte = R.DI && R.DI.fonte.has(n.id);
-        const cls = `fl-n fl-n-${n.t}${kid ? ' fl-kid' : ''}${fonte ? ' fl-cond' + (nodeOk(n) ? ' ok' : '') : ''}${eSel ? ' sel' : ''}${i.gone ? ' gone' : ''}`;
-        const st = `left:${n.x}px;top:${n.y}px;width:${n.w}px;${n.t === 'b' || n.t === 's' ? `height:${n.h}px;` : ''}--c:${COR[n.c || 0]}`;
+        const cls = `fl-n fl-n-${n.t}${kid ? ' fl-kid' : ''}${n.t === 's' && n.fechada ? ' fechada' : ''}${fonte ? ' fl-cond' + (nodeOk(n) ? ' ok' : '') : ''}${eSel ? ' sel' : ''}${i.gone ? ' gone' : ''}`;
+        const altura = n.t === 'b' || n.t === 's' ? `height:${n.h}px;` : kid ? `height:${kidH(n, R)}px;` : (n.t === 'a' || n.t === 'n') && n.h ? `height:${n.h}px;${n.t === 'a' ? 'display:flex;flex-direction:column;' : 'overflow:hidden;'}` : '';
+        const st = `left:${n.x}px;top:${n.y}px;width:${n.w}px;${altura}--c:${n.t === 'e' ? (ST_COR[i.st] || ST_COR['Não iniciado']) : COR[n.c || 0]}`;
         if (n.t === 'b') {
             const pj = n.proj && R.P.get(n.proj);
             return `<div class="${cls}" data-id="${n.id}" style="${st}"><div class="fl-bh"><span class="fl-t">${escH(i.txt)}</span>${pj ? `<button class="fl-pj" data-act="proj" title="Abrir o projeto criado a partir deste bloco">📁 ${escH(pj.nome)}</button>` : ''}</div><i class="fl-rs" data-act="resize"></i></div>`;
         }
-        const ic = n.t === 'e' ? `<i class="fl-d" style="background:${ST_COR[i.st] || '#94a3b8'}"></i>` : (TIPO[n.t].ic ? `<span>${TIPO[n.t].ic}</span>` : '');
+        const ic = i.ic ? `<span>${i.ic}</span>` : n.t === 'e' ? `<i class="fl-d" style="background:${ST_COR[i.st] || '#94a3b8'}"></i>` : (TIPO[n.t].ic ? `<span>${TIPO[n.t].ic}</span>` : '');
+        const porta = '<i class="fl-port" data-act="port" title="Arraste até outro nó para ligar"></i>';
+        const alca = kid ? '' : '<i class="fl-rs" data-act="resize" title="Arraste para redimensionar"></i>';
         if (n.t === 's') {
-            const vazio = !kids(n).length;
-            return `<div class="${cls}" data-id="${n.id}" style="${st}"><div class="fl-hd"><div class="fl-row">${ic}<span class="fl-t" title="${escH(i.txt)}">${escH(i.txt)}</span></div>${i.sub ? `<div class="fl-s">${escH(i.sub)}</div>` : ''}</div>${vazio ? `<div class="fl-slot" style="top:${SH}px">Solte etapas aqui</div>` : ''}<i class="fl-port" data-act="port" title="Arraste até outro nó para ligar"></i>${selos(n, R)}</div>`;
+            const nk = kids(n).length, fechada = !!n.fechada;
+            const sub = i.sub ? `<div class="fl-s">${escH(i.sub)}</div>` : fechada ? `<div class="fl-s">${nk} etapa${nk === 1 ? '' : 's'}</div>` : '';
+            return `<div class="${cls}" data-id="${n.id}" style="${st}"><div class="fl-hd"><div class="fl-row"><button type="button" class="fl-tg" data-act="toggle" title="${fechada ? 'Expandir' : 'Recolher'}">${fechada ? '▸' : '▾'}</button>${ic}<span class="fl-t" title="${escH(i.txt)}">${escH(i.txt)}</span></div>${sub}<button class="fl-add" data-act="addkid" title="Adicionar etapa a esta atividade">＋ Etapa</button></div>${!nk && !fechada ? `<div class="fl-slot" style="top:${SH}px">Solte etapas aqui</div>` : ''}${alca}${porta}${selos(n, R)}</div>`;
         }
-        return `<div class="${cls}" data-id="${n.id}" style="${st}"><div class="fl-row">${ic}<span class="fl-t">${escH(i.txt)}</span></div>${i.sub ? `<div class="fl-s">${escH(i.sub)}</div>` : ''}<i class="fl-port" data-act="port" title="Arraste até outro nó para ligar"></i>${selos(n, R)}</div>`;
+        const thumb = i.thumb ? `<img class="fl-th" src="${escH(i.thumb)}" alt="" draggable="false" ${n.h ? 'style="height:auto;flex:1;min-height:40px" ' : ''}onerror="this.style.display='none'">` : '';
+        return `<div class="${cls}" data-id="${n.id}" style="${st}"><div class="fl-row">${ic}<span class="fl-t" title="${escH(i.txt)}">${escH(i.txt)}</span></div>${i.sub ? `<div class="fl-s">${escH(i.sub)}</div>` : ''}${thumb}${chipsNo(n, R)}${alca}${porta}${selos(n, R)}</div>`;
     }
     function selos(n, R) {
         if (!R.DI) return '';
@@ -259,17 +367,20 @@
         if (R.DI.fonte.has(n.id)) { const ok = nodeOk(n); h += `<i class="fl-bdg${ok ? ' ok' : ''}">${ok ? '✓ condição cumprida' : '🔑 condição'}</i>`; }
         const al = R.DI.alvo.get(n.id);
         if (al) h += `<i class="fl-bdg lk${al.pend ? '' : ' ok'}">${al.pend ? `🔒 ${al.pend} pendente${al.pend > 1 ? 's' : ''}` : '🔓 liberada'}</i>`;
+        const na = n.t === 's' ? anexosDe(n, R).length : 0;
+        if (na) h += `<button class="fl-clip" data-act="clip" title="Ver anexos">📎 ${na}</button>`;
         return h;
     }
-    function render() {
+    function render(prof = 0) {
         const d = D(); if (!d) return;
         sincEdges();
-        const R = refs(); R.DI = depInfo();
+        const R = refs(); R.DI = depInfo(); Rult = R;
         d.nodes.forEach(k => { if (k.pai && !nodeById(k.pai)) { k.pai = null; k.w = TIPO[k.t].w; } });
-        d.nodes.filter(n => n.t === 's').forEach(reflow);
-        const livres = d.nodes.filter(n => n.t !== 'b' && !n.pai), presas = d.nodes.filter(n => n.t !== 'b' && n.pai);
+        d.nodes.filter(n => n.t === 's').forEach(x => reflow(x, R));
+        const livres = d.nodes.filter(n => n.t !== 'b' && !n.pai), presas = d.nodes.filter(n => n.t !== 'b' && n.pai && !oculto(n));
         layB.innerHTML = d.nodes.filter(n => n.t === 'b').sort((a, b) => b.w * b.h - a.w * a.h).map(n => nodeHtml(n, R)).join('');
         layN.innerHTML = livres.concat(presas).map(n => nodeHtml(n, R)).join('');
+        if (!dragAtivo && prof < 3 && normalizar()) { salvar(); return render(prof + 1); }
         drawEdges(); updToolbar();
     }
     function applyView() {
@@ -282,21 +393,14 @@
     function markSel() {
         if (!sel || sel.k !== 'm') grupo = new Set();
         view.querySelectorAll('.fl-n').forEach(el => el.classList.toggle('sel', !!sel && ((sel.k === 'n' && sel.id === el.dataset.id) || (sel.k === 'm' && grupo.has(el.dataset.id)))));
-        const n = selNode(); if (n && n.ref) pn.foco = { k: n.t, id: n.ref };
+        const n = selNode(); if (n && n.ref && n.t !== 'a') pn.foco = { k: n.t, id: n.ref };
         drawEdges(); updToolbar(); if (pn.aberto) desenhaPainel();
     }
     function updToolbar() {
         const n = selNode();
         root.querySelectorAll('[data-sel]').forEach(b => { b.disabled = !sel; b.style.opacity = sel ? 1 : .45; });
         const bp = $('fl-bp'); if (bp) { const on = !!n && n.t === 'b'; bp.disabled = !on; bp.style.opacity = on ? 1 : .45; }
-        const dep = $('fl-dep');
-        if (dep) {
-            const g = !!sel && sel.k === 'g', e = g && D().edges.find(x => x.id === sel.id), a = e && nodeById(e.a), b = e && nodeById(e.b);
-            dep.disabled = !g; dep.style.opacity = g ? 1 : .45;
-            dep.textContent = a && b && isDep(e, a, b) ? '↔ Fluxo normal' : '🔒 Dependência';
-        }
-        const ed = $('fl-edit'); if (ed) { const on = !!(n && n.ref) || (pn.aberto && !!pn.foco); ed.disabled = !on; ed.style.opacity = on ? 1 : .45; }
-        const fh = $('fl-filho'); if (fh && sel && sel.k === 'm') { fh.disabled = true; fh.style.opacity = .45; }
+        const ed = $('fl-edit'); if (ed) { const on = !!(n && n.ref && n.t !== 'a') || (pn.aberto && !!pn.foco); ed.disabled = !on; ed.style.opacity = on ? 1 : .45; }
         const mao = $('fl-mao'); if (mao) { mao.classList.toggle('btn-p', modoMao); mao.classList.toggle('btn-s', !modoMao); }
         const pb = $('fl-pbtn'); if (pb) { pb.classList.toggle('btn-p', pn.aberto); pb.classList.toggle('btn-s', !pn.aberto); }
     }
@@ -358,11 +462,68 @@
         salvar(); render(); if (pn.aberto) desenhaPainel();
     }
 
+    const GAPC = 14;
+    const ehTopo = n => n.t !== 'b' && !n.pai;
+    const topos = () => D().nodes.filter(ehTopo);
+    function caixa(n) {
+        const el = elOf(n.id);
+        return { x: n.x, y: n.y, w: n.w, h: n.t === 's' || n.t === 'b' || ((n.t === 'a' || n.t === 'n') && n.h) ? (n.h || 60) : Math.max(40, el ? el.offsetHeight : 44) };
+    }
+    const sobrepoe = (a, b) => a.x < b.x + b.w + GAPC && a.x + a.w + GAPC > b.x && a.y < b.y + b.h + GAPC && a.y + a.h + GAPC > b.y;
+    function deslizar(rects, obst, dx, dy) {
+        const O = obst.map(o => { const b = caixa(o); return { x: b.x - GAPC, y: b.y - GAPC, w: b.w + 2 * GAPC, h: b.h + 2 * GAPC }; });
+        let ax = dx, ay = dy;
+        rects.forEach(m => O.forEach(o => {
+            if (!(m.y < o.y + o.h && m.y + m.h > o.y)) return;
+            if (dx > 0 && o.x >= m.x + m.w) ax = Math.min(ax, o.x - (m.x + m.w));
+            else if (dx < 0 && o.x + o.w <= m.x) ax = Math.max(ax, o.x + o.w - m.x);
+        }));
+        rects.forEach(m => O.forEach(o => {
+            const mx = m.x + ax;
+            if (!(mx < o.x + o.w && mx + m.w > o.x)) return;
+            if (dy > 0 && o.y >= m.y + m.h) ay = Math.min(ay, o.y - (m.y + m.h));
+            else if (dy < 0 && o.y + o.h <= m.y) ay = Math.max(ay, o.y + o.h - m.y);
+        }));
+        return { dx: ax, dy: ay };
+    }
+    function afastar(membros, todos, obst) {
+        for (let it = 0; it < 80; it++) {
+            let mv = null;
+            for (const m of membros) {
+                const a = caixa(m);
+                for (const o of obst) {
+                    const b = caixa(o); if (!sobrepoe(a, b)) continue;
+                    const c = [[b.x + b.w + GAPC - a.x, 0], [-(a.x + a.w + GAPC - b.x), 0], [0, b.y + b.h + GAPC - a.y], [0, -(a.y + a.h + GAPC - b.y)]];
+                    mv = c.reduce((p, q) => (Math.abs(q[0]) + Math.abs(q[1]) < Math.abs(p[0]) + Math.abs(p[1]) ? q : p)); break;
+                }
+                if (mv) break;
+            }
+            if (!mv) return it > 0;
+            todos.forEach(t => { t.x = Math.round(t.x + mv[0]); t.y = Math.round(t.y + mv[1]); });
+        }
+        return true;
+    }
+    function normalizar() {
+        const fixos = []; let mudou = false;
+        topos().sort((a, b) => (recem.has(a.id) - recem.has(b.id)) || a.y - b.y || a.x - b.x).forEach(n => {
+            for (let it = 0; it < 80; it++) {
+                const a = caixa(n), o = fixos.find(f => sobrepoe(a, caixa(f)));
+                if (!o) break;
+                const b = caixa(o), baixo = b.y + b.h + GAPC - a.y, dir = b.x + b.w + GAPC - a.x;
+                if (baixo <= dir) n.y = Math.round(n.y + baixo); else n.x = Math.round(n.x + dir);
+                mudou = true;
+            }
+            fixos.push(n);
+        });
+        recem.clear();
+        return mudou;
+    }
     const kids = s => D().nodes.filter(n => n.pai === s.id).sort((a, b) => (a.o ?? 1e9) - (b.o ?? 1e9) || a.y - b.y);
-    function reflow(s) {
-        const ks = kids(s);
-        ks.forEach((k, i) => { k.o = i; k.x = s.x + 12; k.y = s.y + SH + i * (KH + GAP); k.w = s.w - 24; });
-        s.h = SH + Math.max(1, ks.length) * (KH + GAP) + GAP;
+    function reflow(s, R) {
+        R = R || Rult || refs();
+        const ks = kids(s); let y = s.y + SH, tot = 0;
+        ks.forEach((k, i) => { const h = kidH(k, R); k.o = i; k.x = s.x + 12; k.y = y; k.w = s.w - 24; y += h + GAP; tot += h + GAP; });
+        s.h = s.fechada ? SH : SH + (ks.length ? tot : KH + GAP) + GAP;
     }
     function desprende(n) {
         const pai = nodeById(n.pai); n.pai = null; n.w = TIPO[n.t].w;
@@ -370,9 +531,9 @@
         render();
     }
     function alvoSnap(drag, p) {
-        const alvos = D().nodes.filter(n => n.t === 's' && n.id !== drag.id && p.x >= n.x && p.x <= n.x + n.w && p.y >= n.y && p.y <= n.y + (n.h || 60));
+        const alvos = D().nodes.filter(n => n.t === 's' && !n.fechada && n.id !== drag.id && p.x >= n.x && p.x <= n.x + n.w && p.y >= n.y && p.y <= n.y + (n.h || 60));
         const a = alvos[alvos.length - 1] || null;
-        return a ? { a, idx: kids(a).filter(k => k.id !== drag.id && k.y + KH / 2 < p.y).length } : null;
+        return a ? { a, exc: drag.id, idx: kids(a).filter(k => k.id !== drag.id && k.y + kidH(k) / 2 < p.y).length } : null;
     }
     function mostraSnap(al) {
         view.querySelectorAll('.fl-n.snap').forEach(el => el.classList.remove('snap'));
@@ -380,10 +541,12 @@
         if (!al) { if (ln) ln.remove(); return; }
         elOf(al.a.id)?.classList.add('snap');
         if (!ln) { ln = document.createElement('div'); ln.className = 'fl-snapln'; layN.appendChild(ln); }
+        let yy = al.a.y + SH;
+        kids(al.a).filter(k => k.id !== al.exc).slice(0, al.idx).forEach(k => { yy += kidH(k) + GAP; });
         ln.style.left = (al.a.x + 12) + 'px'; ln.style.width = (al.a.w - 24) + 'px';
-        ln.style.top = (al.a.y + SH + al.idx * (KH + GAP) - GAP / 2 - 2) + 'px';
+        ln.style.top = (yy - GAP / 2 - 2) + 'px';
     }
-    function rectOf(n) { const el = elOf(n.id); return { x: n.x, y: n.y, w: n.w, h: (n.t === 'b' || n.t === 's') && n.h ? n.h : (el ? el.offsetHeight : 44) }; }
+    function rectOf(n) { const el = elOf(n.id); return { x: n.x, y: n.y, w: n.w, h: (n.t === 'b' || n.t === 's' || n.t === 'a' || n.t === 'n') && n.h ? n.h : (el ? el.offsetHeight : 44) }; }
     function bez(x1, y1, x2, y2, h) {
         const d = Math.max(40, (h ? Math.abs(x2 - x1) : Math.abs(y2 - y1)) / 2), s = (h ? Math.sign(x2 - x1) : Math.sign(y2 - y1)) || 1;
         return h ? `M${x1},${y1} C${x1 + d * s},${y1} ${x2 - d * s},${y2} ${x2},${y2}` : `M${x1},${y1} C${x1},${y1 + d * s} ${x2},${y2 - d * s} ${x2},${y2}`;
@@ -402,8 +565,9 @@
         let h = `<defs>${mk('fl-ar', '#94a3b8')}${mk('fl-ar2', '#d97706')}${mk('fl-ar3', '#4f46e5')}</defs>`;
         const byId = new Map(d.nodes.map(n => [n.id, n]));
         d.edges.forEach(e => {
-            const a = byId.get(e.a), b = byId.get(e.b); if (!a || !b) return;
-            const L = ligar(a, b), dep = isDep(e, a, b), s = sel && sel.k === 'g' && sel.id === e.id;
+            const a0 = byId.get(e.a), b0 = byId.get(e.b); if (!a0 || !b0) return;
+            const vis = x => (oculto(x) ? byId.get(x.pai) : x), a = vis(a0), b = vis(b0); if (a === b) return;
+            const L = ligar(a, b), dep = isDep(e, a0, b0), s = sel && sel.k === 'g' && sel.id === e.id;
             h += `<path d="${L.d}" class="fl-e${dep ? ' dep' : ''}${s ? ' sel' : ''}" marker-end="url(#${s ? 'fl-ar3' : dep ? 'fl-ar2' : 'fl-ar'})"/><path d="${L.d}" class="fl-eh" data-edge="${e.id}"/>`;
             if (s) h += `<g class="fl-pill" data-pill="1" transform="translate(${L.mx},${L.my - 26})"><rect x="-72" y="-11" width="144" height="22" rx="11"/><text text-anchor="middle" dominant-baseline="central">${dep ? '↔ virar fluxo normal' : '🔒 virar dependência'}</text></g>`;
             if (dep) h += `<circle cx="${L.mx}" cy="${L.my}" r="11" class="fl-lkc"/><text x="${L.mx}" y="${L.my}" class="fl-lk" text-anchor="middle" dominant-baseline="central">🔒</text>`;
@@ -416,9 +580,13 @@
     const btnP = (rot, fn, cls) => `<button class="btn ${cls || 'btn-s'} btn-sm" onclick="${fn}">${rot}</button>`;
     const barraP = (done, total) => { const pct = total ? Math.round(done * 100 / total) : 0; return `<div class="fp-bar"><i style="width:${pct}%"></i></div><small class="muted">${pct}% · ${done}/${total} etapas</small>`; };
     const linhaS = s => { const et = s.etapas || []; return `<div class="fp-row" onclick="Flow.foco('s',${s.id})"><span>🗂</span><span class="n">${escH(s.nome)}</span><small class="muted">${et.filter(e => e.status === 'Concluído').length}/${et.length}</small></div>`; };
-    const linhaE = e => `<div class="fp-row" onclick="Flow.foco('e',${e.id})"><i class="fl-d" style="background:${ST_COR[e.status] || '#94a3b8'}"></i><span class="n">${escH(e.nome)}</span><select class="mini st" onclick="event.stopPropagation()" onchange="Flow.status(${e.id},this.value)">${STATUS.map(x => `<option ${e.status === x ? 'selected' : ''}>${x}</option>`).join('')}</select></div>`;
+    const ST_IDX = { 'Não iniciado': 0, 'Em andamento': 1, 'Concluído': 2 };
+    const linhaE = e => {
+        const i = ST_IDX[e.status] ?? 0;
+        return `<div class="fp-row" onclick="Flow.foco('e',${e.id})"><span class="fp-st s${i}" title="${escH(e.status)} (clique para mudar)" onclick="event.stopPropagation()">${['', '▶', '✓'][i]}<select aria-label="Status" onchange="Flow.status(${e.id},this.value)">${STATUS.map(x => `<option ${e.status === x ? 'selected' : ''}>${x}</option>`).join('')}</select></span><span class="n">${escH(e.nome)}</span></div>`;
+    };
     const sec = (t, h) => (h ? `<div class="fp-sec">${t}</div>${h}` : '');
-    function painelHtml() {
+    function painelDetalhes() {
         const R = refs(), f = pn.foco, ed = !!currentUserCanEdit;
         if (!f) return '<div class="fp-vazio">Selecione um projeto, atividade ou etapa do mapa (ou dê dois cliques nele) para ver os detalhes e editar aqui.</div>';
         const mapa = (k, id) => (noMapa(k, id) ? '' : btnP('＋ No mapa', `Flow.addAoMapa('${k}',${id})`));
@@ -446,16 +614,212 @@
             <div class="fp-acts">${ed ? btnP('✏️ Editar', `editarEtapa(${e.id})`) : ''}${mapa('e', e.id)}${btnP('↗ Projetos', `Flow.abrirNoProjetos('e',${e.id})`)}</div>
             ${sec('Anexos', typeof anxChips === 'function' ? anxChips(e, 8, 'e') : '')}${sec('Condições', typeof condChips === 'function' ? condChips('etapa', e, 8) : '')}`;
     }
+    function anexosDe(n, R) {
+        if (n.t === 'a' || n.t === 'b') return [];
+        const obj = n.ref && n.t === 's' ? R.S.get(n.ref)?.s : n.ref && n.t === 'e' ? R.E.get(n.ref)?.e : null;
+        const reais = obj && typeof anxVinculos === 'function' ? anxVinculos(obj).map(v => v.arquivos) : [];
+        const locais = (n.anx || []).map(id => anxReg.get(id)).filter(anxVisivel);
+        return reais.concat(locais.filter(f => !reais.some(r => r.id === f.id)));
+    }
+    function listaAnexos(n) {
+        if (n.ref && (n.t === 's' || n.t === 'e') && !(n.anx || []).length && typeof abrirListaAnexos === 'function') return abrirListaAnexos(n.t === 'e' ? 'e' : 's', n.ref);
+        const R = refs(), lista = anexosDe(n, R), nome = info(n, R).txt;
+        abrirModal(`📎 Anexos — ${nome}`, lista.length
+            ? `<div class="anx-lista">${lista.map(f => `<div class="anx-item" role="button" tabindex="0" onclick="abrirAnexo(${f.id})"><span>${fileIcon(f.nome)}</span><span class="n">${escH(f.nome)}</span>${(n.anx || []).includes(f.id) ? `<button type="button" class="ms-x" aria-label="Remover do nó" onclick="event.stopPropagation();Flow.desanexar('${n.id}',${f.id})">×</button>` : ''}</div>`).join('')}</div>`
+            : '<div class="row-empty">Nenhum anexo.</div>', [{ label: 'Fechar', cls: 'btn-s', action: 'fecharModal()' }]);
+    }
+    function desanexar(nid, arqId) {
+        const n = nodeById(nid); if (!n) return;
+        n.anx = (n.anx || []).filter(x => x !== arqId); salvar(); render(); listaAnexos(n);
+    }
+    async function carregarArqsMapa() {
+        if (!D()) return;
+        const falta = [...new Set(D().nodes.flatMap(n => (n.t === 'a' ? [n.ref] : []).concat(n.anx || [])).filter(id => !anxReg.has(id)))];
+        if (!falta.length) return;
+        const { data } = await sb.from('arquivos').select('id, nome, path, tamanho, visibilidade, criado_por').in('id', falta);
+        (data || []).forEach(f => anxReg.set(f.id, f));
+        if (D()) render();
+    }
+    async function carregarArqs(pid) {
+        if (carregandoArq.has(pid)) return;
+        carregandoArq.add(pid);
+        const { data, error } = await sb.from('arquivos').select('id, nome, path, tamanho, visibilidade, criado_por').eq('projeto_id', pid).order('created_at', { ascending: false });
+        carregandoArq.delete(pid);
+        if (error) { toast('Erro ao carregar os arquivos: ' + error.message, 'error'); arqCache[pid] = []; }
+        else { arqCache[pid] = (data || []).filter(anxVisivel); arqCache[pid].forEach(f => anxReg.set(f.id, f)); }
+        if (pn.aberto && pn.aba === 'anx') desenhaPainel();
+    }
+    function projAnxId() {
+        if (dedicado()) return atual.projeto_id;
+        const ps = wsProjetos || [];
+        if (pn.projAnx && ps.some(p => p.id === pn.projAnx)) return pn.projAnx;
+        const R = refs(), f = pn.foco;
+        const doFoco = f ? (f.k === 'p' ? f.id : f.k === 's' ? R.S.get(f.id)?.p.id : R.E.get(f.id)?.p.id) : null;
+        return doFoco || (ps[0] && ps[0].id) || null;
+    }
+    function painelAnexos() {
+        const pid = projAnxId(); if (!pid) return '<div class="fp-vazio">Não há projetos neste workspace.</div>';
+        const ps = wsProjetos || [], nomeP = (ps.find(p => p.id === pid) || {}).nome || '';
+        const topo = dedicado() ? `<div class="fp-t">📁 ${escH(nomeP)}</div>` : `<select class="fsel" onchange="Flow.projAnx(+this.value)">${ps.slice().sort(ordCmp).map(p => `<option value="${p.id}" ${p.id === pid ? 'selected' : ''}>${escH(p.nome)}</option>`).join('')}</select>`;
+        const arqs = arqCache[pid]; if (!arqs) carregarArqs(pid);
+        const lista = !arqs ? '<div class="fp-vazio">Carregando…</div> ' : arqs.length
+            ? arqs.map(f => `<div class="fp-file" draggable="true" data-arq="${f.id}" onclick="abrirAnexo(${f.id})" title="Arraste para o mapa ou sobre uma atividade/etapa">${isImage(f.nome) ? `<img class="fp-th" src="${escH(anxUrl(f))}" alt="" draggable="false">` : `<span class="fp-ic">${fileIcon(f.nome)}</span>`}<span class="n">${escH(f.nome)}</span><small class="muted">${fmtBytes(f.tamanho)}</small></div>`).join('')
+            : '<div class="fp-vazio">Este projeto ainda não tem arquivos.</div>';
+        return `${topo}<p class="fp-d">Arraste um arquivo para uma atividade ou etapa (anexa) ou para o mapa (cria um nó do arquivo). Também dá para soltar arquivos do computador.</p><div class="fp-acts"><label class="btn btn-s btn-sm" style="cursor:pointer">⬆️ Enviar<input type="file" multiple style="display:none" onchange="Flow.enviar(this)"></label></div>${lista}`;
+    }
+    function painelHtml() {
+        const tab = (k, rot) => `<button class="${pn.aba === k ? 'on' : ''}" onclick="Flow.aba('${k}')">${rot}</button>`;
+        return `<div class="fp-tabs">${tab('det', 'Detalhes')}${tab('anx', '📎 Anexos')}</div>${pn.aba === 'anx' ? painelAnexos() : painelDetalhes()}`;
+    }
+    function aba(k) { pn.aba = k; desenhaPainel(); }
+    function projAnx(id) { pn.projAnx = id; desenhaPainel(); }
+    async function enviarArquivos(files, pId) {
+        const ids = []; let falhas = 0;
+        for (const file of files) {
+            const seguro = file.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w.\-]+/g, '_');
+            const path = `${currentWorkspace.id}/projetos/${pId}/${Date.now()}-${seguro}`;
+            const up = await sb.storage.from('workspace-files').upload(path, file);
+            if (up.error) { falhas++; continue; }
+            const { data, error } = await sb.from('arquivos').insert({ nome: file.name, path, projeto_id: pId, workspace_id: currentWorkspace.id, criado_por: currentUser.id, visibilidade: 'publico', tamanho: file.size })
+                .select('id, nome, path, tamanho, visibilidade, criado_por').single();
+            if (error) { await sb.storage.from('workspace-files').remove([path]); falhas++; continue; }
+            anxReg.set(data.id, data); ids.push(data.id);
+        }
+        if (ids.length) { toast(`${ids.length} arquivo(s) enviado(s).`); delete arqCache[pId]; }
+        if (falhas) toast(`${falhas} arquivo(s) falharam no envio.`, 'error');
+        return ids;
+    }
+    async function enviar(input) {
+        const pid = projAnxId(), files = [...(input.files || [])]; if (!pid || !files.length) return;
+        await enviarArquivos(files, pid); input.value = '';
+        if (pn.aberto && pn.aba === 'anx') desenhaPainel();
+    }
+    function novoArquivo(arqId, x, y) {
+        const f = anxReg.get(arqId); if (!f) return;
+        const n = { id: uid(), t: 'a', ref: arqId, txt: f.nome, x: Math.round(x), y: Math.round(y), w: TIPO.a.w, c: 5 };
+        D().nodes.push(n); recem.add(n.id); sel = { k: 'n', id: n.id }; salvar(); render();
+    }
+    async function anexar(n, ids) {
+        const R = refs(), real = n.ref && (n.t === 's' || n.t === 'e');
+        if (real) {
+            if (!FD_FEAT.anx) { toast('Rode o SQL migracao_etapas_soltas_anexos.sql no Supabase para anexar arquivos a atividades e etapas.', 'warning'); return false; }
+            const obj = n.t === 's' ? R.S.get(n.ref)?.s : R.E.get(n.ref)?.e; if (!obj) return false;
+            const col = n.t === 's' ? 'sessao_id' : 'etapa_id';
+            const novos = ids.filter(id => !(obj.anexo_vinculos || []).some(v => v.arquivo_id === id));
+            if (!novos.length) { toast('Esse arquivo já está anexado.', 'warning'); return true; }
+            const r = await sb.from('anexo_vinculos').insert(novos.map(id => ({ arquivo_id: id, [col]: n.ref, criado_por: currentUser.id }))).select('id, arquivo_id');
+            if (r.error) { toast('Erro ao anexar: ' + r.error.message, 'error'); return false; }
+            obj.anexo_vinculos = (obj.anexo_vinculos || []).concat(r.data.map(v => ({ id: v.id, arquivo_id: v.arquivo_id, arquivos: anxReg.get(v.arquivo_id) })));
+            refreshProjetos();
+        } else n.anx = [...new Set([...(n.anx || []), ...ids])];
+        salvar(); render(); if (pn.aberto) desenhaPainel();
+        toast('Arquivo anexado.');
+        return true;
+    }
+    async function soltarArquivo(ev) {
+        const nEl = ev.target.closest('.fl-n'), n = nEl && nodeById(nEl.dataset.id), p = toWorld(ev.clientX, ev.clientY);
+        const alvoNo = n && n.t !== 'b' && n.t !== 'a' ? n : null;
+        const dt = ev.dataTransfer, idArq = +dt.getData('text/fd-arquivo');
+        let ids = idArq ? [idArq] : [];
+        if (!ids.length && dt.files && dt.files.length) {
+            const R = refs(), doNo = alvoNo && alvoNo.ref ? (alvoNo.t === 'p' ? alvoNo.ref : alvoNo.t === 's' ? R.S.get(alvoNo.ref)?.p.id : R.E.get(alvoNo.ref)?.p.id) : null;
+            const pid = doNo || projAnxId();
+            if (!pid) return toast('Escolha um projeto no painel Anexos antes de soltar arquivos do computador.', 'warning');
+            ids = await enviarArquivos([...dt.files], pid);
+        }
+        if (!ids.length) return;
+        if (alvoNo) await anexar(alvoNo, ids); else ids.forEach((id, i) => novoArquivo(id, p.x + i * 24, p.y + i * 24));
+    }
     function desenhaPainel() {
         const el = $('fl-panel'); if (!el) return;
         const on = pn.aberto && !!D();
         el.classList.toggle('hidden', !on);
         if (on) el.innerHTML = painelHtml();
     }
-    function atualizar() { if (!D()) return; render(); desenhaPainel(); }
+    function atualizar() {
+        if (!D()) return;
+        if (dedicado()) { const p = (wsProjetos || []).find(x => x.id === atual.projeto_id); if (p && sincProjeto(D(), p)) salvar(); }
+        render(); desenhaPainel();
+    }
+    function sincProjeto(d, p) {
+        const antes = JSON.stringify(d);
+        const sessoes = (p.sessoes || []).slice().sort(ordCmp), soltas = (p.soltas || []).slice().sort(ordCmp);
+        const idS = new Set(sessoes.map(x => x.id)), idE = new Set(todasEtapas(p).map(x => x.id));
+        d.nodes = d.nodes.filter(n => !(n.real && !n.ref) && !(n.t === 's' && n.ref && !idS.has(n.ref)) && !(n.t === 'e' && n.ref && !idE.has(n.ref)) && !(n.t === 'p' && n.ref && n.ref !== p.id));
+        const vivos = new Set(d.nodes.map(n => n.id));
+        d.nodes.forEach(k => { if (k.pai && !vivos.has(k.pai)) { k.pai = null; k.w = TIPO[k.t].w; } });
+        d.edges = d.edges.filter(e => vivos.has(e.a) && vivos.has(e.b));
+        const achar = (t, ref) => d.nodes.find(n => n.t === t && n.ref === ref);
+        const ss = d.nodes.filter(n => n.t === 's' && n.ref);
+        const colX = ss.length ? Math.min(...ss.map(n => n.x)) : 360;
+        let y = ss.length ? Math.max(...ss.map(n => n.y + (n.h || 100))) + 40 : 40;
+        const novos = [], cria = (t, ref, x, yy) => { const n = { id: uid(), t, ref, x, y: yy, w: TIPO[t].w, c: { p: 0, s: 1, e: 2 }[t] }; d.nodes.push(n); return n; };
+        sessoes.forEach(sx => {
+            let sn = achar('s', sx.id);
+            if (!sn) { sn = cria('s', sx.id, colX, y); y += SH + Math.max(1, (sx.etapas || []).length) * (KH + GAP) + GAP + 40; novos.push(sn); }
+            (sx.etapas || []).slice().sort(ordCmp).forEach((e, i) => {
+                let en = achar('e', e.id); if (!en) en = cria('e', e.id, sn.x + 12, sn.y + SH);
+                if (en.pai !== sn.id) en.pai = sn.id;
+                if (en.o !== i) en.o = i;
+            });
+        });
+        soltas.forEach(e => {
+            let en = achar('e', e.id); if (!en) { en = cria('e', e.id, colX, y); y += 70; novos.push(en); }
+            if (en.pai) { en.pai = null; en.w = TIPO.e.w; }
+        });
+        const raiz = achar('p', p.id) || cria('p', p.id, colX - 290, 60);
+        novos.forEach(n => { if (!d.edges.some(e => e.a === raiz.id && e.b === n.id)) d.edges.push({ id: uid(), a: raiz.id, b: n.id }); });
+        return JSON.stringify(d) !== antes;
+    }
+    async function criarAtividadeReal(pId, nome) {
+        const p = (wsProjetos || []).find(x => x.id === pId); if (!p) return null;
+        const { data, error } = await sb.from('sessoes').insert({ projeto_id: pId, nome, descricao: '', ...(FD_FEAT.ordem ? { ordem: proxOrdem(topoLista(p).map(x => x.o)) } : {}) }).select('id').single();
+        if (error) { toast('Erro ao criar a atividade: ' + error.message, 'error'); return null; }
+        await sb.from('sessao_usuarios').insert({ sessao_id: data.id, usuario_id: currentUser.id });
+        await addLog('create', 'sessao', data.id, { nome });
+        return data.id;
+    }
+    async function criarEtapaReal(pId, sId, nome) {
+        const p = (wsProjetos || []).find(x => x.id === pId); if (!p) return null;
+        if (!sId && !FD_FEAT.orf) { toast('Para criar etapas avulsas, rode o SQL migracao_etapas_soltas_anexos.sql no Supabase.', 'warning'); return null; }
+        const sess = sId ? (p.sessoes || []).find(x => x.id === sId) : null;
+        const linha = { nome, descricao: '', status: 'Não iniciado', prioridade: 0, prazo: null, responsavel_id: currentUser.id, sessao_id: sId || null,
+            ...(FD_FEAT.orf ? { projeto_id: pId } : {}), ...(FD_FEAT.ordem ? { ordem: sId ? proxOrdem(sess?.etapas) : proxOrdem(topoLista(p).map(x => x.o)) } : {}) };
+        const { data, error } = await sb.from('etapas').insert(linha).select('id').single();
+        if (error) { toast('Erro ao criar a etapa: ' + error.message, 'error'); return null; }
+        if (FD_FEAT.multi) await salvarResponsaveis(data.id, [currentUser.id]);
+        await addLog('create', 'etapa', data.id, { nome });
+        return data.id;
+    }
+    function descarta(n) {
+        const d = D(); d.nodes = d.nodes.filter(x => x.id !== n.id); d.edges = d.edges.filter(e => e.a !== n.id && e.b !== n.id);
+        sel = null; salvar(); render();
+    }
+    async function efetivar(n) {
+        const pId = atual.projeto_id, pai = n.pai ? nodeById(n.pai) : null; let id = null;
+        if (n.t === 's') id = await criarAtividadeReal(pId, n.txt);
+        else if (!pai || pai.ref) id = await criarEtapaReal(pId, pai ? pai.ref : null, n.txt);
+        if (!id) return descarta(n);
+        const raiz = D().nodes.find(x => x.t === 'p' && x.ref === pId);
+        if (n.t === 's' && raiz && !D().edges.some(e => e.a === raiz.id && e.b === n.id)) D().edges.push({ id: uid(), a: raiz.id, b: n.id });
+        n.ref = id; delete n.real; delete n.txt; salvar();
+        await renderizarProjetos();
+        atualizar();
+    }
+    async function moverReal(n, alvo) {
+        const ctx = findEtapaCtx(n.ref); if (!ctx) return atualizar();
+        if (alvo && !alvo.a.ref) alvo = null;
+        let o = null;
+        if (alvo) {
+            const irmaos = kids(alvo.a).filter(k => k.id !== n.id && k.ref);
+            o = alvo.idx < irmaos.length ? { beforeId: irmaos[alvo.idx].ref } : { sessaoId: alvo.a.ref };
+        } else if (ctx.s) o = { topo: 'end' };
+        if (o) await moverEtapa(n.ref, o);
+        salvar(); atualizar();
+    }
     function painel() {
         const n = selNode(); pn.aberto = !pn.aberto;
-        if (n && n.ref) pn.foco = { k: n.t, id: n.ref };
+        if (n && n.ref && n.t !== 'a') pn.foco = { k: n.t, id: n.ref };
         desenhaPainel(); updToolbar();
     }
     function foco(k, id) {
@@ -472,7 +836,7 @@
         if (p) irProj(p.id); else toast('Item não encontrado (foi excluído?).', 'warning');
     }
     function editarReal() {
-        const n = selNode(), f = n && n.ref ? { k: n.t, id: n.ref } : pn.foco;
+        const n = selNode(), f = n && n.ref && n.t !== 'a' ? { k: n.t, id: n.ref } : pn.foco;
         if (!f) return toast('Selecione um item do mapa que venha de um projeto.', 'warning');
         if (!currentUserCanEdit) return toast('Você não tem permissão para editar.', 'warning');
         if (f.k === 'p') return editarProjeto(f.id);
@@ -512,10 +876,15 @@
             return startMarquee(ev, soma);
         }
         const n = nodeById(nEl.dataset.id); if (!n) return;
+        const alvoAct = ev.target.closest('[data-act]'), act = alvoAct ? alvoAct.dataset.act : null;
+        if (act === 'toggle') { n.fechada = !n.fechada; salvar(); render(); return; }
+        if (act === 'open') { abrirAnexo(+alvoAct.dataset.arq); return; }
+        if (act === 'clip') { listaAnexos(n); return; }
+        if (act === 'addkid') { if (n.fechada) n.fechada = false; sel = { k: 'n', id: n.id }; markSel(); return novo('e', { pai: n.id, o: 1e9, w: n.w - 24 }); }
         if (soma) { const l = new Set(idsSel()); if (l.has(n.id)) l.delete(n.id); else l.add(n.id); return setSelIds(l); }
-        const act = ev.target.dataset.act;
         if (!(sel && sel.k === 'm' && grupo.has(n.id))) { sel = { k: 'n', id: n.id }; markSel(); }
-        if (act === 'port') startLink(ev, n); else if (act === 'resize') startResize(ev, n); else if (sel.k === 'm') startDragGrupo(ev, n); else startDrag(ev, n);
+        const titulo = !!ev.target.closest('.fl-t');
+        if (act === 'port') startLink(ev, n); else if (act === 'resize') startResize(ev, n); else if (sel.k === 'm') startDragGrupo(ev, n); else startDrag(ev, n, titulo);
     }
     function startMarquee(ev, soma) {
         const base = soma ? idsSel() : [], box = document.createElement('div'); box.className = 'fl-mq';
@@ -529,6 +898,7 @@
             box.style.cssText = `left:${l}px;top:${t}px;width:${w}px;height:${h}px`;
             const X1 = (l - v.x) / v.z, Y1 = (t - v.y) / v.z, X2 = (l + w - v.x) / v.z, Y2 = (t + h - v.y) / v.z, hit = new Set(base);
             D().nodes.forEach(n => {
+                if (oculto(n)) return;
                 const R = rectOf(n);
                 const toca = R.x < X2 && R.x + R.w > X1 && R.y < Y2 && R.y + R.h > Y1, todo = R.x >= X1 && R.x + R.w <= X2 && R.y >= Y1 && R.y + R.h <= Y2;
                 if (n.t === 'b' ? todo : toca) hit.add(n.id);
@@ -539,47 +909,76 @@
     function startDragGrupo(ev, n) {
         const todos = new Map(), add = g => todos.set(g.id, g);
         grupo.forEach(id => { const g = nodeById(id); if (!g) return; add(g); if (g.t === 'b') dentro(g).forEach(add); if (g.t === 's') kids(g).forEach(add); });
-        const orig = [...todos.values()].map(g => [g, g.x, g.y]); let mexeu = false, solto = false;
+        const lista = [...todos.values()], ids = new Set(todos.keys()), orig = lista.map(g => [g, g.x, g.y]), tops = () => lista.filter(ehTopo);
+        let mexeu = false, solto = false, cx = 0, cy = 0;
+        dragAtivo = true;
         track(ev, (dx, dy) => {
             const z = D().view.z; if (Math.abs(dx) + Math.abs(dy) > 3) mexeu = true; if (!mexeu) return;
-            if (!solto) { solto = true; grupo.forEach(id => { const g = nodeById(id); if (g && g.pai && !todos.has(g.pai)) desprende(g); }); }
-            orig.forEach(([g, x, y]) => { g.x = Math.round(x + dx / z); g.y = Math.round(y + dy / z); const el = elOf(g.id); if (el) { el.style.left = g.x + 'px'; el.style.top = g.y + 'px'; } });
+            if (!solto) { solto = true; if (!dedicado()) grupo.forEach(id => { const g = nodeById(id); if (g && g.pai && !todos.has(g.pai)) desprende(g); }); }
+            const r = deslizar(tops().map(caixa), topos().filter(o => !ids.has(o.id)), dx / z - cx, dy / z - cy);
+            cx += r.dx; cy += r.dy;
+            orig.forEach(([g, x, y]) => { g.x = Math.round(x + cx); g.y = Math.round(y + cy); const el = elOf(g.id); if (el) { el.style.left = g.x + 'px'; el.style.top = g.y + 'px'; } });
             drawEdges();
-        }, () => { if (mexeu) salvar(); else setSelIds([n.id]); });
+        }, () => {
+            dragAtivo = false;
+            if (!mexeu) return setSelIds([n.id]);
+            afastar(tops(), lista, topos().filter(o => !ids.has(o.id)));
+            salvar(); if (dedicado()) atualizar(); else render();
+        });
     }
     function startPan(ev) {
         const v = D().view, ox = v.x, oy = v.y; let mexeu = false;
         track(ev, (dx, dy) => { mexeu = true; v.x = ox + dx; v.y = oy + dy; applyView(); }, () => { if (mexeu) salvar(); });
     }
-    function startDrag(ev, n) {
-        const grupo = (n.t === 'b' ? dentro(n) : n.t === 's' ? kids(n) : []).concat(n).map(g => [g, g.x, g.y]);
-        let mexeu = false, solto = false, alvo = null;
+    function startDrag(ev, n, titulo) {
+        const todos = (n.t === 'b' ? dentro(n) : n.t === 's' ? kids(n) : []).concat(n), ids = new Set(todos.map(g => g.id));
+        const orig = todos.map(g => [g, g.x, g.y]), tops = () => todos.filter(ehTopo);
+        const obst = () => topos().filter(o => !ids.has(o.id) && !(n.t === 'e' && o.t === 's'));
+        let mexeu = false, solto = false, alvo = null, cx = 0, cy = 0;
+        dragAtivo = true;
         track(ev, (dx, dy, e) => {
             const z = D().view.z; if (Math.abs(dx) + Math.abs(dy) > 3) mexeu = true; if (!mexeu) return;
             if (n.pai && !solto) { solto = true; desprende(n); }
-            grupo.forEach(([g, x, y]) => { g.x = Math.round(x + dx / z); g.y = Math.round(y + dy / z); const el = elOf(g.id); if (el) { el.style.left = g.x + 'px'; el.style.top = g.y + 'px'; } });
+            const r = deslizar(tops().map(caixa), obst(), dx / z - cx, dy / z - cy);
+            cx += r.dx; cy += r.dy;
+            orig.forEach(([g, x, y]) => { g.x = Math.round(x + cx); g.y = Math.round(y + cy); const el = elOf(g.id); if (el) { el.style.left = g.x + 'px'; el.style.top = g.y + 'px'; } });
             drawEdges();
             if (n.t === 'e') { alvo = alvoSnap(n, toWorld(e.clientX, e.clientY)); mostraSnap(alvo); }
         }, () => {
-            mostraSnap(null);
+            dragAtivo = false; mostraSnap(null);
+            if (!mexeu) { if (titulo) editar(n.id); return; }
+            const livre = () => afastar(tops(), todos, topos().filter(o => !ids.has(o.id)));
+            if (n.t === 'e' && n.ref && mexeu && dedicado()) { if (!alvo) livre(); moverReal(n, alvo); return; }
             if (n.t === 'e' && alvo && mexeu) { n.pai = alvo.a.id; n.o = alvo.idx - .5; render(); salvar(); return; }
-            if (mexeu) salvar();
+            if (mexeu) { livre(); salvar(); render(); }
         });
     }
     function startResize(ev, n) {
-        const w = n.w, h = n.h;
+        const el0 = elOf(n.id), w = n.w, h = n.h || (el0 ? el0.offsetHeight : 120), comAltura = n.t === 'b' || n.t === 'a' || n.t === 'n';
+        const minW = n.t === 'b' || n.t === 's' ? 200 : 120, minH = n.t === 'b' ? 120 : 70;
         track(ev, (dx, dy) => {
-            const z = D().view.z; n.w = Math.max(200, Math.round(w + dx / z)); n.h = Math.max(120, Math.round(h + dy / z));
-            const el = elOf(n.id); el.style.width = n.w + 'px'; el.style.height = n.h + 'px';
-        }, () => salvar());
+            const z = D().view.z; n.w = Math.max(minW, Math.round(w + dx / z));
+            if (comAltura) n.h = Math.max(minH, Math.round(h + dy / z));
+            const el = elOf(n.id); if (!el) return;
+            el.style.width = n.w + 'px'; if (comAltura) el.style.height = n.h + 'px';
+            if (n.t === 's') kids(n).forEach(k => { const ke = elOf(k.id); if (ke) ke.style.width = (n.w - 24) + 'px'; });
+            drawEdges();
+        }, () => { salvar(); render(); });
     }
     function startLink(ev, n) {
         const A = rectOf(n), tmp = document.createElementNS(SVGNS, 'path'); tmp.setAttribute('class', 'fl-tmp'); svg.appendChild(tmp);
         track(ev, (dx, dy, e) => { const p = toWorld(e.clientX, e.clientY); tmp.setAttribute('d', bez(A.x + A.w, A.y + A.h / 2, p.x, p.y, true)); }, e => {
             tmp.remove();
             const t = document.elementFromPoint(e.clientX, e.clientY)?.closest('.fl-n'), m = t && nodeById(t.dataset.id);
-            if (m && m.id !== n.id && m.t !== 'b' && !D().edges.some(x => x.a === n.id && x.b === m.id)) { const id = uid(); D().edges.push({ id, a: n.id, b: m.id }); sel = { k: 'g', id }; salvar(); markSel(); }
+            if (!m || m.id === n.id || m.t === 'b') return;
+            if ((n.t === 'a') !== (m.t === 'a')) return agregar(n.t === 'a' ? n : m, n.t === 'a' ? m : n);
+            if (!D().edges.some(x => x.a === n.id && x.b === m.id)) { const id = uid(); D().edges.push({ id, a: n.id, b: m.id }); sel = { k: 'g', id }; salvar(); markSel(); }
         });
+    }
+    async function agregar(arq, alvo) {
+        if (!(await anexar(alvo, [arq.ref]))) return;
+        const d = D(); d.nodes = d.nodes.filter(x => x.id !== arq.id); d.edges = d.edges.filter(e => e.a !== arq.id && e.b !== arq.id);
+        sel = null; salvar(); render(); if (pn.aberto) desenhaPainel();
     }
     function onClick(ev) {
         const b = ev.target.closest('[data-act="proj"]'); if (!b) return;
@@ -589,20 +988,43 @@
     function onDbl(ev) {
         const g = ev.target.closest('[data-edge]');
         if (g) { sel = { k: 'g', id: g.dataset.edge }; markSel(); return alternarDep(); }
-        const nEl = ev.target.closest('.fl-n'); if (!nEl || ev.target.closest('.fl-pj')) return;
+        const nEl = ev.target.closest('.fl-n'); if (!nEl || ev.target.closest('.fl-pj') || editing || ev.target.closest('.fl-t')) return;
         const n = nodeById(nEl.dataset.id); if (!n) return;
+        if (n.t === 'a') return abrirAnexo(n.ref);
         if (!n.ref) return editar(n.id);
         pn.aberto = true; pn.foco = { k: n.t, id: n.ref }; desenhaPainel(); updToolbar();
     }
+    const textoDe = e => String(e.innerText ?? e.textContent ?? '').trim();
     function editar(id) {
-        const n = nodeById(id), el = elOf(id)?.querySelector('.fl-t'); if (!n || !el || n.ref) return;
+        const n = nodeById(id), el = elOf(id)?.querySelector('.fl-t'); if (!n || !el) return;
+        const real = !!n.ref && ['p', 's', 'e', 'a'].includes(n.t);
+        if (real && n.t !== 'a' && !currentUserCanEdit) return toast('Você não tem permissão para renomear itens do projeto.', 'warning');
+        if (real && info(n, refs()).gone) return;
+        const antes = textoDe(el);
         editing = true; el.contentEditable = 'true'; el.focus(); document.getSelection().selectAllChildren(el);
         let cancelou = false;
         el.onkeydown = e => {
             if (e.key === 'Enter' && !(e.shiftKey && n.t === 'n')) { e.preventDefault(); el.blur(); }
             if (e.key === 'Escape') { cancelou = true; el.blur(); }
         };
-        el.onblur = () => { editing = false; if (!cancelou) { const v = el.innerText.trim(); if (v) { n.txt = v; salvar(); } } render(); };
+        el.onblur = () => {
+            editing = false;
+            const v = cancelou ? '' : textoDe(el);
+            if (n.real) { if (v) { n.txt = v; render(); efetivar(n); } else descarta(n); return; }
+            if (real) { render(); if (v && v !== antes) renomearReal(n, v); return; }
+            if (v) { n.txt = v; salvar(); }
+            render();
+        };
+    }
+    async function renomearReal(n, nome) {
+        const R = refs(), tab = { p: 'projetos', s: 'sessoes', e: 'etapas', a: 'arquivos' }[n.t];
+        const obj = n.t === 'p' ? R.P.get(n.ref) : n.t === 's' ? R.S.get(n.ref)?.s : n.t === 'e' ? R.E.get(n.ref)?.e : anxReg.get(n.ref);
+        if (!obj) return;
+        const { error } = await updateChecado(tab, { nome }, n.ref);
+        if (error) { toast('Erro ao renomear: ' + error.message, 'error'); return atualizar(); }
+        obj.nome = nome;
+        if (n.t !== 'a') addLog('update', { p: 'projeto', s: 'sessao', e: 'etapa' }[n.t], n.ref, { nome: `renomeado para "${nome}"` });
+        refreshProjetos(); atualizar();
     }
     document.addEventListener('keydown', ev => {
         if (!root || root.offsetParent === null || !D() || editing) return;
@@ -626,14 +1048,15 @@
             id: uid(), t, x: Math.round(c.x - w / 2) + j(), y: Math.round(c.y - 30) + j(), w,
             txt: { b: 'Novo bloco', s: 'Nova atividade', e: 'Nova etapa', n: 'Nota' }[t], c: { p: 0, s: 1, e: 2, n: 3, b: 6 }[t]
         }, t === 'b' ? { h: 240 } : {}, extra || {});
-        D().nodes.push(n);
+        if (dedicado() && (t === 's' || t === 'e') && !n.ref) n.real = 1;
+        D().nodes.push(n); recem.add(n.id);
         if (paiId) D().edges.push({ id: uid(), a: paiId, b: n.id });
         sel = { k: 'n', id: n.id }; salvar(); render();
         if (t !== 'p' && !n.ref) editar(n.id);
         return n;
     }
     function filho() {
-        const n = selNode(); if (!n || n.t === 'b') return;
+        const n = selNode(); if (!n || n.t === 'b' || n.t === 'a') return;
         if (n.t === 's') return novo('e', { pai: n.id, o: 1e9, w: n.w - 24 });
         if (n.t === 'e' && n.pai) return novo('e', { pai: n.pai, o: (n.o ?? 0) + .5, w: n.w });
         const t = { p: 's', s: 'e', e: 'e', n: 'n' }[n.t], irmaos = D().edges.filter(e => e.a === n.id).length;
@@ -653,6 +1076,14 @@
             d.edges = d.edges.filter(x => x.id !== alvo.id);
         } else {
             const ids = new Set(alvo.k === 'm' ? grupo : [alvo.id]);
+            if (dedicado()) {
+                const reais = [...ids].map(nodeById).filter(x => x && x.ref && x.t !== 'a');
+                if (reais.length) {
+                    if (ids.size > 1) return toast('Atividades e etapas do projeto são excluídas uma por vez, porque isso apaga de verdade.', 'warning');
+                    if (reais[0].t === 'p') return toast('O projeto não pode ser excluído por aqui.', 'warning');
+                    return reais[0].t === 'e' ? deletarEtapa(reais[0].ref) : deletarSessaoConfirm(reais[0].ref);
+                }
+            }
             if (ids.size > 1 && !confirm(`Remover ${ids.size} itens do mapa? (nada é apagado dos projetos)`)) return;
             d.nodes.forEach(k => { if (k.pai && ids.has(k.pai) && !ids.has(k.id)) { k.pai = null; k.w = TIPO[k.t].w; } });
             d.nodes = d.nodes.filter(n => !ids.has(n.id)); d.edges = d.edges.filter(e => !ids.has(e.a) && !ids.has(e.b));
@@ -771,6 +1202,10 @@
             [{ label: 'Criar projeto', cls: 'btn-p', action: `Flow.blocoProjeto('${b.id}')` }, { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }]);
     }
     async function blocoProjeto(id) {
+        try { await blocoProjetoInterno(id); }
+        catch (e) { console.error(e); toast('Erro ao salvar o projeto: ' + (e && e.message ? e.message : e), 'error'); }
+    }
+    async function blocoProjetoInterno(id) {
         if (!currentUserCanEdit) return toast('Você não tem permissão para criar projetos.', 'warning');
         const b = nodeById(id), nome = $('fl-pn')?.value.trim(), desc = $('fl-pd')?.value.trim() || '';
         if (!b) return; if (!nome) return toast('Informe o nome do projeto.', 'warning');
@@ -798,7 +1233,7 @@
         const ets = itens.filter(x => x.t === 'e').sort(ord);
         const sessaoDaEtapa = n => {
             if (n.pai && sessDe.has(n.pai)) return sessDe.get(n.pai);
-            const g = D().edges.find(e => (e.a === n.id && sessDe.has(e.b)) || (e.b === n.id && sessDe.has(e.a)));
+            const g = D().edges.find(e => { const a = nodeById(e.a), b = nodeById(e.b); return !(a && b && isDep(e, a, b)) && ((e.a === n.id && sessDe.has(e.b)) || (e.b === n.id && sessDe.has(e.a))); });
             return g ? sessDe.get(g.a === n.id ? g.b : g.a) : null;
         };
         let geral = null; const cont = {};
@@ -820,13 +1255,18 @@
                 if (FD_FEAT.multi) await sb.from('etapa_responsaveis').insert(r.data.map(e => ({ etapa_id: e.id, usuario_id: currentUser.id })));
             }
         }
-        if (FD_FEAT.cond) {
-            const novo = n => (n.t === 's' && sessDe.has(n.id) ? { t: 'sessao', id: sessDe.get(n.id) } : n.t === 'e' && etaDe.has(n.id) ? { t: 'etapa', id: etaDe.get(n.id) } : null);
-            const conds = [];
-            D().edges.forEach(e => {
-                const a = nodeById(e.a), b = nodeById(e.b); if (!a || !b || !isDep(e, a, b)) return;
-                const ia = novo(a), ib = novo(b);
-                if (ia && ib && !(ia.t === ib.t && ia.id === ib.id)) conds.push({ workspace_id: currentWorkspace.id, alvo_tipo: ib.t, alvo_id: ib.id, cond_tipo: ia.t, cond_id: ia.id, criado_por: currentUser.id });
+        const depEdges = D().edges.filter(e => { const a = nodeById(e.a), b = nodeById(e.b); return a && b && isDep(e, a, b); });
+        if (depEdges.length && !FD_FEAT.cond) toast('As dependências não foram copiadas: rode o SQL migracao_flow_condicoes.sql no Supabase.', 'warning');
+        if (FD_FEAT.cond && depEdges.length) {
+            const novoItem = n => (n.t === 's' && sessDe.has(n.id) ? { t: 'sessao', id: sessDe.get(n.id) } : n.t === 'e' && etaDe.has(n.id) ? { t: 'etapa', id: etaDe.get(n.id) } : null);
+            const vistos = new Set(), conds = [];
+            depEdges.forEach(e => {
+                const ia = novoItem(nodeById(e.a)), ib = novoItem(nodeById(e.b));
+                if (!ia || !ib || (ia.t === ib.t && ia.id === ib.id)) return;
+                const k = `${ib.t}:${ib.id}<${ia.t}:${ia.id}`, inv = `${ia.t}:${ia.id}<${ib.t}:${ib.id}`;
+                if (vistos.has(k) || vistos.has(inv)) return;
+                vistos.add(k);
+                conds.push({ workspace_id: currentWorkspace.id, alvo_tipo: ib.t, alvo_id: ib.id, cond_tipo: ia.t, cond_id: ia.id, criado_por: currentUser.id });
             });
             if (conds.length) { const r = await sb.from('condicoes').insert(conds); if (r.error) falha = r.error; }
         }
@@ -838,5 +1278,5 @@
         if (falha) toast('Projeto criado, mas parte do conteúdo falhou: ' + falha.message, 'warning'); else toast(`Projeto "${nome}" criado a partir do bloco! 🎉`);
     }
 
-    window.Flow = { abrir, trocar, recarregar, novo, filho, cor, remover, zoom, ajustar, modalMapa, salvarMapa, excluirMapa, modalImportar, marcar, importar, modalBloco, blocoProjeto, alternarDep, mao, painel, foco, status, addAoMapa, abrirNoProjetos, editarReal };
+    window.Flow = { abrir, trocar, recarregar, novo, filho, cor, remover, zoom, ajustar, modalMapa, salvarMapa, excluirMapa, modalImportar, marcar, importar, modalBloco, blocoProjeto, alternarDep, irProjeto, mao, aba, projAnx, enviar, desanexar, painel, foco, status, addAoMapa, abrirNoProjetos, editarReal };
 })();

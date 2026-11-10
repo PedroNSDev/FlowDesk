@@ -138,7 +138,7 @@ const DASHBOARD_ESTILO = `.dash-head{display:flex;justify-content:space-between;
 .dash-line-box{position:relative;flex:1;min-height:200px}
 .dash-line-svg{position:absolute;left:0;top:0;display:block}
 .dash-nota{display:block;margin-top:6px;flex-shrink:0;color:var(--muted)}
-.dash-filtros{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .dash-filtros{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .dash-cat{display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .dash-cat-top{width:auto;padding:6px 30px 6px 12px;font-size:.82rem;font-weight:600;border-radius:9px;text-transform:none;letter-spacing:0;color:var(--text)}
 .dash-cat-sel{width:auto;max-width:60%;padding:4px 24px 4px 9px;border:1px solid var(--border);border-radius:8px;background:#fff;font:600 .72rem var(--font);color:var(--text);text-transform:none;letter-spacing:0;cursor:pointer}
