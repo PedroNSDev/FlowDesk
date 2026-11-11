@@ -142,6 +142,13 @@
         .fl-panel .fp-sec{margin:12px 0 6px}
         .fl-panel .fp-t{font-size:.95rem}
         .fl-panel .fp-acts{margin:8px 0}
+        .fl-n.arrastando{opacity:.72;z-index:30;box-shadow:0 8px 24px rgba(15,23,42,.25)}
+        .fl-ghost{position:absolute;box-sizing:border-box;border:2px dashed #3b82f6;border-radius:10px;background:rgba(59,130,246,.08);pointer-events:none;z-index:5}
+        .fl-ctx{position:fixed;z-index:1300;min-width:176px;background:#fff;border:1px solid #d1d5db;border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.18);padding:4px;font:500 .82rem var(--font);user-select:none;-webkit-user-select:none}
+        .fl-ctx button{display:flex;align-items:center;gap:10px;width:100%;border:none;background:none;padding:7px 12px;border-radius:5px;cursor:pointer;color:var(--text);font:inherit;text-align:left}
+        .fl-ctx button:hover{background:var(--acc-lt);color:var(--acc)}
+        .fl-ctx hr{border:none;border-top:1px solid var(--border);margin:4px 2px}
+        .fl-ctx .ic{width:16px;text-align:center}
         .fl-add{position:absolute;right:10px;top:9px;border:1px solid var(--c);background:var(--surface);color:var(--c);border-radius:20px;padding:1px 9px;font:700 .68rem var(--font);cursor:pointer}
         .fl-add:hover{background:var(--c);color:#fff}
         .fl-hd .fl-row{padding-right:74px}
@@ -189,6 +196,7 @@
         view.addEventListener('pointerdown', onDown);
         view.addEventListener('mousedown', ev => { if (!ev.target.closest('[contenteditable=true]')) ev.preventDefault(); });
         view.addEventListener('dblclick', onDbl);
+        view.addEventListener('contextmenu', abreMenu);
         view.addEventListener('click', onClick);
         view.addEventListener('wheel', ev => {
             if (!D()) return; ev.preventDefault();
@@ -470,27 +478,11 @@
         return { x: n.x, y: n.y, w: n.w, h: n.t === 's' || n.t === 'b' || ((n.t === 'a' || n.t === 'n') && n.h) ? (n.h || 60) : Math.max(40, el ? el.offsetHeight : 44) };
     }
     const sobrepoe = (a, b) => a.x < b.x + b.w + GAPC && a.x + a.w + GAPC > b.x && a.y < b.y + b.h + GAPC && a.y + a.h + GAPC > b.y;
-    function deslizar(rects, obst, dx, dy) {
-        const O = obst.map(o => { const b = caixa(o); return { x: b.x - GAPC, y: b.y - GAPC, w: b.w + 2 * GAPC, h: b.h + 2 * GAPC }; });
-        let ax = dx, ay = dy;
-        rects.forEach(m => O.forEach(o => {
-            if (!(m.y < o.y + o.h && m.y + m.h > o.y)) return;
-            if (dx > 0 && o.x >= m.x + m.w) ax = Math.min(ax, o.x - (m.x + m.w));
-            else if (dx < 0 && o.x + o.w <= m.x) ax = Math.max(ax, o.x + o.w - m.x);
-        }));
-        rects.forEach(m => O.forEach(o => {
-            const mx = m.x + ax;
-            if (!(mx < o.x + o.w && mx + m.w > o.x)) return;
-            if (dy > 0 && o.y >= m.y + m.h) ay = Math.min(ay, o.y - (m.y + m.h));
-            else if (dy < 0 && o.y + o.h <= m.y) ay = Math.max(ay, o.y + o.h - m.y);
-        }));
-        return { dx: ax, dy: ay };
-    }
-    function afastar(membros, todos, obst) {
+    function simular(membros, obst) {
+        const rs = membros.map(m => ({ ...caixa(m) })); let tx = 0, ty = 0;
         for (let it = 0; it < 80; it++) {
             let mv = null;
-            for (const m of membros) {
-                const a = caixa(m);
+            for (const a of rs) {
                 for (const o of obst) {
                     const b = caixa(o); if (!sobrepoe(a, b)) continue;
                     const c = [[b.x + b.w + GAPC - a.x, 0], [-(a.x + a.w + GAPC - b.x), 0], [0, b.y + b.h + GAPC - a.y], [0, -(a.y + a.h + GAPC - b.y)]];
@@ -498,10 +490,22 @@
                 }
                 if (mv) break;
             }
-            if (!mv) return it > 0;
-            todos.forEach(t => { t.x = Math.round(t.x + mv[0]); t.y = Math.round(t.y + mv[1]); });
+            if (!mv) return it > 0 ? { dx: tx, dy: ty, rs } : null;
+            rs.forEach(r => { r.x += mv[0]; r.y += mv[1]; }); tx += mv[0]; ty += mv[1];
         }
+        return { dx: tx, dy: ty, rs };
+    }
+    function afastar(membros, todos, obst) {
+        const r = simular(membros, obst); if (!r) return false;
+        todos.forEach(t => { t.x = Math.round(t.x + r.dx); t.y = Math.round(t.y + r.dy); });
         return true;
+    }
+    function mostraFantasma(r) {
+        let g = layN.querySelector('.fl-ghost');
+        if (!r) { if (g) g.remove(); return; }
+        const x1 = Math.min(...r.rs.map(a => a.x)), y1 = Math.min(...r.rs.map(a => a.y)), x2 = Math.max(...r.rs.map(a => a.x + a.w)), y2 = Math.max(...r.rs.map(a => a.y + a.h));
+        if (!g) { g = document.createElement('div'); g.className = 'fl-ghost'; layN.appendChild(g); }
+        g.style.cssText = `left:${x1}px;top:${y1}px;width:${x2 - x1}px;height:${y2 - y1}px`;
     }
     function normalizar() {
         const fixos = []; let mudou = false;
@@ -648,6 +652,7 @@
         if (error) { toast('Erro ao carregar os arquivos: ' + error.message, 'error'); arqCache[pid] = []; }
         else { arqCache[pid] = (data || []).filter(anxVisivel); arqCache[pid].forEach(f => anxReg.set(f.id, f)); }
         if (pn.aberto && pn.aba === 'anx') desenhaPainel();
+        if (axPos) axLista();
     }
     function projAnxId() {
         if (dedicado()) return atual.projeto_id;
@@ -835,6 +840,72 @@
         const p = k === 'p' ? R.P.get(id) : R.S.get(id)?.p;
         if (p) irProj(p.id); else toast('Item não encontrado (foi excluído?).', 'warning');
     }
+    let axPos = null, axPid = null;
+    function fechaMenu() { const m = $('fl-ctx'); if (m) m.remove(); }
+    function editarNo(n) {
+        if (!currentUserCanEdit) return toast('Você não tem permissão para editar.', 'warning');
+        if (n.t === 'p') return editarProjeto(n.ref);
+        if (n.t === 'e') return editarEtapa(n.ref);
+        const o = refs().S.get(n.ref);
+        if (o) editarSessao(n.ref, o.p.id); else toast('Atividade não encontrada.', 'warning');
+    }
+    function abreMenu(ev) {
+        if (!D()) return;
+        ev.preventDefault(); fechaMenu();
+        const nEl = ev.target.closest('.fl-n'), n = nEl ? nodeById(nEl.dataset.id) : null, p = toWorld(ev.clientX, ev.clientY);
+        const pos = { x: Math.round(p.x), y: Math.round(p.y) };
+        if (n && !(sel && ((sel.k === 'n' && sel.id === n.id) || (sel.k === 'm' && grupo.has(n.id))))) { sel = { k: 'n', id: n.id }; markSel(); }
+        const novaEtapa = () => {
+            if (n && n.t === 's') { if (n.fechada) n.fechada = false; sel = { k: 'n', id: n.id }; return novo('e', { pai: n.id, o: 1e9, w: n.w - 24 }); }
+            novo('e', pos);
+        };
+        const real = !!n && !!n.ref && ['p', 's', 'e'].includes(n.t);
+        const itens = [['＋', 'Etapa', novaEtapa], ['＋', 'Atividade', () => novo('s', pos)], ['＋', 'Anexo', () => modalAnexo(pos)]];
+        if (n) {
+            itens.push(null, ['✏️', 'Renomear', () => setTimeout(() => { sel = { k: 'n', id: n.id }; markSel(); editar(n.id); }, 0)]);
+            if (real) itens.push(['🛠', 'Editar', () => editarNo(n)]);
+        }
+        const m = document.createElement('div'); m.id = 'fl-ctx'; m.className = 'fl-ctx';
+        itens.forEach(it => {
+            if (!it) { m.appendChild(document.createElement('hr')); return; }
+            const b = document.createElement('button'); b.type = 'button'; b.innerHTML = `<span class="ic">${it[0]}</span><span>${it[1]}</span>`;
+            b.addEventListener('click', () => { fechaMenu(); it[2](); });
+            m.appendChild(b);
+        });
+        document.body.appendChild(m);
+        const r = m.getBoundingClientRect();
+        m.style.left = Math.max(4, Math.min(ev.clientX, window.innerWidth - r.width - 8)) + 'px';
+        m.style.top = Math.max(4, Math.min(ev.clientY, window.innerHeight - r.height - 8)) + 'px';
+        const fora = e => { if (e.target && e.target.closest && e.target.closest('#fl-ctx')) return; fechaMenu(); document.removeEventListener('pointerdown', fora, true); };
+        document.addEventListener('pointerdown', fora, true);
+    }
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape') fechaMenu(); });
+    function modalAnexo(p) {
+        const ps = wsProjetos || [];
+        if (!ps.length) return toast('Não há projetos neste workspace.', 'warning');
+        axPos = { x: Math.round(p.x), y: Math.round(p.y) }; axPid = projAnxId();
+        const topo = dedicado()
+            ? `<div class="fp-t">📁 ${escH((ps.find(x => x.id === axPid) || {}).nome || '')}</div>`
+            : `<div class="fg"><label class="fl">Projeto</label><select class="fsel" onchange="Flow.axProj(+this.value)">${ps.slice().sort(ordCmp).map(x => `<option value="${x.id}" ${x.id === axPid ? 'selected' : ''}>${escH(x.nome)}</option>`).join('')}</select></div>`;
+        abrirModal('📎 Adicionar anexo ao mapa', `${topo}<div id="fl-ax-l" class="anx-picker"></div><div class="anx-acts"><label class="btn btn-s btn-sm" style="cursor:pointer">⬆️ Enviar novo<input type="file" multiple style="display:none" onchange="Flow.axEnviar(this)"></label></div>`, [{ label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }]);
+        axLista();
+    }
+    function axLista() {
+        const el = $('fl-ax-l'); if (!el) return;
+        const arqs = arqCache[axPid];
+        if (!arqs) { carregarArqs(axPid); el.innerHTML = '<div class="row-empty">Carregando…</div>'; return; }
+        el.innerHTML = arqs.length
+            ? arqs.map(f => `<div class="anx-item" role="button" tabindex="0" onclick="Flow.axEscolher(${f.id})"><span>${fileIcon(f.nome)}</span><span class="n">${escH(f.nome)}</span><small class="muted">${fmtBytes(f.tamanho)}</small></div>`).join('')
+            : '<div class="row-empty">Este projeto ainda não tem arquivos. Use “Enviar novo”.</div>';
+    }
+    function axProj(id) { axPid = id; axLista(); }
+    function axEscolher(id) { fecharModal(); if (axPos) novoArquivo(id, axPos.x, axPos.y); axPos = null; }
+    async function axEnviar(input) {
+        const files = [...(input.files || [])]; if (!files.length || !axPid || !axPos) return;
+        const ids = await enviarArquivos(files, axPid); input.value = '';
+        fecharModal(); const pos = axPos; axPos = null;
+        ids.forEach((id, i) => novoArquivo(id, pos.x + i * 24, pos.y + i * 24));
+    }
     function editarReal() {
         const n = selNode(), f = n && n.ref && n.t !== 'a' ? { k: n.t, id: n.ref } : pn.foco;
         if (!f) return toast('Selecione um item do mapa que venha de um projeto.', 'warning');
@@ -863,6 +934,7 @@
     function onDown(ev) {
         if (!D()) return;
         if (ev.button === 1) { ev.preventDefault(); return startPan(ev); }
+        if (ev.button === 2) return;
         if (ev.pointerType === 'mouse' && ev.button !== 0) return;
         if (editing) { if (ev.target.closest('[contenteditable=true]')) return; document.activeElement.blur(); }
         if (ev.target.closest('.fl-pj')) return;
@@ -909,20 +981,22 @@
     function startDragGrupo(ev, n) {
         const todos = new Map(), add = g => todos.set(g.id, g);
         grupo.forEach(id => { const g = nodeById(id); if (!g) return; add(g); if (g.t === 'b') dentro(g).forEach(add); if (g.t === 's') kids(g).forEach(add); });
-        const lista = [...todos.values()], ids = new Set(todos.keys()), orig = lista.map(g => [g, g.x, g.y]), tops = () => lista.filter(ehTopo);
-        let mexeu = false, solto = false, cx = 0, cy = 0;
+        const lista = [...todos.values()], ids = new Set(todos.keys()), orig = lista.map(g => [g, g.x, g.y]), tops = () => lista.filter(ehTopo), outros = () => topos().filter(o => !ids.has(o.id));
+        let mexeu = false, solto = false;
         dragAtivo = true;
         track(ev, (dx, dy) => {
             const z = D().view.z; if (Math.abs(dx) + Math.abs(dy) > 3) mexeu = true; if (!mexeu) return;
             if (!solto) { solto = true; if (!dedicado()) grupo.forEach(id => { const g = nodeById(id); if (g && g.pai && !todos.has(g.pai)) desprende(g); }); }
-            const r = deslizar(tops().map(caixa), topos().filter(o => !ids.has(o.id)), dx / z - cx, dy / z - cy);
-            cx += r.dx; cy += r.dy;
-            orig.forEach(([g, x, y]) => { g.x = Math.round(x + cx); g.y = Math.round(y + cy); const el = elOf(g.id); if (el) { el.style.left = g.x + 'px'; el.style.top = g.y + 'px'; } });
+            orig.forEach(([g, x, y]) => {
+                g.x = Math.round(x + dx / z); g.y = Math.round(y + dy / z);
+                const el = elOf(g.id); if (el) { el.style.left = g.x + 'px'; el.style.top = g.y + 'px'; el.classList.add('arrastando'); }
+            });
             drawEdges();
+            mostraFantasma(simular(tops(), outros()));
         }, () => {
-            dragAtivo = false;
+            dragAtivo = false; mostraFantasma(null);
             if (!mexeu) return setSelIds([n.id]);
-            afastar(tops(), lista, topos().filter(o => !ids.has(o.id)));
+            afastar(tops(), lista, outros());
             salvar(); if (dedicado()) atualizar(); else render();
         });
     }
@@ -932,22 +1006,23 @@
     }
     function startDrag(ev, n, titulo) {
         const todos = (n.t === 'b' ? dentro(n) : n.t === 's' ? kids(n) : []).concat(n), ids = new Set(todos.map(g => g.id));
-        const orig = todos.map(g => [g, g.x, g.y]), tops = () => todos.filter(ehTopo);
-        const obst = () => topos().filter(o => !ids.has(o.id) && !(n.t === 'e' && o.t === 's'));
-        let mexeu = false, solto = false, alvo = null, cx = 0, cy = 0;
+        const orig = todos.map(g => [g, g.x, g.y]), tops = () => todos.filter(ehTopo), outros = () => topos().filter(o => !ids.has(o.id));
+        let mexeu = false, solto = false, alvo = null;
         dragAtivo = true;
         track(ev, (dx, dy, e) => {
             const z = D().view.z; if (Math.abs(dx) + Math.abs(dy) > 3) mexeu = true; if (!mexeu) return;
             if (n.pai && !solto) { solto = true; desprende(n); }
-            const r = deslizar(tops().map(caixa), obst(), dx / z - cx, dy / z - cy);
-            cx += r.dx; cy += r.dy;
-            orig.forEach(([g, x, y]) => { g.x = Math.round(x + cx); g.y = Math.round(y + cy); const el = elOf(g.id); if (el) { el.style.left = g.x + 'px'; el.style.top = g.y + 'px'; } });
+            orig.forEach(([g, x, y]) => {
+                g.x = Math.round(x + dx / z); g.y = Math.round(y + dy / z);
+                const el = elOf(g.id); if (el) { el.style.left = g.x + 'px'; el.style.top = g.y + 'px'; el.classList.add('arrastando'); }
+            });
             drawEdges();
             if (n.t === 'e') { alvo = alvoSnap(n, toWorld(e.clientX, e.clientY)); mostraSnap(alvo); }
+            mostraFantasma(alvo ? null : simular(tops(), outros()));
         }, () => {
-            dragAtivo = false; mostraSnap(null);
+            dragAtivo = false; mostraSnap(null); mostraFantasma(null);
             if (!mexeu) { if (titulo) editar(n.id); return; }
-            const livre = () => afastar(tops(), todos, topos().filter(o => !ids.has(o.id)));
+            const livre = () => afastar(tops(), todos, outros());
             if (n.t === 'e' && n.ref && mexeu && dedicado()) { if (!alvo) livre(); moverReal(n, alvo); return; }
             if (n.t === 'e' && alvo && mexeu) { n.pai = alvo.a.id; n.o = alvo.idx - .5; render(); salvar(); return; }
             if (mexeu) { livre(); salvar(); render(); }
@@ -971,14 +1046,10 @@
             tmp.remove();
             const t = document.elementFromPoint(e.clientX, e.clientY)?.closest('.fl-n'), m = t && nodeById(t.dataset.id);
             if (!m || m.id === n.id || m.t === 'b') return;
-            if ((n.t === 'a') !== (m.t === 'a')) return agregar(n.t === 'a' ? n : m, n.t === 'a' ? m : n);
-            if (!D().edges.some(x => x.a === n.id && x.b === m.id)) { const id = uid(); D().edges.push({ id, a: n.id, b: m.id }); sel = { k: 'g', id }; salvar(); markSel(); }
+            const ligado = D().edges.some(x => (x.a === n.id && x.b === m.id) || (x.a === m.id && x.b === n.id));
+            if (!ligado) { const id = uid(); D().edges.push({ id, a: n.id, b: m.id }); sel = { k: 'g', id }; salvar(); markSel(); }
+            if ((n.t === 'a') !== (m.t === 'a')) anexar(n.t === 'a' ? m : n, [(n.t === 'a' ? n : m).ref]);
         });
-    }
-    async function agregar(arq, alvo) {
-        if (!(await anexar(alvo, [arq.ref]))) return;
-        const d = D(); d.nodes = d.nodes.filter(x => x.id !== arq.id); d.edges = d.edges.filter(e => e.a !== arq.id && e.b !== arq.id);
-        sel = null; salvar(); render(); if (pn.aberto) desenhaPainel();
     }
     function onClick(ev) {
         const b = ev.target.closest('[data-act="proj"]'); if (!b) return;
@@ -1278,5 +1349,5 @@
         if (falha) toast('Projeto criado, mas parte do conteúdo falhou: ' + falha.message, 'warning'); else toast(`Projeto "${nome}" criado a partir do bloco! 🎉`);
     }
 
-    window.Flow = { abrir, trocar, recarregar, novo, filho, cor, remover, zoom, ajustar, modalMapa, salvarMapa, excluirMapa, modalImportar, marcar, importar, modalBloco, blocoProjeto, alternarDep, irProjeto, mao, aba, projAnx, enviar, desanexar, painel, foco, status, addAoMapa, abrirNoProjetos, editarReal };
+    window.Flow = { abrir, trocar, recarregar, novo, filho, cor, remover, zoom, ajustar, modalMapa, salvarMapa, excluirMapa, modalImportar, marcar, importar, modalBloco, blocoProjeto, alternarDep, irProjeto, mao, aba, projAnx, enviar, desanexar, painel, foco, status, addAoMapa, abrirNoProjetos, editarReal, axProj, axEscolher, axEnviar };
 })();

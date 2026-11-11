@@ -760,6 +760,9 @@
         .kb-card{gap:8px;padding:12px;border-radius:12px}
         .kb-card.t-late{background:#fef2f2;border-color:#fecaca}
         .kb-st{padding:5px 8px;font-size:.74rem;border-radius:8px}
+        .imp-it{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;font-size:.84rem}
+        .imp-it b{overflow-wrap:anywhere}
+        .imp-it span{color:var(--muted);font-size:.76rem;white-space:nowrap}
     </style>
 </head>
 <body>
@@ -823,6 +826,8 @@
             <div class="ph" style="align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
                 <div><div class="pt" id="proj-title">Projetos</div><div class="ps" id="proj-sub">Visão geral dos projetos do workspace</div></div>
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <button id="btn-exportar-proj" class="btn btn-s hidden" onclick="exportarContexto()" title="Baixa os projetos desta tela em um arquivo .json">⬇️ Exportar</button>
+                    <button id="btn-importar-proj" class="btn btn-s hidden" onclick="abrirModalImportar()" title="Cria projetos a partir de um arquivo exportado">⬆️ Importar</button>
                     <button id="btn-nova-pasta-proj" class="btn btn-s hidden" onclick="abrirModalNovaPastaProjeto()">📁 Nova Pasta</button>
                     <button id="btn-novo-proj" class="btn btn-p hidden" onclick="abrirModalProjeto()">+ Novo Projeto</button>
                 </div>
@@ -1316,6 +1321,8 @@ function renderProjetosView() {
     const pastaSelecionada = wsPastasProjetos.find(item => String(item.id) === pastaIdSelecionada);
     g('proj-sub').textContent = p ? (p.descricao || 'Sem descrição') : pastaSelecionada ? `Projetos na pasta ${pastaSelecionada.nome}` : selectedPastaProjeto === 'none' ? 'Projetos sem pasta' : 'Organize e acesse os projetos pelas pastas';
     g('btn-nova-pasta-proj').classList.toggle('hidden', !(currentUserCanEdit && !p && selectedPastaProjeto === 'folders'));
+    g('btn-exportar-proj').classList.toggle('hidden', !!p || !projetosDoContexto().length);
+    g('btn-importar-proj').classList.toggle('hidden', !(currentUserCanEdit && !p));
     c.innerHTML = projToolbar() + (p ? renderProjDetail(p) : renderProjOverview());
 }
 
@@ -1524,7 +1531,8 @@ function renderProjDetail(p) {
         <div class="pd-acts">
             ${currentUserCanEdit ? `<button class="btn btn-s btn-sm" onclick="editarProjeto(${p.id})">✏️ Editar</button><button class="btn btn-s btn-sm" title="Cria uma etapa; escolha uma atividade ou deixe sem atividade" onclick="abrirModalEtapa(${p.id},null)">+ Etapa</button><button class="btn btn-p btn-sm" onclick="abrirModalSessao(${p.id})">+ Atividade</button>` : ''}
             <button class="btn btn-s btn-sm" onclick="irParaAnexosProjeto(${p.id})">🔗 Anexos</button>
-            <button class="btn btn-s btn-sm" onclick="abrirFlowProjeto(${p.id})" title="Abrir este projeto no Flow para editá-lo visualmente">Flow</button>
+            <button class="btn btn-s btn-sm" onclick="exportarProjetos([${p.id}])" title="Baixa este projeto em um arquivo .json que pode ser importado depois">⬇️ Exportar</button>
+            <button class="btn btn-s btn-sm" onclick="abrirFlowProjeto(${p.id})" title="Abrir este projeto no Flow para editá-lo visualmente">🧠 Flow</button>
         </div></div>`;
     if (!(p.sessoes||[]).length && !(p.soltas||[]).length) return head + `<div class="empty-state"><div class="ei">🗂</div><h3>Nada por aqui ainda</h3><p>Crie uma atividade para organizar as etapas deste projeto</p></div>`;
     return head + (projetosViewMode === 'board' ? renderBoard(p) : renderListView(p));
@@ -1646,12 +1654,14 @@ function etapasFlatSelect() {
     return 'id, nome, status, prazo, prioridade, responsavel_id' + (FD_FEAT.multi ? ', etapa_responsaveis(usuario_id)' : '')
         + ', sessoes!inner(id, nome, projeto_id, projetos!inner(id, nome, workspace_id))';
 }
+// Versão que inclui etapas soltas (filtrar por flatWsCol()); usada em Progresso e no popup de contribuidores
 function etapasFlatSelectWs() {
     return FD_FEAT.orf
         ? etapasFlatSelect().replace(/, sessoes!inner\(.*$/, '') + ', sessao_id, projeto_id, sessoes(id, nome, projeto_id), projetos!inner(id, nome, workspace_id)'
         : etapasFlatSelect();
 }
 const flatWsCol = () => FD_FEAT.orf ? 'projetos.workspace_id' : 'sessoes.projetos.workspace_id';
+// Etapa solta recebe uma atividade fictícia "Sem atividade" para não quebrar quem lê e.sessoes
 function flatNorm(lista) {
     return (lista || []).map(e => {
         const pr = e.projetos || e.sessoes?.projetos || null;
@@ -2197,6 +2207,269 @@ function upDrop(ev) {
 
 function verUsuario(uid) { return verContribuidor(uid); }
 
+const FD_EXPORT_FORMATO = 'flowdesk-projetos';
+let impSt = null, impBusy = false;
+
+const slugArquivo = t => String(t || 'projeto').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase().slice(0, 50) || 'projeto';
+const unameDe = id => wsMembers.find(u => u.id === id)?.username || null;
+const projetosDoContexto = () => selectedPastaProjeto === 'folders' ? [...wsProjetos] : projetosVisiveis(false);
+
+function projetoParaExport(p) {
+    const refs = new Map();
+    let n = 0;
+    (p.sessoes || []).forEach(sess => refs.set('sessao:' + sess.id, 'a' + (++n)));
+    todasEtapas(p).forEach(e => refs.set('etapa:' + e.id, 'e' + (++n)));
+    const conds = (tipo, id) => condDe(tipo, id).map(c => refs.get(c.cond_tipo + ':' + c.cond_id)).filter(Boolean);
+    const etapaOut = e => ({
+        ref: refs.get('etapa:' + e.id), nome: e.nome, descricao: e.descricao || '', status: e.status,
+        prioridade: e.prioridade || 0, prazo: e.prazo || null,
+        responsaveis: etapaRespIds(e).map(unameDe).filter(Boolean), condicoes: conds('etapa', e.id)
+    });
+    const pasta = p.pasta_id ? pastaById(p.pasta_id) : null;
+    return {
+        nome: p.nome, descricao: p.descricao || '',
+        pasta: pasta ? { nome: pasta.nome, categoria: pasta.categoria || null } : null,
+        membros: [...new Set((p.projeto_usuarios || []).map(x => unameDe(x.usuario_id)).filter(Boolean))],
+        atividades: (p.sessoes || []).map(sess => ({
+            ref: refs.get('sessao:' + sess.id), nome: sess.nome, descricao: sess.descricao || '',
+            colaboradores: (sess.sessao_usuarios || []).map(x => unameDe(x.usuario_id)).filter(Boolean),
+            condicoes: conds('sessao', sess.id), etapas: (sess.etapas || []).map(etapaOut)
+        })),
+        etapas_soltas: (p.soltas || []).map(etapaOut)
+    };
+}
+
+function exportarProjetos(ids) {
+    const lista = ids.map(id => wsProjetos.find(p => p.id === id)).filter(Boolean);
+    if (!lista.length) { toast('Nenhum projeto para exportar.', 'warning'); return; }
+    const pacote = { formato: FD_EXPORT_FORMATO, versao: 1, exportado_em: new Date().toISOString(), workspace: currentWorkspace.nome, projetos: lista.map(projetoParaExport) };
+    const blob = new Blob([JSON.stringify(pacote, null, 2)], { type: 'application/json;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = lista.length === 1 ? `projeto-${slugArquivo(lista[0].nome)}.json` : `projetos-${slugArquivo(currentWorkspace.codigo)}-${dataLocalHojeISO()}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    addLog('download', 'projeto', lista.length === 1 ? lista[0].id : null, { nome: lista.length === 1 ? lista[0].nome : `${lista.length} projetos exportados` });
+    toast(lista.length === 1 ? `Projeto "${lista[0].nome}" exportado. ⬇️` : `${lista.length} projetos exportados. ⬇️`);
+}
+function exportarContexto() { exportarProjetos(projetosDoContexto().map(p => p.id)); }
+
+const impTxt = (v, max) => typeof v === 'string' ? v.trim().slice(0, max) : '';
+const impArr = v => Array.isArray(v) ? v : [];
+const impUsers = v => impArr(v).map(u => impTxt(u, 80).toLowerCase()).filter(Boolean);
+function impNormEtapa(e) {
+    if (!e || typeof e !== 'object') return null;
+    const nome = impTxt(e.nome, 200); if (!nome) return null;
+    return {
+        ref: impTxt(e.ref, 30), nome, descricao: impTxt(e.descricao, 2000),
+        status: STATUS.includes(e.status) ? e.status : 'Não iniciado',
+        prioridade: Math.min(4, Math.max(0, parseInt(e.prioridade, 10) || 0)),
+        prazo: /^\d{4}-\d{2}-\d{2}$/.test(e.prazo || '') ? e.prazo : null,
+        responsaveis: impUsers(e.responsaveis), condicoes: impArr(e.condicoes).map(r => impTxt(r, 30)).filter(Boolean)
+    };
+}
+function impNormalizar(pacote) {
+    if (!pacote || pacote.formato !== FD_EXPORT_FORMATO || !Array.isArray(pacote.projetos)) throw new Error('Arquivo inválido: não é uma exportação de projetos do FlowDesk.');
+    const projetos = pacote.projetos.slice(0, 100).map(p => {
+        const nome = impTxt(p?.nome, 200); if (!nome) return null;
+        const pastaNome = impTxt(p.pasta?.nome, 120);
+        return {
+            nome, descricao: impTxt(p.descricao, 4000),
+            pasta: pastaNome ? { nome: pastaNome, categoria: impTxt(p.pasta.categoria, 40) || null } : null,
+            membros: impUsers(p.membros),
+            atividades: impArr(p.atividades).map(a => {
+                const an = impTxt(a?.nome, 200); if (!an) return null;
+                return { ref: impTxt(a.ref, 30), nome: an, descricao: impTxt(a.descricao, 2000), colaboradores: impUsers(a.colaboradores),
+                    condicoes: impArr(a.condicoes).map(r => impTxt(r, 30)).filter(Boolean), etapas: impArr(a.etapas).map(impNormEtapa).filter(Boolean) };
+            }).filter(Boolean),
+            etapas_soltas: impArr(p.etapas_soltas).map(impNormEtapa).filter(Boolean)
+        };
+    }).filter(Boolean);
+    if (!projetos.length) throw new Error('O arquivo não contém projetos.');
+    const total = projetos.reduce((n, p) => n + p.atividades.reduce((m, a) => m + a.etapas.length, 0) + p.etapas_soltas.length, 0);
+    if (total > 5000) throw new Error('O arquivo tem etapas demais (máximo de 5000 por importação).');
+    return projetos;
+}
+
+function abrirModalImportar() {
+    if (!currentUserCanEdit) return;
+    impSt = null;
+    const pastaSel = selectedPastaProjeto.startsWith('folder:') ? selectedPastaProjeto.slice('folder:'.length) : '__arquivo__';
+    abrirModal('⬆️ Importar projetos', `
+        <div class="dz" id="imp-dz" onclick="document.getElementById('imp-file').click()"
+            ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="impDrop(event)">
+            <div class="dz-ic">📥</div>
+            <div><b>Arraste o arquivo exportado aqui</b></div>
+            <div style="margin-top:2px">ou <span class="dz-link">clique para escolher</span> (.json)</div>
+            <input id="imp-file" type="file" accept=".json,application/json" hidden onclick="event.stopPropagation()" onchange="impLer(this.files[0]);this.value=''"/>
+        </div>
+        <div id="imp-prev"></div>
+        <div id="imp-opts" class="hidden">
+            <div class="fg" style="margin-top:12px"><label class="fl" for="imp-dest">Pasta de destino</label>
+                <select id="imp-dest" class="fsel">
+                    <option value="__arquivo__" ${pastaSel === '__arquivo__' ? 'selected' : ''}>Usar a pasta do arquivo (cria se não existir)</option>
+                    <option value="">Sem pasta</option>
+                    ${wsPastasProjetos.map(pasta => `<option value="${pasta.id}" ${String(pasta.id) === pastaSel ? 'selected' : ''}>${escH(pasta.nome)}</option>`).join('')}
+                </select></div>
+            <label class="int-chk"><input type="checkbox" id="imp-modelo"/><span><b>Importar como modelo</b><small>Todas as etapas voltam para "Não iniciado" e os prazos são removidos.</small></span></label>
+            <p class="fhint">Responsáveis e colaboradores são ligados pelo @usuário; quem não existir neste workspace é ignorado. Anexos não fazem parte da exportação.</p>
+        </div>
+    `, [
+        { label: '⬆️ Importar', cls: 'btn-p', action: 'executarImportacao()' },
+        { label: 'Cancelar', cls: 'btn-s', action: 'fecharModal()' }
+    ]);
+}
+function impDrop(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.remove('over');
+    impLer(Array.from(ev.dataTransfer.files || [])[0]);
+}
+function impLer(file) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast('Arquivo muito grande (máximo de 5 MB).', 'warning'); return; }
+    const leitor = new FileReader();
+    leitor.onload = () => {
+        try { impSt = { dados: impNormalizar(JSON.parse(leitor.result)), arquivo: file.name }; }
+        catch (e) { impSt = null; impPreview(e instanceof SyntaxError ? 'O arquivo não é um JSON válido.' : e.message); return; }
+        impPreview();
+    };
+    leitor.onerror = () => { impSt = null; impPreview('Não foi possível ler o arquivo.'); };
+    leitor.readAsText(file);
+}
+function impPreview(erro) {
+    const prev = document.getElementById('imp-prev'), opts = document.getElementById('imp-opts');
+    if (!prev || !opts) return;
+    if (erro || !impSt) { prev.innerHTML = `<div class="n-hint" style="margin-top:12px">⚠ ${escH(erro || 'Arquivo inválido.')}</div>`; opts.classList.add('hidden'); return; }
+    const cont = p => ({ a: p.atividades.length, e: p.atividades.reduce((n, a) => n + a.etapas.length, 0) + p.etapas_soltas.length });
+    prev.innerHTML = `<div class="cpop-sec" style="margin-top:14px">${escH(impSt.arquivo)} · ${impSt.dados.length} ${impSt.dados.length === 1 ? 'projeto' : 'projetos'}</div>`
+        + impSt.dados.map(p => { const c = cont(p); return `<div class="imp-it"><b>${escH(p.nome)}</b><span>${c.a} ${c.a === 1 ? 'atividade' : 'atividades'} · ${c.e} ${c.e === 1 ? 'etapa' : 'etapas'}</span></div>`; }).join('');
+    opts.classList.remove('hidden');
+}
+
+function impNomeUnico(base, usados) {
+    let nome = base, i = 1;
+    while (usados.has(nome.toLowerCase())) { nome = i === 1 ? `${base} (importado)` : `${base} (importado ${i})`; i++; }
+    usados.add(nome.toLowerCase());
+    return nome;
+}
+async function impInserir(tabela, linhas, retorna) {
+    const saida = [];
+    for (let i = 0; i < linhas.length; i += 200) {
+        const q = sb.from(tabela).insert(linhas.slice(i, i + 200));
+        const { data, error } = retorna ? await q.select('id') : await q;
+        if (error) throw new Error(`${tabela}: ${error.message}`);
+        if (retorna) saida.push(...(data || []));
+    }
+    if (retorna && saida.length !== linhas.length) throw new Error(`${tabela}: o banco não devolveu todos os ids.`);
+    return saida;
+}
+async function impPasta(info) {
+    const existente = wsPastasProjetos.find(p => p.nome.toLowerCase() === info.nome.toLowerCase());
+    if (existente) return existente.id;
+    const novo = { workspace_id: currentWorkspace.id, nome: info.nome };
+    if (FD_FEAT.pasta) { novo.categoria = info.categoria; novo.ordem = proxOrdem(wsPastasProjetos); }
+    const { data, error } = await sb.from('pastas_projetos').insert(novo).select(FD_FEAT.pasta ? 'id, nome, categoria, ordem' : 'id, nome').single();
+    if (error) throw new Error('pasta: ' + error.message);
+    wsPastasProjetos.push(data); ordenarPastas();
+    return data.id;
+}
+async function impProjeto(pj, o) {
+    const resolver = lista => {
+        const ids = [];
+        lista.forEach(un => {
+            const m = wsMembers.find(u => (u.username || '').toLowerCase() === un);
+            if (!m) o.faltam.add(un); else if (!ids.includes(m.id)) ids.push(m.id);
+        });
+        return ids;
+    };
+    let pastaId = null;
+    if (o.dest === '__arquivo__') { if (pj.pasta) pastaId = await impPasta(pj.pasta); }
+    else if (o.dest) pastaId = o.dest;
+    const nome = impNomeUnico(pj.nome, o.usados);
+    const novoProj = { nome, descricao: pj.descricao, workspace_id: currentWorkspace.id };
+    if (pastaId) novoProj.pasta_id = pastaId;
+    if (FD_FEAT.pord) novoProj.ordem = o.proxProj++;
+    const { data: proj, error } = await sb.from('projetos').insert(novoProj).select('id').single();
+    if (error) throw new Error('projeto: ' + error.message);
+    try {
+        const membros = [...new Set([currentUser.id, ...resolver(pj.membros)])];
+        await impInserir('projeto_usuarios', membros.map(uid => ({ projeto_id: proj.id, usuario_id: uid })));
+
+        const soltas = pj.etapas_soltas;
+        const extra = !FD_FEAT.orf && soltas.length ? [{ ref: '', nome: 'Etapas soltas', descricao: '', colaboradores: [], condicoes: [], etapas: soltas }] : [];
+        const sessoes = [...pj.atividades, ...extra];
+        const sessIds = sessoes.length
+            ? (await impInserir('sessoes', sessoes.map((a, i) => ({ projeto_id: proj.id, nome: a.nome, descricao: a.descricao, ...(FD_FEAT.ordem ? { ordem: i + 1 } : {}) })), true)).map(r => r.id)
+            : [];
+        const sessUsers = [];
+        sessoes.forEach((a, i) => [...new Set([currentUser.id, ...resolver(a.colaboradores)])].forEach(uid => sessUsers.push({ sessao_id: sessIds[i], usuario_id: uid })));
+        await impInserir('sessao_usuarios', sessUsers);
+
+        const itens = [];
+        sessoes.forEach((a, i) => a.etapas.forEach((e, j) => itens.push({ e, sessao: i, ordem: j + 1 })));
+        if (FD_FEAT.orf) soltas.forEach((e, j) => itens.push({ e, sessao: null, ordem: sessoes.length + j + 1 }));
+        itens.forEach(it => { it.resp = resolver(it.e.responsaveis); });
+        const etIds = itens.length
+            ? (await impInserir('etapas', itens.map(it => ({
+                sessao_id: it.sessao != null ? sessIds[it.sessao] : null, nome: it.e.nome, descricao: it.e.descricao,
+                responsavel_id: it.resp[0] || null, status: o.modelo ? 'Não iniciado' : it.e.status, prioridade: it.e.prioridade,
+                prazo: o.modelo ? null : it.e.prazo, ...(FD_FEAT.orf ? { projeto_id: proj.id } : {}), ...(FD_FEAT.ordem ? { ordem: it.ordem } : {})
+            })), true)).map(r => r.id)
+            : [];
+        if (FD_FEAT.multi) {
+            const linhas = [];
+            itens.forEach((it, i) => it.resp.forEach(uid => linhas.push({ etapa_id: etIds[i], usuario_id: uid })));
+            await impInserir('etapa_responsaveis', linhas);
+        }
+        if (FD_FEAT.cond) {
+            const alvos = new Map();
+            sessoes.forEach((a, i) => { if (a.ref) alvos.set(a.ref, { tipo: 'sessao', id: sessIds[i], def: a }); });
+            itens.forEach((it, i) => { if (it.e.ref) alvos.set(it.e.ref, { tipo: 'etapa', id: etIds[i], def: it.e }); });
+            const linhas = [];
+            alvos.forEach(alvo => alvo.def.condicoes.forEach(r => {
+                const cond = alvos.get(r);
+                if (cond && !(cond.tipo === alvo.tipo && cond.id === alvo.id)) linhas.push({ workspace_id: currentWorkspace.id, alvo_tipo: alvo.tipo, alvo_id: alvo.id, cond_tipo: cond.tipo, cond_id: cond.id, criado_por: currentUser.id });
+            }));
+            await impInserir('condicoes', linhas);
+        }
+        return { id: proj.id, nome, atividades: sessoes.length, etapas: itens.length };
+    } catch (e) {
+        await sb.from('projetos').delete().eq('id', proj.id);
+        throw e;
+    }
+}
+async function executarImportacao() {
+    if (!currentUserCanEdit || impBusy) return;
+    if (!impSt) { toast('Escolha um arquivo para importar.', 'warning'); return; }
+    impBusy = true;
+    const btn = document.querySelector('#m-foot .btn-p');
+    if (btn) { btn.disabled = true; btn.textContent = 'Importando…'; }
+    const o = {
+        dest: document.getElementById('imp-dest')?.value ?? '__arquivo__', modelo: !!document.getElementById('imp-modelo')?.checked,
+        usados: new Set(wsProjetos.map(p => p.nome.toLowerCase())), faltam: new Set(), criados: [], proxProj: proxOrdem(wsProjetos)
+    };
+    let falha = null;
+    for (const pj of impSt.dados) {
+        try { o.criados.push(await impProjeto(pj, o)); } catch (e) { falha = e; break; }
+    }
+    impBusy = false;
+    if (btn) { btn.disabled = false; btn.textContent = '⬆️ Importar'; }
+    if (falha) toast('Erro na importação: ' + falha.message, 'error');
+    if (o.criados.length) {
+        const et = o.criados.reduce((n, c) => n + c.etapas, 0), at = o.criados.reduce((n, c) => n + c.atividades, 0);
+        await addLog('create', 'projeto', null, { nome: `${o.criados.length} projeto(s) importado(s)` });
+        await pushNotificacao('📥', `${currentUser.nome} importou ${o.criados.length} projeto(s) (${at} atividades, ${et} etapas).`, 'geral');
+        if (!falha) fecharModal();
+        await renderizarProjetos();
+        toast(`${o.criados.length} projeto(s) importado(s): ${at} atividades e ${et} etapas. 📥`);
+        if (!falha && o.criados.length === 1) { switchTab('projetos', true); abrirProjeto(o.criados[0].id); }
+    }
+    if (o.faltam.size) {
+        const lista = [...o.faltam];
+        toast(`Ignorados (não estão neste workspace): ${lista.slice(0, 5).map(u => '@' + u).join(', ')}${lista.length > 5 ? '…' : ''}`, 'warning');
+    }
+}
+
 // ─── CRUD PROJETOS ────────────────────────────────
 function abrirModalProjeto() {
     abrirModal('📁 Novo Projeto', `
@@ -2392,8 +2665,10 @@ async function anxSalvar(tipo, id) {
 const anxIdsDe = obj => (obj?.anexo_vinculos || []).map(v => v.arquivo_id);
 
 // ─── CONDIÇÕES ───────────────────────────────────────
+// Uma atividade/etapa pode exigir que outras atividades/etapas do projeto estejam concluídas.
+// tipo: 'etapa' | 'sessao'. Atividade concluída = tem etapas e todas estão concluídas.
 let wsCondicoes = [];
-let cdSt = null;   
+let cdSt = null;   // estado do seletor no modal: { pId, tipo, id, itens: [{t, i}], orig: [{t, i}] }
 async function carregarCondicoes() {
     if (!FD_FEAT.cond) { wsCondicoes = []; return; }
     const { data, error } = await sb.from('condicoes').select('id, alvo_tipo, alvo_id, cond_tipo, cond_id').eq('workspace_id', currentWorkspace.id);
