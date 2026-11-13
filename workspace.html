@@ -763,6 +763,38 @@
         .imp-it{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;font-size:.84rem}
         .imp-it b{overflow-wrap:anywhere}
         .imp-it span{color:var(--muted);font-size:.76rem;white-space:nowrap}
+        .sel-cb{width:16px;height:16px;accent-color:var(--acc);cursor:pointer;flex-shrink:0;margin-top:2px}
+        .grp-h .sel-cb,.kb-grp-h .sel-cb{margin:0 2px 0 0}
+        .row.sel-on:not(.row-h){background:#eef2ff;box-shadow:inset 3px 0 0 var(--acc)}
+        .row.sel-on:not(.row-h):hover{background:#e0e7ff}
+        .kb-card.sel-on{border-color:var(--acc);box-shadow:0 0 0 2px rgba(79,70,229,.28)}
+        .kb-top{display:flex;gap:8px;align-items:flex-start}
+        .kb-top .r-t{flex:1;min-width:0}
+        .kb-grp-h{justify-content:flex-start}
+        .kb-grp-h .kb-grp-n{flex:1}
+        .sel-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:850;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;max-width:min(980px,94vw);padding:10px 14px;background:#0f172a;color:#fff;border-radius:16px;box-shadow:var(--sh-lg);animation:fadeUp .2s ease}
+        .sel-n{font-size:.84rem}
+        .sel-n b{font-size:1rem}
+        .sel-l{font-size:.74rem;opacity:.7}
+        .sel-sep{width:1px;height:22px;background:rgba(255,255,255,.18)}
+        .sel-st{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff}
+        .sel-st:hover{background:#fff;color:var(--text);transform:none}
+        .sel-bar .btn-s{background:transparent;border-color:rgba(255,255,255,.25);color:#fff}
+        .sel-bar .btn-s:hover{background:rgba(255,255,255,.12);color:#fff}
+        .pf-bar{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:12px}
+        .pf-search{position:relative}
+        .pf-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none}
+        .pf-bar .pf-in{width:100%;padding:8px 10px;font-size:.82rem;margin:0;border-radius:9px;min-width:0}
+        .pf-search .pf-in{padding:10px 12px 10px 38px;font-size:.88rem;border-radius:10px}
+        .pf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:10px}
+        .pf-f{display:flex;flex-direction:column;gap:4px;min-width:0}
+        .pf-f>span{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+        .pf-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);min-height:30px}
+        .pr-sel{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:.78rem;font-weight:600;background:#fff;color:var(--text);cursor:pointer;outline:none}
+        .pr-sel:focus{border-color:var(--acc)}
+        .prog-row .pr-sel.s-done{background:#dcfce7;border-color:#86efac;color:#166534}
+        .prog-row .pr-sel.s-doing{background:#fef3c7;border-color:#fde68a;color:#92400e}
+        .kb-sels{display:grid;grid-template-columns:minmax(0,1fr) 68px;gap:6px}
     </style>
 </head>
 <body>
@@ -1323,7 +1355,9 @@ function renderProjetosView() {
     g('btn-nova-pasta-proj').classList.toggle('hidden', !(currentUserCanEdit && !p && selectedPastaProjeto === 'folders'));
     g('btn-exportar-proj').classList.toggle('hidden', !!p || !projetosDoContexto().length);
     g('btn-importar-proj').classList.toggle('hidden', !(currentUserCanEdit && !p));
+    if (!p) { selE.clear(); selProjeto = null; }
     c.innerHTML = projToolbar() + (p ? renderProjDetail(p) : renderProjOverview());
+    c.querySelectorAll('input[data-parcial="1"]').forEach(i => { i.indeterminate = true; });
 }
 
 function projStats(p) {
@@ -1525,6 +1559,9 @@ async function criarPastaProjeto() {
 }
 
 function renderProjDetail(p) {
+    if (selProjeto !== p.id) { selE.clear(); selProjeto = p.id; }
+    const validos = new Set(todasEtapas(p).map(e => e.id));
+    [...selE].forEach(id => { if (!validos.has(id)) selE.delete(id); });
     const st = projStats(p);
     const head = `<div class="pd-head">
         <div class="pd-prog"><div class="pv-bar"><i style="width:${st.pct}%"></i></div><span>${st.pct}% · ${st.done}/${st.total} etapas</span></div>
@@ -1535,7 +1572,7 @@ function renderProjDetail(p) {
             <button class="btn btn-s btn-sm" onclick="abrirFlowProjeto(${p.id})" title="Abrir este projeto no Flow para editá-lo visualmente">🧠 Flow</button>
         </div></div>`;
     if (!(p.sessoes||[]).length && !(p.soltas||[]).length) return head + `<div class="empty-state"><div class="ei">🗂</div><h3>Nada por aqui ainda</h3><p>Crie uma atividade para organizar as etapas deste projeto</p></div>`;
-    return head + (projetosViewMode === 'board' ? renderBoard(p) : renderListView(p));
+    return head + (projetosViewMode === 'board' ? renderBoard(p) : renderListView(p)) + selBarHtml(p);
 }
 
 
@@ -1550,8 +1587,10 @@ function renderSessaoGrp(p, s) {
         const et = s.etapas || [], closed = collapsedSess.has(s.id);
         const done = et.filter(e => e.status === 'Concluído').length;
         const colabs = (s.sessao_usuarios||[]).map(su => wsMembers.find(u => u.id === su.usuario_id)).filter(Boolean);
+        const ids = et.map(e => e.id), nSel = ids.filter(id => selE.has(id)).length;
         return `<section class="grp" data-sessao-id="${s.id}">
             <div class="grp-h" onclick="toggleGrp(${s.id})">
+                <input type="checkbox" class="sel-cb" aria-label="Selecionar todas as etapas de ${escH(s.nome)}" ${nSel && nSel === ids.length ? 'checked' : ''} ${nSel && nSel < ids.length ? 'data-parcial="1"' : ''} ${ids.length ? '' : 'disabled'} onclick="selToggleIds([${ids.join(',')}], event)">
                 ${currentUserCanEdit ? `<span class="grip" draggable="true" data-drag-kind="sessao" data-drag-id="${s.id}" title="Arraste para reordenar a atividade" onclick="event.stopPropagation()">⠿</span>` : ''}
                 <span class="chev ${closed ? '' : 'open'}">▶</span><b>${escH(s.nome)}</b>
                 <span class="badge b-gray">${done}/${et.length}</span><span class="avs">${colabs.map(avClick).join('')}</span>${anxChips(s, 2, 's')}${condChips('sessao', s, 2)}<span class="grp-sp"></span>
@@ -1566,8 +1605,8 @@ function renderSessaoGrp(p, s) {
 
 function renderEtapa(pId, sId, e) {
     const perto = e.prazo && prazoClass(e.prazo, e.status) === 'b-amber';
-    return `<div class="row ${ST_CLS[e.status]||''}${perto ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}${etapaVencida(e) ? ' t-late' : ''}" data-etapa-id="${e.id}">
-        <div class="r-name">${currentUserCanEdit ? `<span class="grip" draggable="true" data-drag-kind="etapa" data-drag-id="${e.id}" title="Arraste para reordenar ou mover para outra atividade">⠿</span>` : ''}<span class="dot"></span><div><div class="r-t">${escH(e.nome)}</div>${e.descricao ? `<div class="r-d">${escH(e.descricao)}</div>` : ''}${anxChips(e, 3, 'e')}${condChips('etapa', e)}</div></div>
+    return `<div class="row ${ST_CLS[e.status]||''}${perto ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}${etapaVencida(e) ? ' t-late' : ''}${selE.has(e.id) ? ' sel-on' : ''}" data-etapa-id="${e.id}">
+        <div class="r-name"><input type="checkbox" class="sel-cb" aria-label="Selecionar a etapa ${escH(e.nome)}" ${selE.has(e.id) ? 'checked' : ''} onclick="selToggleIds([${e.id}], event)">${currentUserCanEdit ? `<span class="grip" draggable="true" data-drag-kind="etapa" data-drag-id="${e.id}" title="Arraste para reordenar ou mover para outra atividade">⠿</span>` : ''}<span class="dot"></span><div><div class="r-t">${escH(e.nome)}</div>${e.descricao ? `<div class="r-d">${escH(e.descricao)}</div>` : ''}${anxChips(e, 3, 'e')}${condChips('etapa', e)}</div></div>
         <div class="r-resp">${respCell(etapaRespIds(e), e.id)}</div>
         <div>${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span class="muted">—</span>'}</div>
         <div><select class="mini" title="Prioridade" onchange="updateEtapaPrio(${e.id}, this.value)">${[0,1,2,3,4].map(v => `<option ${e.prioridade==v?'selected':''}>${v}</option>`).join('')}</select></div>
@@ -1575,6 +1614,7 @@ function renderEtapa(pId, sId, e) {
             ${currentUserCanEdit ? `<button class="ib" title="Editar etapa" onclick="editarEtapa(${e.id})">✏️</button>` : ''}</div>
     </div>`;
 }
+
 
 
 
@@ -1586,20 +1626,26 @@ function renderBoard(p) {
         const total = blocos.reduce((n, g) => n + g.itens.length, 0);
         return `<div class="kb-col ${ST_CLS[st]}" data-kb-status="${st}">
             <div class="kb-h"><span class="dot"></span>${st}<span class="badge b-gray">${total}</span></div>
-            ${blocos.map(g => `<div class="kb-grp">
-                <div class="kb-grp-h" title="${g.s ? escH(g.s.nome) : 'Etapas soltas'}"><span class="kb-grp-n">${g.s ? '🗂 ' + escH(g.s.nome) : '🔹 Etapas soltas'}</span><span class="badge b-gray">${g.itens.length}</span></div>
+            ${blocos.map(g => {
+                const ids = g.itens.map(e => e.id), nSel = ids.filter(id => selE.has(id)).length;
+                return `<div class="kb-grp">
+                <div class="kb-grp-h" title="${g.s ? escH(g.s.nome) : 'Etapas soltas'}"><input type="checkbox" class="sel-cb" aria-label="Selecionar as etapas deste grupo" ${nSel === ids.length ? 'checked' : ''} ${nSel && nSel < ids.length ? 'data-parcial="1"' : ''} onclick="selToggleIds([${ids.join(',')}], event)"><span class="kb-grp-n">${g.s ? '🗂 ' + escH(g.s.nome) : '🔹 Etapas soltas'}</span><span class="badge b-gray">${g.itens.length}</span></div>
                 ${g.itens.map(renderKbCard).join('')}
-            </div>`).join('') || '<div class="row-empty">Vazio — solte um card aqui</div>'}
+            </div>`;
+            }).join('') || '<div class="row-empty">Vazio — solte um card aqui</div>'}
         </div>`;
     }).join('')}</div>`;
 }
 function renderKbCard(e) {
     const perto = e.prazo && prazoClass(e.prazo, e.status) === 'b-amber';
-    return `<div class="kb-card${etapaVencida(e) ? ' late t-late' : ''}${perto ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}" draggable="true" data-etapa-id="${e.id}" data-drag-kind="etapa" data-drag-id="${e.id}" ${currentUserCanEdit ? `onclick="editarEtapa(${e.id})"` : ''}>
-        <div class="r-t">${escH(e.nome)}</div>
+    return `<div class="kb-card${etapaVencida(e) ? ' late t-late' : ''}${perto ? ' t-warn' : ''}${prazoAmanha(e.prazo, e.status) ? ' t-orange' : ''}${selE.has(e.id) ? ' sel-on' : ''}" draggable="true" data-etapa-id="${e.id}" data-drag-kind="etapa" data-drag-id="${e.id}" ${currentUserCanEdit ? `onclick="editarEtapa(${e.id})"` : ''}>
+        <div class="kb-top"><input type="checkbox" class="sel-cb" aria-label="Selecionar a etapa ${escH(e.nome)}" ${selE.has(e.id) ? 'checked' : ''} onclick="selToggleIds([${e.id}], event)"><div class="r-t">${escH(e.nome)}</div></div>
         ${anxChips(e, 2, 'e')}${condChips('etapa', e, 2)}
         <div class="kb-f">${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span></span>'}${avStack(etapaRespIds(e))}</div>
-        <select class="mini st kb-st" title="Alterar o status desta etapa" aria-label="Status de ${escH(e.nome)}" onclick="event.stopPropagation()" onchange="updateEtapaStatus(${e.id}, this.value)">${STATUS.map(x => `<option ${e.status === x ? 'selected' : ''}>${x}</option>`).join('')}</select>
+        <div class="kb-sels">
+            <select class="mini st kb-st" title="Alterar o status desta etapa" aria-label="Status de ${escH(e.nome)}" onclick="event.stopPropagation()" onchange="updateEtapaStatus(${e.id}, this.value)">${STATUS.map(x => `<option ${e.status === x ? 'selected' : ''}>${x}</option>`).join('')}</select>
+            <select class="mini kb-st" title="Alterar a prioridade" aria-label="Prioridade de ${escH(e.nome)}" onclick="event.stopPropagation()" onchange="updateEtapaPrio(${e.id}, this.value)">${[0,1,2,3,4].map(v => `<option value="${v}" ${(e.prioridade ?? 0) === v ? 'selected' : ''}>P${v}</option>`).join('')}</select>
+        </div>
     </div>`;
 }
 const FD_FEAT = { multi: true, ordem: true, pord: true, pasta: true, orf: false, anx: false, cond: false };
@@ -2470,6 +2516,63 @@ async function executarImportacao() {
     }
 }
 
+const selE = new Set();
+let selProjeto = null, selLoteBusy = false;
+
+function selToggleIds(ids, ev) {
+    if (ev) ev.stopPropagation();
+    const todos = ids.length > 0 && ids.every(id => selE.has(id));
+    ids.forEach(id => { if (todos) selE.delete(id); else selE.add(id); });
+    renderProjetosView();
+}
+function selLimpar() { selE.clear(); renderProjetosView(); }
+function selBarHtml(p) {
+    if (!selE.size) return '';
+    const todas = todasEtapas(p);
+    const ativs = (p.sessoes || []).filter(x => (x.etapas || []).length && x.etapas.every(e => selE.has(e.id))).length;
+    const icone = { 'Não iniciado': '⚪', 'Em andamento': '🟡', 'Concluído': '✅' };
+    return `<div class="sel-bar" role="region" aria-label="Ações em lote">
+        <span class="sel-n"><b>${selE.size}</b> ${selE.size === 1 ? 'etapa selecionada' : 'etapas selecionadas'}${ativs ? ` · ${ativs} ${ativs === 1 ? 'atividade' : 'atividades'}` : ''}</span>
+        <span class="sel-sep"></span>
+        <span class="sel-l">Marcar como</span>
+        ${STATUS.map(st => `<button type="button" class="btn btn-sm sel-st" onclick="aplicarStatusLote('${st}')">${icone[st]} ${st}</button>`).join('')}
+        <span class="sel-sep"></span>
+        <button type="button" class="btn btn-s btn-sm" onclick="selToggleIds([${todas.map(e => e.id).join(',')}], event)">${selE.size === todas.length ? 'Desmarcar tudo' : 'Selecionar tudo'}</button>
+        <button type="button" class="btn btn-s btn-sm" onclick="selLimpar()">✕ Limpar</button>
+    </div>`;
+}
+async function aplicarStatusLote(status) {
+    if (selLoteBusy || !STATUS.includes(status)) return;
+    const alvo = [...selE].map(findEtapa).filter(Boolean).filter(e => e.status !== status);
+    if (!alvo.length) { toast('As etapas selecionadas já estão com esse status.', 'warning'); return; }
+    if (FD_FEAT.cond && status !== 'Não iniciado') {
+        const pend = alvo.filter(e => condPendentes(e.id).length);
+        if (pend.length && !confirm(`${pend.length} etapa(s) têm condições pendentes:\n• ${pend.slice(0, 8).map(e => e.nome).join('\n• ')}${pend.length > 8 ? '\n…' : ''}\n\nMudar o status mesmo assim?`)) return;
+    }
+    selLoteBusy = true;
+    alvo.forEach(e => { e.status = status; });
+    selE.clear();
+    renderProjetosView();
+    alvo.forEach(e => etapaPatchCaches(e.id, { status }));
+    const ids = alvo.map(e => e.id);
+    let erro = null;
+    for (let i = 0; i < ids.length && !erro; i += 200) {
+        const parte = ids.slice(i, i + 200);
+        const { data, error } = await sb.from('etapas').update({ status }).in('id', parte).select('id');
+        if (error) erro = error;
+        else if ((data || []).length !== parte.length) erro = { message: 'o banco não aplicou a alteração em todas as etapas (sem permissão de edição).' };
+    }
+    selLoteBusy = false;
+    if (erro) { toast('Erro ao mudar o status em lote: ' + erro.message, 'error'); await renderizarProjetos(); return; }
+    await addLog('update', 'etapa', null, { nome: `${ids.length} etapa(s) alteradas em lote`, status });
+    toast(`${ids.length} etapa(s) marcada(s) como "${status}". ✅`);
+}
+document.addEventListener('keydown', ev => {
+    if (ev.key !== 'Escape' || !selE.size) return;
+    if (!document.getElementById('modal-ov').classList.contains('hidden') || !document.getElementById('cpop-ov').classList.contains('hidden')) return;
+    selLimpar();
+});
+
 // ─── CRUD PROJETOS ────────────────────────────────
 function abrirModalProjeto() {
     abrirModal('📁 Novo Projeto', `
@@ -2947,16 +3050,29 @@ function findEtapa(id) {
     for (const p of wsProjetos) { const e = todasEtapas(p).find(x => x.id === id); if (e) return e; }
     return null;
 }
+
 async function updateEtapaPrio(eId, prio) {
-    const e = findEtapa(eId); if (e) e.prioridade = +prio;
-    const { error } = await sb.from('etapas').update({ prioridade: +prio }).eq('id', eId);
-    if (error) toast('Erro ao atualizar prioridade.', 'error');
+    const e = findEtapa(eId); if (!e) return false;
+    const novo = +prio, antes = e.prioridade ?? 0;
+    if (novo === antes) return true;
+    e.prioridade = novo; etapaPatchCaches(eId, { prioridade: novo });
+    const { error } = await updateChecado('etapas', { prioridade: novo }, eId);
+    if (error) {
+        e.prioridade = antes; etapaPatchCaches(eId, { prioridade: antes }); renderProjetosView();
+        toast('Erro ao atualizar prioridade: ' + error.message, 'error');
+        return false;
+    }
+    return true;
 }
 
 async function updateEtapaStatus(eId, status) {
     const e = findEtapa(eId); if (!e) return false;
     if (e.status === status) return true;
-    if (!condConfirmar(eId, status)) { renderProjetosView(); return false; }
+    if (!condConfirmar(eId, status)) {
+        renderProjetosView();
+        if (document.getElementById('tab-progresso')?.classList.contains('active') && progData.length) progAtualizar();
+        return false;
+    }
     const old = e.status; e.status = status; renderProjetosView(); etapaPatchCaches(eId, { status });
     const { error } = await sb.from('etapas').update({ status }).eq('id', eId);
     if (error) { e.status = old; renderProjetosView(); etapaPatchCaches(eId, { status: old }); toast('Erro ao atualizar status.', 'error'); return false; }
@@ -3009,7 +3125,7 @@ let progF = { q: '', proj: '', sess: '', resp: '', prazo: '', status: '', prio: 
 let progSort = { col: 'prazo', dir: 1 };
 let progQuickSets = [];
 const PROG_COLS = [['etapa','Etapa'],['sess','Atividade'],['resp','Responsável'],['prazo','Prazo'],['status','Status'],['prio','Prio.']];
-const PROG_W = ['27%','17%','19%','13%','15%','9%'];
+const PROG_W = ['28%','16%','17%','13%','16%','10%'];
 
 function progSet(k, v) {
     progF[k] = v;
@@ -3068,8 +3184,8 @@ function progRow(e, i) {
         <td class="pr-sess">${escH(e.sessoes?.nome || '—')}</td>
         <td>${us.length ? `<div class="pr-resp" role="button" tabindex="0" title="${escH(us.map(u => u.nome).join(', '))}" onclick="event.stopPropagation();${us.length === 1 ? `verUsuario(${us[0].id})` : `abrirRespEtapa(${e.id})`}" onkeydown="if(event.key==='Enter'){event.stopPropagation();${us.length === 1 ? `verUsuario(${us[0].id})` : `abrirRespEtapa(${e.id})`}}">${respVisual(us.map(u => u.id))}</div>` : '<span class="muted" style="font-size:.78rem">—</span>'}</td>
         <td>${e.prazo ? `<span class="badge ${prazoClass(e.prazo, e.status)}">${prazoLabel(e.prazo, e.status)}</span>` : '<span class="badge b-gray">Sem prazo</span>'}</td>
-        <td><span class="badge ${e.status==='Concluído'?'b-green':e.status==='Em andamento'?'b-amber':'b-gray'}">${e.status}</span></td>
-        <td><span class="badge b-gray">${e.prioridade ?? 0}</span></td>
+        <td><select class="pr-sel ${ST_CLS[e.status] || ''}" title="Alterar o status" aria-label="Status de ${escH(e.nome)}" onclick="event.stopPropagation()" onchange="updateEtapaStatus(${e.id}, this.value)">${STATUS.map(x => `<option ${e.status === x ? 'selected' : ''}>${x}</option>`).join('')}</select></td>
+        <td><select class="pr-sel" title="Alterar a prioridade" aria-label="Prioridade de ${escH(e.nome)}" onclick="event.stopPropagation()" onchange="updateEtapaPrio(${e.id}, this.value)">${[0,1,2,3,4].map(v => `<option value="${v}" ${(e.prioridade ?? 0) === v ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
     </tr>`;
 }
 function progAtualizar() {
@@ -3101,6 +3217,7 @@ function progAtualizar() {
     document.getElementById('prog-sum').innerHTML = defs.map((d, i) =>
         `<button type="button" class="ps-card ${d.on ? 'on' : ''} ${d.late && d.n ? 'late' : ''}" title="${d.on && i ? 'Clique de novo para remover este filtro' : 'Filtrar'}" onclick="progQuick(${i})"><b>${d.n}</b><span>${d.l}</span></button>`).join('');
 }
+
 function renderProgresso(etapas) {
     if (etapas) progData = etapas;
     const c = document.getElementById('progresso-container');
@@ -3122,6 +3239,7 @@ function renderProgresso(etapas) {
     const optsSess = [...sessPorProj].filter(([pid]) => !progF.proj || String(pid) === progF.proj)
         .map(([pid, m]) => `<optgroup label="${escH(projs.get(pid))}">${[...m].map(([id, n]) => opt(id, n)).join('')}</optgroup>`).join('');
     const optsResp = wsMembers.filter(u => respUsados.has(u.id)).sort((a, b) => a.nome.localeCompare(b.nome)).map(u => opt(u.id, u.nome)).join('');
+    const filtro = (rot, k, ops) => `<label class="pf-f"><span>${rot}</span><select class="pf-in" data-pf="${k}" onchange="progSet('${k}', this.value)">${ops}</select></label>`;
     c.innerHTML = `
         <div class="anim-item" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:14px;box-shadow:var(--sh)">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -3134,23 +3252,26 @@ function renderProgresso(etapas) {
             <div style="font-size:.75rem;color:var(--muted);margin-top:7px">${concl} de ${total} etapas concluídas</div>
         </div>
         <div class="prog-sum" id="prog-sum"></div>
-        <div class="prog-info"><span id="prog-count"></span><button type="button" id="prog-clear" class="btn btn-s btn-sm hidden" onclick="progLimpar()">✕ Limpar filtros</button></div>
+        <div class="pf-bar">
+            <div class="pf-search">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input class="pf-in" data-pf="q" type="search" placeholder="Buscar por etapa ou projeto" aria-label="Buscar por etapa ou projeto" value="${escH(progF.q)}" oninput="progSet('q', this.value)">
+            </div>
+            <div class="pf-grid">
+                ${filtro('Projeto', 'proj', `<option value="">Todos</option>${optsProj}`)}
+                ${filtro('Atividade', 'sess', `<option value="">Todas</option>${optsSess}`)}
+                ${filtro('Responsável', 'resp', `<option value="">Todos</option><option value="none">👤 Sem responsável</option>${optsResp}`)}
+                ${filtro('Prazo', 'prazo', `<option value="">Todos</option><option value="atrasada">⚠️ Atrasadas</option><option value="hoje">Vence hoje</option><option value="7d">Próximos 7 dias</option><option value="mes">Este mês</option><option value="com">Com prazo</option><option value="sem">Sem prazo</option>`)}
+                ${filtro('Status', 'status', `<option value="">Todos</option>${STATUS.map(x => opt(x, x)).join('')}`)}
+                ${filtro('Prioridade', 'prio', `<option value="">Todas</option>${[0,1,2,3,4].map(v => opt(v, 'Prioridade ' + v)).join('')}`)}
+            </div>
+            <div class="pf-foot"><span id="prog-count"></span><button type="button" id="prog-clear" class="btn btn-s btn-sm hidden" onclick="progLimpar()">✕ Limpar filtros</button></div>
+        </div>
         <div style="overflow-x:auto">
         <table class="prog-table">
             <colgroup>${PROG_W.map(w => `<col style="width:${w}">`).join('')}</colgroup>
             <thead>
                 <tr>${PROG_COLS.map(([k, l]) => `<th class="sortable" onclick="progSortBy('${k}')">${l}<span class="sort-ar" data-k="${k}"></span></th>`).join('')}</tr>
-                <tr class="pf">
-                    <th><input class="pf-in" data-pf="q" type="search" placeholder="🔍 Buscar etapa ou projeto" value="${escH(progF.q)}" oninput="progSet('q', this.value)">
-                        <select class="pf-in" data-pf="proj" onchange="progSet('proj', this.value)"><option value="">Todos os projetos</option>${optsProj}</select></th>
-                    <th><select class="pf-in" data-pf="sess" onchange="progSet('sess', this.value)"><option value="">Todas</option>${optsSess}</select></th>
-                    <th><select class="pf-in" data-pf="resp" onchange="progSet('resp', this.value)"><option value="">Todos</option><option value="none">👤 Sem responsável</option>${optsResp}</select></th>
-                    <th><select class="pf-in" data-pf="prazo" onchange="progSet('prazo', this.value)">
-                        <option value="">Todos</option><option value="atrasada">⚠️ Atrasadas</option><option value="hoje">Vence hoje</option>
-                        <option value="7d">Próximos 7 dias</option><option value="mes">Este mês</option><option value="com">Com prazo</option><option value="sem">Sem prazo</option></select></th>
-                    <th><select class="pf-in" data-pf="status" onchange="progSet('status', this.value)"><option value="">Todos</option>${STATUS.map(x => opt(x, x)).join('')}</select></th>
-                    <th><select class="pf-in" data-pf="prio" onchange="progSet('prio', this.value)"><option value="">Todas</option>${[0,1,2,3,4].map(v => opt(v, v)).join('')}</select></th>
-                </tr>
             </thead>
             <tbody id="prog-body"></tbody>
         </table></div>

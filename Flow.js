@@ -5,14 +5,14 @@
     const TIPO = { p: { ic: '📁', w: 220 }, s: { ic: '🗂', w: 250 }, e: { ic: '', w: 200 }, n: { ic: '', w: 190 }, b: { ic: '', w: 360 }, a: { ic: '📎', w: 200 } };
     const ST_COR = { 'Não iniciado': '#94a3b8', 'Em andamento': '#eab308', 'Concluído': '#10b981' };
     const SVGNS = 'http://www.w3.org/2000/svg';
-    const SH = 54, KH = 40, GAP = 6, ANX = 26;
+    const SH = 54, KH = 40, GAP = 6, ANX = 26, DESC = 20;
 
     let root = null, view = null, world = null, layB = null, layN = null, svg = null;
     let mapas = [], atual = null, sel = null, editing = false, saveT = null, semTabela = false;
     let grupo = new Set(), espaco = false, modoMao = false;
     let alvoProjeto = null, colProj = false;
     let pn = { aberto: false, foco: null, aba: 'det', projAnx: null };
-    let dragAtivo = false, Rult = null;
+    let dragAtivo = false, Rult = null, modoMarcar = false, descEdit = null;
     const recem = new Set(), arqCache = {}, carregandoArq = new Set();
 
     const uid = () => Math.random().toString(36).slice(2, 9);
@@ -21,9 +21,11 @@
     const nodeById = id => D().nodes.find(n => n.id === id);
     const elOf = id => layB.querySelector(`[data-id="${id}"]`) || layN.querySelector(`[data-id="${id}"]`);
     const selNode = () => (sel && sel.k === 'n' ? nodeById(sel.id) : null);
+    const etapasSel = () => idsSel().map(nodeById).filter(x => x && x.t === 'e');
     const idsSel = () => (sel && sel.k === 'm' ? [...grupo] : sel && sel.k === 'n' ? [sel.id] : []);
     function setSelIds(ids) {
         const l = [...ids].filter(id => nodeById(id));
+        if (l.length > 1 && l.some(id => nodeById(id).t === 'e')) modoMarcar = true;
         grupo = new Set(l.length > 1 ? l : []);
         sel = !l.length ? null : l.length === 1 ? { k: 'n', id: l[0] } : { k: 'm' };
         markSel();
@@ -88,7 +90,16 @@
         .fl-n.fl-n-b.sel{border-style:solid}
         .fl-row{display:flex;align-items:flex-start;gap:7px}
         .fl-row .fl-t{flex:1;min-width:0;overflow-wrap:anywhere}
-        .fl-d{width:9px;height:9px;border-radius:50%;flex:none;margin-top:5px}
+        .fl-d{width:14px;height:14px;border-radius:50%;flex:none;margin-top:3px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;font:700 .58rem var(--font);font-style:normal;color:#fff;cursor:pointer;transition:box-shadow .1s}
+        .fl-d:hover{box-shadow:0 0 0 3px rgba(15,23,42,.18)}
+        .fl-n.sel .fl-d{box-shadow:0 0 0 2px #1e293b}
+        .fl-n.sel .fl-d::after{content:'✓'}
+        .fl-bulk{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:25;display:none;align-items:center;gap:6px;background:#fff;border:1px solid #d1d5db;border-radius:999px;padding:5px 8px 5px 14px;box-shadow:0 6px 20px rgba(15,23,42,.18);font:600 .78rem var(--font);user-select:none;-webkit-user-select:none}
+        .fl-bulk span{color:var(--muted);margin-right:4px;white-space:nowrap}
+        .fl-bulk button{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:4px 10px;font:inherit;cursor:pointer;color:var(--text)}
+        .fl-bulk button:hover{background:var(--acc-lt)}
+        .fl-bulk button i{width:10px;height:10px;border-radius:50%;display:inline-block}
+        .fl-bulk button.x{border:none;padding:4px 8px;color:var(--muted)}
         .fl-s{margin:3px 0 0 22px;font:500 .72rem var(--font);color:var(--muted)}
         .fl-bh{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 14px;font-weight:700;color:var(--c)}
         .fl-pj{border:1px solid var(--c);background:var(--surface);color:var(--c);border-radius:20px;padding:1px 9px;font:600 .7rem var(--font);cursor:pointer}
@@ -149,6 +160,12 @@
         .fl-ctx button:hover{background:var(--acc-lt);color:var(--acc)}
         .fl-ctx hr{border:none;border-top:1px solid var(--border);margin:4px 2px}
         .fl-ctx .ic{width:16px;text-align:center}
+        .fl-ds{font:500 .7rem var(--font);color:var(--muted);padding:0 0 0 17px;height:${DESC}px;line-height:${DESC}px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:text}
+        .fl-n:not(.fl-kid) .fl-ds{height:auto;line-height:1.3;padding:3px 0 0 21px;white-space:normal;max-height:2.8em}
+        .fl-ds[contenteditable=true]{outline:2px solid var(--acc);border-radius:4px;background:#fff;color:var(--text);user-select:text;white-space:normal}
+        .fl-ds:empty::before{content:'Breve descrição…';color:#94a3b8}
+        .fl-view.marcando .fl-n-e{cursor:pointer}
+        .fl-view.marcando .fl-n-e:not(.sel) .fl-d{box-shadow:0 0 0 2px rgba(15,23,42,.35)}
         .fl-add{position:absolute;right:10px;top:9px;border:1px solid var(--c);background:var(--surface);color:var(--c);border-radius:20px;padding:1px 9px;font:700 .68rem var(--font);cursor:pointer}
         .fl-add:hover{background:var(--c);color:#fff}
         .fl-hd .fl-row{padding-right:74px}
@@ -190,6 +207,7 @@
         </div>
         <div class="fl-wrap"><div class="fl-view" id="fl-view">
             <div class="fl-world" id="fl-world"><div class="fl-lay" id="fl-lb"></div><svg class="fl-svg" id="fl-svg"></svg><div class="fl-lay" id="fl-ln"></div></div>
+            <div class="fl-bulk" id="fl-bulk"><span id="fl-bulk-n"></span><button type="button" data-st="Não iniciado"><i style="background:#94a3b8"></i>Não iniciado</button><button type="button" data-st="Em andamento"><i style="background:#eab308"></i>Em andamento</button><button type="button" data-st="Concluído"><i style="background:#10b981"></i>Concluído</button><button type="button" class="x" data-x="1" title="Limpar seleção (Esc)">✕ Limpar</button></div>
             <div class="fl-hint">Arraste no fundo para selecionar (Ctrl/Shift soma) · Espaço ou botão do meio: mover a tela · roda: zoom · bolinha liga nós (seta = fluxo; clique nela para virar dependência) · solte etapas numa atividade para encaixar</div>
         </div><div class="fl-panel hidden" id="fl-panel"></div></div>`;
         view = $('fl-view'); world = $('fl-world'); layB = $('fl-lb'); layN = $('fl-ln'); svg = $('fl-svg');
@@ -197,6 +215,10 @@
         view.addEventListener('mousedown', ev => { if (!ev.target.closest('[contenteditable=true]')) ev.preventDefault(); });
         view.addEventListener('dblclick', onDbl);
         view.addEventListener('contextmenu', abreMenu);
+        $('fl-bulk').addEventListener('click', ev => {
+            const b = ev.target.closest('button'); if (!b) return;
+            if (b.dataset.x) setSelIds([]); else statusLote(b.dataset.st);
+        });
         view.addEventListener('click', onClick);
         view.addEventListener('wheel', ev => {
             if (!D()) return; ev.preventDefault();
@@ -289,7 +311,8 @@
             if (!p) { atual = null; return telaVazia('⚠️', 'Projeto não encontrado', 'Ele pode ter sido excluído.'); }
             primeira = !m.dados.nodes.length;
             if (sincProjeto(m.dados, p)) salvar();
-        }
+            pn.foco = { k: 'p', id: m.projeto_id };
+        } else if (limparRaizes(m.dados)) salvar();
         $('fl-cfg').classList.toggle('hidden', ded);
         ['fl-imp', 'fl-bp'].forEach(b => $(b) && $(b).classList.toggle('hidden', ded));
         $('fl-del').title = ded ? 'Exclui o item selecionado do projeto (pede confirmação)' : 'Remove do mapa (não apaga nada do projeto)';
@@ -338,11 +361,18 @@
             const o = R.E.get(n.ref); if (!o) return { txt: n.txt || '(etapa removida)', gone: true };
             return { txt: o.e.nome, st: o.e.status, sub: `${o.p.nome}${o.s ? ' · ' + o.s.nome : ''}` };
         }
-        return { txt: n.txt || '' };
+        return { txt: n.txt || '', st: n.t === 'e' ? n.st : undefined };
     }
 
     const oculto = n => !!(n.pai && nodeById(n.pai) && nodeById(n.pai).fechada);
-    const kidH = (k, R) => KH + (anexosDe(k, R || Rult || refs()).length ? ANX : 0);
+    const descDe = (n, R) => {
+        if (n.t !== 'e') return '';
+        const o = n.ref ? (R || Rult || refs()).E.get(n.ref) : null;
+        return String(o ? (o.e.descricao || '') : (n.desc || '')).trim();
+    };
+    const temDesc = (k, R) => k.t === 'e' && (descEdit === k.id || !!descDe(k, R));
+    const kidH = (k, R) => KH + (temDesc(k, R) ? DESC : 0) + (anexosDe(k, R || Rult || refs()).length ? ANX : 0);
+    const descHtml = (n, R) => { const d = temDesc(n, R) ? descDe(n, R) : null; return d === null ? '' : `<div class="fl-ds" title="${escH(d)}">${escH(d)}</div>`; };
     function chipsNo(n, R) {
         const l = anexosDe(n, R); if (!l.length) return '';
         return `<div class="fl-ax">${l.slice(0, 2).map(f => `<button type="button" class="fl-chip" data-act="open" data-arq="${f.id}" title="${escH(f.nome)}"><span>${fileIcon(f.nome)}</span><span class="n">${escH(f.nome)}</span></button>`).join('')}${l.length > 2 ? `<button type="button" class="fl-chip" data-act="clip" title="Ver todos os anexos">+${l.length - 2}</button>` : ''}</div>`;
@@ -358,7 +388,7 @@
             const pj = n.proj && R.P.get(n.proj);
             return `<div class="${cls}" data-id="${n.id}" style="${st}"><div class="fl-bh"><span class="fl-t">${escH(i.txt)}</span>${pj ? `<button class="fl-pj" data-act="proj" title="Abrir o projeto criado a partir deste bloco">📁 ${escH(pj.nome)}</button>` : ''}</div><i class="fl-rs" data-act="resize"></i></div>`;
         }
-        const ic = i.ic ? `<span>${i.ic}</span>` : n.t === 'e' ? `<i class="fl-d" style="background:${ST_COR[i.st] || '#94a3b8'}"></i>` : (TIPO[n.t].ic ? `<span>${TIPO[n.t].ic}</span>` : '');
+        const ic = i.ic ? `<span>${i.ic}</span>` : n.t === 'e' ? `<i class="fl-d" data-act="chk" title="Marcar etapa (selecionar várias)" style="background:${ST_COR[i.st] || '#94a3b8'}"></i>` : (TIPO[n.t].ic ? `<span>${TIPO[n.t].ic}</span>` : '');
         const porta = '<i class="fl-port" data-act="port" title="Arraste até outro nó para ligar"></i>';
         const alca = kid ? '' : '<i class="fl-rs" data-act="resize" title="Arraste para redimensionar"></i>';
         if (n.t === 's') {
@@ -367,7 +397,7 @@
             return `<div class="${cls}" data-id="${n.id}" style="${st}"><div class="fl-hd"><div class="fl-row"><button type="button" class="fl-tg" data-act="toggle" title="${fechada ? 'Expandir' : 'Recolher'}">${fechada ? '▸' : '▾'}</button>${ic}<span class="fl-t" title="${escH(i.txt)}">${escH(i.txt)}</span></div>${sub}<button class="fl-add" data-act="addkid" title="Adicionar etapa a esta atividade">＋ Etapa</button></div>${!nk && !fechada ? `<div class="fl-slot" style="top:${SH}px">Solte etapas aqui</div>` : ''}${alca}${porta}${selos(n, R)}</div>`;
         }
         const thumb = i.thumb ? `<img class="fl-th" src="${escH(i.thumb)}" alt="" draggable="false" ${n.h ? 'style="height:auto;flex:1;min-height:40px" ' : ''}onerror="this.style.display='none'">` : '';
-        return `<div class="${cls}" data-id="${n.id}" style="${st}"><div class="fl-row">${ic}<span class="fl-t" title="${escH(i.txt)}">${escH(i.txt)}</span></div>${i.sub ? `<div class="fl-s">${escH(i.sub)}</div>` : ''}${thumb}${chipsNo(n, R)}${alca}${porta}${selos(n, R)}</div>`;
+        return `<div class="${cls}" data-id="${n.id}" style="${st}"><div class="fl-row">${ic}<span class="fl-t" title="${escH(i.txt)}">${escH(i.txt)}</span></div>${i.sub ? `<div class="fl-s">${escH(i.sub)}</div>` : ''}${descHtml(n, R)}${thumb}${chipsNo(n, R)}${alca}${porta}${selos(n, R)}</div>`;
     }
     function selos(n, R) {
         if (!R.DI) return '';
@@ -400,15 +430,24 @@
     }
     function markSel() {
         if (!sel || sel.k !== 'm') grupo = new Set();
+        if (!idsSel().length) modoMarcar = false;
         view.querySelectorAll('.fl-n').forEach(el => el.classList.toggle('sel', !!sel && ((sel.k === 'n' && sel.id === el.dataset.id) || (sel.k === 'm' && grupo.has(el.dataset.id)))));
         const n = selNode(); if (n && n.ref && n.t !== 'a') pn.foco = { k: n.t, id: n.ref };
         drawEdges(); updToolbar(); if (pn.aberto) desenhaPainel();
     }
     function updToolbar() {
+        if (!idsSel().length) modoMarcar = false;
         const n = selNode();
         root.querySelectorAll('[data-sel]').forEach(b => { b.disabled = !sel; b.style.opacity = sel ? 1 : .45; });
         const bp = $('fl-bp'); if (bp) { const on = !!n && n.t === 'b'; bp.disabled = !on; bp.style.opacity = on ? 1 : .45; }
         const ed = $('fl-edit'); if (ed) { const on = !!(n && n.ref && n.t !== 'a') || (pn.aberto && !!pn.foco); ed.disabled = !on; ed.style.opacity = on ? 1 : .45; }
+        const bulk = $('fl-bulk');
+        if (bulk) {
+            const ne = etapasSel().length;
+            bulk.style.display = ne >= 2 || (modoMarcar && ne >= 1) ? 'flex' : 'none';
+            $('fl-bulk-n').textContent = `${ne} etapa${ne === 1 ? '' : 's'}`;
+        }
+        view.classList.toggle('marcando', modoMarcar);
         const mao = $('fl-mao'); if (mao) { mao.classList.toggle('btn-p', modoMao); mao.classList.toggle('btn-s', !modoMao); }
         const pb = $('fl-pbtn'); if (pb) { pb.classList.toggle('btn-p', pn.aberto); pb.classList.toggle('btn-s', !pn.aberto); }
     }
@@ -534,10 +573,11 @@
         if (pai) reflow(pai);
         render();
     }
-    function alvoSnap(drag, p) {
-        const alvos = D().nodes.filter(n => n.t === 's' && !n.fechada && n.id !== drag.id && p.x >= n.x && p.x <= n.x + n.w && p.y >= n.y && p.y <= n.y + (n.h || 60));
+    function alvoSnap(drag, p, excl) {
+        const ex = excl || new Set([drag.id]);
+        const alvos = D().nodes.filter(n => n.t === 's' && !n.fechada && !ex.has(n.id) && p.x >= n.x && p.x <= n.x + n.w && p.y >= n.y && p.y <= n.y + (n.h || 60));
         const a = alvos[alvos.length - 1] || null;
-        return a ? { a, exc: drag.id, idx: kids(a).filter(k => k.id !== drag.id && k.y + kidH(k) / 2 < p.y).length } : null;
+        return a ? { a, exc: ex, idx: kids(a).filter(k => !ex.has(k.id) && k.y + kidH(k) / 2 < p.y).length } : null;
     }
     function mostraSnap(al) {
         view.querySelectorAll('.fl-n.snap').forEach(el => el.classList.remove('snap'));
@@ -546,7 +586,7 @@
         elOf(al.a.id)?.classList.add('snap');
         if (!ln) { ln = document.createElement('div'); ln.className = 'fl-snapln'; layN.appendChild(ln); }
         let yy = al.a.y + SH;
-        kids(al.a).filter(k => k.id !== al.exc).slice(0, al.idx).forEach(k => { yy += kidH(k) + GAP; });
+        kids(al.a).filter(k => !al.exc.has(k.id)).slice(0, al.idx).forEach(k => { yy += kidH(k) + GAP; });
         ln.style.left = (al.a.x + 12) + 'px'; ln.style.width = (al.a.w - 24) + 'px';
         ln.style.top = (yy - GAP / 2 - 2) + 'px';
     }
@@ -593,7 +633,7 @@
     function painelDetalhes() {
         const R = refs(), f = pn.foco, ed = !!currentUserCanEdit;
         if (!f) return '<div class="fp-vazio">Selecione um projeto, atividade ou etapa do mapa (ou dê dois cliques nele) para ver os detalhes e editar aqui.</div>';
-        const mapa = (k, id) => (noMapa(k, id) ? '' : btnP('＋ No mapa', `Flow.addAoMapa('${k}',${id})`));
+        const mapa = (k, id) => (noMapa(k, id) || (k === 'p' && dedicado()) ? '' : btnP('＋ No mapa', `Flow.addAoMapa('${k}',${id})`));
         if (f.k === 'p') {
             const p = R.P.get(f.id); if (!p) return '<div class="fp-vazio">Projeto não encontrado (foi excluído?).</div>';
             const et = todasEtapas(p);
@@ -746,22 +786,35 @@
         if (dedicado()) { const p = (wsProjetos || []).find(x => x.id === atual.projeto_id); if (p && sincProjeto(D(), p)) salvar(); }
         render(); desenhaPainel();
     }
+    function limparRaizes(d) {
+        const R = refs(), byId = new Map(d.nodes.map(n => [n.id, n])), tocados = new Set();
+        const pertence = (n, pid) => (n.t === 's' ? R.S.get(n.ref)?.p.id === pid : n.t === 'e' ? R.E.get(n.ref)?.p.id === pid : false);
+        const nE = d.edges.length, nN = d.nodes.length;
+        d.edges = d.edges.filter(e => {
+            const a = byId.get(e.a), b = byId.get(e.b);
+            if (a && b && a.t === 'p' && a.ref && b.ref && pertence(b, a.ref)) { tocados.add(a.id); return false; }
+            return true;
+        });
+        const ligados = new Set(d.edges.flatMap(e => [e.a, e.b]));
+        d.nodes = d.nodes.filter(n => !(n.t === 'p' && tocados.has(n.id) && !ligados.has(n.id)));
+        return d.edges.length !== nE || d.nodes.length !== nN;
+    }
     function sincProjeto(d, p) {
         const antes = JSON.stringify(d);
         const sessoes = (p.sessoes || []).slice().sort(ordCmp), soltas = (p.soltas || []).slice().sort(ordCmp);
         const idS = new Set(sessoes.map(x => x.id)), idE = new Set(todasEtapas(p).map(x => x.id));
-        d.nodes = d.nodes.filter(n => !(n.real && !n.ref) && !(n.t === 's' && n.ref && !idS.has(n.ref)) && !(n.t === 'e' && n.ref && !idE.has(n.ref)) && !(n.t === 'p' && n.ref && n.ref !== p.id));
+        d.nodes = d.nodes.filter(n => !(n.real && !n.ref) && !(n.t === 's' && n.ref && !idS.has(n.ref)) && !(n.t === 'e' && n.ref && !idE.has(n.ref)) && !(n.t === 'p' && n.ref));
         const vivos = new Set(d.nodes.map(n => n.id));
         d.nodes.forEach(k => { if (k.pai && !vivos.has(k.pai)) { k.pai = null; k.w = TIPO[k.t].w; } });
         d.edges = d.edges.filter(e => vivos.has(e.a) && vivos.has(e.b));
         const achar = (t, ref) => d.nodes.find(n => n.t === t && n.ref === ref);
         const ss = d.nodes.filter(n => n.t === 's' && n.ref);
-        const colX = ss.length ? Math.min(...ss.map(n => n.x)) : 360;
+        const colX = ss.length ? Math.min(...ss.map(n => n.x)) : 60;
         let y = ss.length ? Math.max(...ss.map(n => n.y + (n.h || 100))) + 40 : 40;
-        const novos = [], cria = (t, ref, x, yy) => { const n = { id: uid(), t, ref, x, y: yy, w: TIPO[t].w, c: { p: 0, s: 1, e: 2 }[t] }; d.nodes.push(n); return n; };
+        const cria = (t, ref, x, yy) => { const n = { id: uid(), t, ref, x, y: yy, w: TIPO[t].w, c: { p: 0, s: 1, e: 2 }[t] }; d.nodes.push(n); return n; };
         sessoes.forEach(sx => {
             let sn = achar('s', sx.id);
-            if (!sn) { sn = cria('s', sx.id, colX, y); y += SH + Math.max(1, (sx.etapas || []).length) * (KH + GAP) + GAP + 40; novos.push(sn); }
+            if (!sn) { sn = cria('s', sx.id, colX, y); y += SH + Math.max(1, (sx.etapas || []).length) * (KH + GAP) + GAP + 40; }
             (sx.etapas || []).slice().sort(ordCmp).forEach((e, i) => {
                 let en = achar('e', e.id); if (!en) en = cria('e', e.id, sn.x + 12, sn.y + SH);
                 if (en.pai !== sn.id) en.pai = sn.id;
@@ -769,11 +822,9 @@
             });
         });
         soltas.forEach(e => {
-            let en = achar('e', e.id); if (!en) { en = cria('e', e.id, colX, y); y += 70; novos.push(en); }
+            let en = achar('e', e.id); if (!en) { en = cria('e', e.id, colX, y); y += 70; }
             if (en.pai) { en.pai = null; en.w = TIPO.e.w; }
         });
-        const raiz = achar('p', p.id) || cria('p', p.id, colX - 290, 60);
-        novos.forEach(n => { if (!d.edges.some(e => e.a === raiz.id && e.b === n.id)) d.edges.push({ id: uid(), a: raiz.id, b: n.id }); });
         return JSON.stringify(d) !== antes;
     }
     async function criarAtividadeReal(pId, nome) {
@@ -805,8 +856,6 @@
         if (n.t === 's') id = await criarAtividadeReal(pId, n.txt);
         else if (!pai || pai.ref) id = await criarEtapaReal(pId, pai ? pai.ref : null, n.txt);
         if (!id) return descarta(n);
-        const raiz = D().nodes.find(x => x.t === 'p' && x.ref === pId);
-        if (n.t === 's' && raiz && !D().edges.some(e => e.a === raiz.id && e.b === n.id)) D().edges.push({ id: uid(), a: raiz.id, b: n.id });
         n.ref = id; delete n.real; delete n.txt; salvar();
         await renderizarProjetos();
         atualizar();
@@ -833,7 +882,7 @@
         pn.aberto = true; pn.foco = { k, id }; desenhaPainel(); updToolbar();
     }
     async function status(id, v) { await updateEtapaStatus(id, v); atualizar(); }
-    function addAoMapa(k, id) { novo(k, { ref: id }); desenhaPainel(); }
+    function addAoMapa(k, id) { if (k === 'p' && dedicado()) return; novo(k, { ref: id }); desenhaPainel(); }
     function abrirNoProjetos(k, id) {
         const R = refs();
         if (k === 'e') return irParaEtapa(id);
@@ -850,11 +899,11 @@
         if (o) editarSessao(n.ref, o.p.id); else toast('Atividade não encontrada.', 'warning');
     }
     function abreMenu(ev) {
-        if (!D()) return;
+        if (!D() || ev.target.closest('#fl-bulk')) return;
         ev.preventDefault(); fechaMenu();
         const nEl = ev.target.closest('.fl-n'), n = nEl ? nodeById(nEl.dataset.id) : null, p = toWorld(ev.clientX, ev.clientY);
         const pos = { x: Math.round(p.x), y: Math.round(p.y) };
-        if (n && !(sel && ((sel.k === 'n' && sel.id === n.id) || (sel.k === 'm' && grupo.has(n.id))))) { sel = { k: 'n', id: n.id }; markSel(); }
+        if (n && !modoMarcar && !(sel && ((sel.k === 'n' && sel.id === n.id) || (sel.k === 'm' && grupo.has(n.id))))) { sel = { k: 'n', id: n.id }; markSel(); }
         const novaEtapa = () => {
             if (n && n.t === 's') { if (n.fechada) n.fechada = false; sel = { k: 'n', id: n.id }; return novo('e', { pai: n.id, o: 1e9, w: n.w - 24 }); }
             novo('e', pos);
@@ -863,6 +912,7 @@
         const itens = [['＋', 'Etapa', novaEtapa], ['＋', 'Atividade', () => novo('s', pos)], ['＋', 'Anexo', () => modalAnexo(pos)]];
         if (n) {
             itens.push(null, ['✏️', 'Renomear', () => setTimeout(() => { sel = { k: 'n', id: n.id }; markSel(); editar(n.id); }, 0)]);
+            if (n.t === 'e') itens.push(['📝', 'Descrição', () => setTimeout(() => { descEdit = n.id; render(); editar(n.id, 'desc'); }, 0)]);
             if (real) itens.push(['🛠', 'Editar', () => editarNo(n)]);
         }
         const m = document.createElement('div'); m.id = 'fl-ctx'; m.className = 'fl-ctx';
@@ -906,6 +956,24 @@
         fecharModal(); const pos = axPos; axPos = null;
         ids.forEach((id, i) => novoArquivo(id, pos.x + i * 24, pos.y + i * 24));
     }
+    async function statusLote(novo) {
+        const ns = idsSel().map(nodeById).filter(n => n && n.t === 'e'); if (!ns.length) return;
+        const reais = ns.filter(n => n.ref && findEtapa(n.ref)), rascunhos = ns.filter(n => !n.ref);
+        if (novo !== 'Não iniciado' && typeof condPendentes === 'function') {
+            const bloq = reais.filter(n => condPendentes(n.ref).length);
+            if (bloq.length && !confirm(`${bloq.length} etapa(s) têm condições pendentes. Mudar o status mesmo assim?`)) return;
+        }
+        rascunhos.forEach(n => { n.st = novo; });
+        if (reais.length) {
+            const antes = reais.map(n => [n.ref, findEtapa(n.ref).status]);
+            const aplica = (id, st) => { findEtapa(id).status = st; if (typeof etapaPatchCaches === 'function') etapaPatchCaches(id, { status: st }); };
+            reais.forEach(n => aplica(n.ref, novo));
+            const { error } = await sb.from('etapas').update({ status: novo }).in('id', reais.map(n => n.ref));
+            if (error) { antes.forEach(([id, st]) => aplica(id, st)); toast('Erro ao atualizar o status: ' + error.message, 'error'); }
+        }
+        salvar(); refreshProjetos(); atualizar();
+        toast(`${ns.length} etapa(s) agora em "${novo}".`);
+    }
     function editarReal() {
         const n = selNode(), f = n && n.ref && n.t !== 'a' ? { k: n.t, id: n.ref } : pn.foco;
         if (!f) return toast('Selecione um item do mapa que venha de um projeto.', 'warning');
@@ -933,6 +1001,7 @@
     }
     function onDown(ev) {
         if (!D()) return;
+        if (ev.target.closest('#fl-bulk')) return;
         if (ev.button === 1) { ev.preventDefault(); return startPan(ev); }
         if (ev.button === 2) return;
         if (ev.pointerType === 'mouse' && ev.button !== 0) return;
@@ -943,20 +1012,75 @@
         const nEl = ev.target.closest('.fl-n'), soma = ev.shiftKey || ev.ctrlKey || ev.metaKey;
         if (!nEl) {
             const g = ev.target.closest('[data-edge]');
-            if (g) { sel = { k: 'g', id: g.dataset.edge }; markSel(); return; }
-            if (ev.pointerType === 'touch') { setSelIds([]); return startPan(ev); }
-            return startMarquee(ev, soma);
+            if (g) { if (!modoMarcar) { sel = { k: 'g', id: g.dataset.edge }; markSel(); } return; }
+            if (ev.pointerType === 'touch') { if (!modoMarcar) setSelIds([]); return startPan(ev); }
+            return startMarquee(ev, soma || modoMarcar);
         }
         const n = nodeById(nEl.dataset.id); if (!n) return;
         const alvoAct = ev.target.closest('[data-act]'), act = alvoAct ? alvoAct.dataset.act : null;
+        if (act === 'chk') { modoMarcar = true; const l = new Set(idsSel()); if (l.has(n.id)) l.delete(n.id); else l.add(n.id); return setSelIds(l); }
         if (act === 'toggle') { n.fechada = !n.fechada; salvar(); render(); return; }
         if (act === 'open') { abrirAnexo(+alvoAct.dataset.arq); return; }
         if (act === 'clip') { listaAnexos(n); return; }
         if (act === 'addkid') { if (n.fechada) n.fechada = false; sel = { k: 'n', id: n.id }; markSel(); return novo('e', { pai: n.id, o: 1e9, w: n.w - 24 }); }
         if (soma) { const l = new Set(idsSel()); if (l.has(n.id)) l.delete(n.id); else l.add(n.id); return setSelIds(l); }
+        if (modoMarcar) {
+            if (act === 'port') return startLink(ev, n);
+            if (act === 'resize') return startResize(ev, n);
+            if (n.t !== 'e') return startDrag(ev, n, null);
+            const jaEstava = idsSel().includes(n.id);
+            if (!jaEstava) setSelIds([...idsSel(), n.id]);
+            return startDragEtapas(ev, n, jaEstava);
+        }
         if (!(sel && sel.k === 'm' && grupo.has(n.id))) { sel = { k: 'n', id: n.id }; markSel(); }
-        const titulo = !!ev.target.closest('.fl-t');
-        if (act === 'port') startLink(ev, n); else if (act === 'resize') startResize(ev, n); else if (sel.k === 'm') startDragGrupo(ev, n); else startDrag(ev, n, titulo);
+        const alvoEd = ev.target.closest('.fl-ds') ? 'desc' : ev.target.closest('.fl-t') ? 'nome' : null;
+        const soEtapas = sel.k === 'm' && idsSel().every(id => { const x = nodeById(id); return x && x.t === 'e'; });
+        if (act === 'port') startLink(ev, n); else if (act === 'resize') startResize(ev, n); else if (sel.k === 'm') (soEtapas ? startDragEtapas(ev, n, true) : startDragGrupo(ev, n)); else startDrag(ev, n, alvoEd);
+    }
+    function desprendeLote(lista) {
+        const pais = new Set();
+        lista.forEach(g => { if (g.pai) { pais.add(g.pai); g.pai = null; g.w = TIPO[g.t].w; } });
+        pais.forEach(id => { const p = nodeById(id); if (p) reflow(p); });
+        render();
+    }
+    async function moverVarias(ord, alvo) {
+        const irmaos = kids(alvo.a).filter(k => !alvo.exc.has(k.id) && k.ref);
+        const antes = alvo.idx < irmaos.length ? irmaos[alvo.idx].ref : null;
+        for (const g of ord.filter(x => x.ref)) await moverEtapa(g.ref, antes != null ? { beforeId: antes } : { sessaoId: alvo.a.ref });
+        salvar(); atualizar();
+    }
+    async function soltarVarias(ord) {
+        for (const g of ord.filter(x => x.ref)) { const c = findEtapaCtx(g.ref); if (c && c.s) await moverEtapa(g.ref, { topo: 'end' }); }
+        salvar(); atualizar();
+    }
+    function startDragEtapas(ev, n, jaEstava) {
+        const lista = etapasSel(), ids = new Set(lista.map(g => g.id));
+        const orig = lista.map(g => [g, g.x, g.y]), outros = () => topos().filter(o => !ids.has(o.id));
+        let mexeu = false, solto = false, alvo = null;
+        dragAtivo = true;
+        track(ev, (dx, dy, e) => {
+            const z = D().view.z; if (Math.abs(dx) + Math.abs(dy) > 3) mexeu = true; if (!mexeu) return;
+            if (!solto) { solto = true; desprendeLote(lista); }
+            orig.forEach(([g, x, y]) => {
+                g.x = Math.round(x + dx / z); g.y = Math.round(y + dy / z);
+                const el = elOf(g.id); if (el) { el.style.left = g.x + 'px'; el.style.top = g.y + 'px'; el.classList.add('arrastando'); }
+            });
+            drawEdges();
+            alvo = alvoSnap(n, toWorld(e.clientX, e.clientY), ids); mostraSnap(alvo);
+            mostraFantasma(alvo ? null : simular(lista, outros()));
+        }, () => {
+            dragAtivo = false; mostraSnap(null); mostraFantasma(null);
+            if (!mexeu) { if (jaEstava) setSelIds(idsSel().filter(id => id !== n.id)); return; }
+            const ord = lista.slice().sort((a, b) => a.y - b.y || a.x - b.x);
+            if (alvo && !(dedicado() && !alvo.a.ref)) {
+                if (dedicado()) return moverVarias(ord, alvo);
+                ord.forEach((g, i) => { g.pai = alvo.a.id; g.o = alvo.idx - .5 + (i + 1) * .001; });
+                render(); salvar(); return;
+            }
+            afastar(lista, lista, outros());
+            if (dedicado()) return soltarVarias(ord);
+            salvar(); render();
+        });
     }
     function startMarquee(ev, soma) {
         const base = soma ? idsSel() : [], box = document.createElement('div'); box.className = 'fl-mq';
@@ -1021,7 +1145,7 @@
             mostraFantasma(alvo ? null : simular(tops(), outros()));
         }, () => {
             dragAtivo = false; mostraSnap(null); mostraFantasma(null);
-            if (!mexeu) { if (titulo) editar(n.id); return; }
+            if (!mexeu) { if (titulo) editar(n.id, titulo); return; }
             const livre = () => afastar(tops(), todos, outros());
             if (n.t === 'e' && n.ref && mexeu && dedicado()) { if (!alvo) livre(); moverReal(n, alvo); return; }
             if (n.t === 'e' && alvo && mexeu) { n.pai = alvo.a.id; n.o = alvo.idx - .5; render(); salvar(); return; }
@@ -1059,33 +1183,46 @@
     function onDbl(ev) {
         const g = ev.target.closest('[data-edge]');
         if (g) { sel = { k: 'g', id: g.dataset.edge }; markSel(); return alternarDep(); }
-        const nEl = ev.target.closest('.fl-n'); if (!nEl || ev.target.closest('.fl-pj') || editing || ev.target.closest('.fl-t')) return;
+        const nEl = ev.target.closest('.fl-n'); if (!nEl || ev.target.closest('.fl-pj') || editing || ev.target.closest('.fl-t, .fl-ds')) return;
         const n = nodeById(nEl.dataset.id); if (!n) return;
         if (n.t === 'a') return abrirAnexo(n.ref);
         if (!n.ref) return editar(n.id);
         pn.aberto = true; pn.foco = { k: n.t, id: n.ref }; desenhaPainel(); updToolbar();
     }
     const textoDe = e => String(e.innerText ?? e.textContent ?? '').trim();
-    function editar(id) {
-        const n = nodeById(id), el = elOf(id)?.querySelector('.fl-t'); if (!n || !el) return;
+    function editar(id, campo) {
+        const n = nodeById(id), desc = campo === 'desc', el = elOf(id)?.querySelector(desc ? '.fl-ds' : '.fl-t'); if (!n || !el) return;
         const real = !!n.ref && ['p', 's', 'e', 'a'].includes(n.t);
-        if (real && n.t !== 'a' && !currentUserCanEdit) return toast('Você não tem permissão para renomear itens do projeto.', 'warning');
+        if (real && n.t !== 'a' && !currentUserCanEdit) { descEdit = null; return toast('Você não tem permissão para editar itens do projeto.', 'warning'); }
         if (real && info(n, refs()).gone) return;
         const antes = textoDe(el);
         editing = true; el.contentEditable = 'true'; el.focus(); document.getSelection().selectAllChildren(el);
         let cancelou = false;
         el.onkeydown = e => {
-            if (e.key === 'Enter' && !(e.shiftKey && n.t === 'n')) { e.preventDefault(); el.blur(); }
+            if (e.key === 'Enter' && !(e.shiftKey && n.t === 'n' && !desc)) { e.preventDefault(); el.blur(); }
             if (e.key === 'Escape') { cancelou = true; el.blur(); }
         };
         el.onblur = () => {
             editing = false;
-            const v = cancelou ? '' : textoDe(el);
-            if (n.real) { if (v) { n.txt = v; render(); efetivar(n); } else descarta(n); return; }
-            if (real) { render(); if (v && v !== antes) renomearReal(n, v); return; }
-            if (v) { n.txt = v; salvar(); }
+            const v = cancelou ? null : textoDe(el);
+            if (desc) {
+                descEdit = null;
+                if (v === null || v === antes) return render();
+                if (real) { render(); return salvarDescricao(n, v); }
+                n.desc = v; salvar(); return render();
+            }
+            const nome = v === null ? '' : v;
+            if (n.real) { if (nome) { n.txt = nome; render(); efetivar(n); } else descarta(n); return; }
+            if (real) { render(); if (nome && nome !== antes) renomearReal(n, nome); return; }
+            if (nome) { n.txt = nome; salvar(); }
             render();
         };
+    }
+    async function salvarDescricao(n, v) {
+        const obj = refs().E.get(n.ref)?.e; if (!obj) return;
+        const { error } = await updateChecado('etapas', { descricao: v }, n.ref);
+        if (error) { toast('Erro ao salvar a descrição: ' + error.message, 'error'); return atualizar(); }
+        obj.descricao = v; refreshProjetos(); atualizar();
     }
     async function renomearReal(n, nome) {
         const R = refs(), tab = { p: 'projetos', s: 'sessoes', e: 'etapas', a: 'arquivos' }[n.t];
@@ -1101,7 +1238,7 @@
         if (!root || root.offsetParent === null || !D() || editing) return;
         if (ev.target.closest('input, textarea, select, [contenteditable=true]') || !$('modal-ov').classList.contains('hidden')) return;
         if (ev.code === 'Space') { if (ev.target.closest('button, a')) return; ev.preventDefault(); if (!espaco) { espaco = true; atualizaMao(); } return; }
-        if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'a') { ev.preventDefault(); setSelIds(D().nodes.map(n => n.id)); }
+        if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'a') { ev.preventDefault(); setSelIds(D().nodes.filter(n => !oculto(n)).map(n => n.id)); }
         else if (ev.key === 'Delete' || ev.key === 'Backspace') { ev.preventDefault(); remover(); }
         else if (ev.key === 'Tab' && selNode()) { ev.preventDefault(); filho(); }
         else if (ev.key === 'Escape') { sel = null; markSel(); }
@@ -1221,7 +1358,7 @@
         const P = (wsProjetos || []).slice().sort(ordCmp);
         if (!P.length) return toast('Não há projetos neste workspace.', 'warning');
         const et = (e, extra) => `<div class="fl-i2"><label><input type="checkbox" data-k="e" data-id="${e.id}" ${extra}/> ${escH(e.nome)}</label></div>`;
-        abrirModal('📥 Adicionar do projeto', `<p class="fhint" style="margin-bottom:8px">Marque o que entra no mapa. Os itens são montados em árvore (projeto → atividades → etapas); o que já estiver no mapa é reaproveitado.</p>
+        abrirModal('📥 Adicionar do projeto', `<p class="fhint" style="margin-bottom:8px">Marque o que entra no mapa. As atividades entram com as etapas dentro; o que já estiver no mapa é reaproveitado.</p>
             <div class="fl-imp">${P.map(p => `<details><summary><label><input type="checkbox" data-k="p" data-id="${p.id}" onchange="Flow.marcar(this)"/> 📁 ${escH(p.nome)}</label></summary>
                 ${(p.sessoes || []).slice().sort(ordCmp).map(s => `<div class="fl-i1"><label><input type="checkbox" data-k="s" data-id="${s.id}" data-p="${p.id}" onchange="Flow.marcar(this)"/> 🗂 ${escH(s.nome)}</label>${(s.etapas || []).slice().sort(ordCmp).map(e => et(e, `data-s="${s.id}" data-p="${p.id}"`)).join('')}</div>`).join('')}
                 ${(p.soltas || []).map(e => `<div class="fl-i1">${et(e, `data-p="${p.id}"`)}</div>`).join('')}</details>`).join('')}</div>`,
@@ -1238,26 +1375,22 @@
         const R = refs(), tem = (k, id) => ck.some(x => x.k === k && x.id === id);
         const existe = (t, ref) => d.nodes.find(n => n.t === t && n.ref === ref);
         const cria = (t, ref, x, y) => existe(t, ref) || (d.nodes.push({ id: uid(), t, ref, x, y, w: TIPO[t].w, c: { p: 0, s: 1, e: 2 }[t] }), d.nodes[d.nodes.length - 1]);
-        const liga = (a, b) => { if (a && b && !d.edges.some(e => e.a === a.id && e.b === b.id)) d.edges.push({ id: uid(), a: a.id, b: b.id }); };
         const X0 = d.nodes.length ? Math.min(...d.nodes.map(n => n.x)) : toWorld(view.getBoundingClientRect().left + 40, 0).x;
         let y = d.nodes.length ? Math.max(...d.nodes.map(n => n.y + ((n.t === 'b' || n.t === 's') && n.h ? n.h : 70))) + 70 : toWorld(0, view.getBoundingClientRect().top + 40).y;
         const LIN = 66;
         (wsProjetos || []).slice().sort(ordCmp).forEach(p => {
             const sess = (p.sessoes || []).slice().sort(ordCmp).filter(s => tem('s', s.id) || (s.etapas || []).some(e => tem('e', e.id)));
             const soltas = (p.soltas || []).filter(e => tem('e', e.id));
-            if (!tem('p', p.id) && !sess.length && !soltas.length) return;
-            const y0 = y; let pNode = null;
-            const nodesS = [];
+            if (!sess.length && !soltas.length) return;
             sess.forEach(s => {
                 const es = (s.etapas || []).slice().sort(ordCmp).filter(e => tem('e', e.id)), comNo = tem('s', s.id);
                 const alt = comNo ? SH + Math.max(1, es.length) * (KH + GAP) + 2 * GAP : Math.max(1, es.length) * LIN;
-                const sNode = comNo ? cria('s', s.id, X0 + 270, y) : null;
-                if (sNode) es.forEach((e, i) => { const k = cria('e', e.id, X0 + 282, y); k.pai = sNode.id; k.o = i; });
-                else es.forEach((e, i) => cria('e', e.id, X0 + 520, y + i * LIN));
-                nodesS.push(sNode); y += alt;
+                const sNode = comNo ? cria('s', s.id, X0, y) : null;
+                if (sNode) es.forEach((e, i) => { const k = cria('e', e.id, X0 + 12, y); k.pai = sNode.id; k.o = i; });
+                else es.forEach((e, i) => cria('e', e.id, X0 + 250, y + i * LIN));
+                y += alt;
             });
-            soltas.forEach(e => { nodesS.push(cria('e', e.id, X0 + 270, y)); y += LIN; });
-            if (tem('p', p.id)) { pNode = cria('p', p.id, X0, y0 + Math.max(0, (y - y0 - LIN) / 2)); nodesS.forEach(n => liga(pNode, n)); }
+            soltas.forEach(e => { cria('e', e.id, X0, y); y += LIN; });
             y += 34;
         });
         fecharModal(); salvar(); render(); ajustar();
@@ -1349,5 +1482,5 @@
         if (falha) toast('Projeto criado, mas parte do conteúdo falhou: ' + falha.message, 'warning'); else toast(`Projeto "${nome}" criado a partir do bloco! 🎉`);
     }
 
-    window.Flow = { abrir, trocar, recarregar, novo, filho, cor, remover, zoom, ajustar, modalMapa, salvarMapa, excluirMapa, modalImportar, marcar, importar, modalBloco, blocoProjeto, alternarDep, irProjeto, mao, aba, projAnx, enviar, desanexar, painel, foco, status, addAoMapa, abrirNoProjetos, editarReal, axProj, axEscolher, axEnviar };
+    window.Flow = { abrir, trocar, recarregar, novo, filho, cor, remover, zoom, ajustar, modalMapa, salvarMapa, excluirMapa, modalImportar, marcar, importar, modalBloco, blocoProjeto, alternarDep, irProjeto, mao, aba, projAnx, enviar, desanexar, painel, foco, status, addAoMapa, abrirNoProjetos, editarReal, axProj, axEscolher, axEnviar, statusLote };
 })();
